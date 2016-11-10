@@ -13,19 +13,37 @@
 {% block app_title %}{{ tethys_app.name }}{% endblock %}
 
 {% block app_navigation_items %}
-  <li class="title">App Navigation</li>
-  <li class="active"><a href="">Home</a></li>
-  <li><a href="">Jobs</a></li>
-  <li><a href="">Results</a></li>
-  <li class="title">Steps</li>
-  <li><a href="">1. The First Step</a></li>
-  <li><a href="">2. The Second Step</a></li>
-  <li><a href="">3. The Third Step</a></li>
-  <li class="separator"></li>
-  <li><a href="">Get Started</a></li>
 {% endblock %}
 
 {% block app_content %}
+	<!--Modal to be called for error checking, welcome screen, etc.
+	    See modal.js
+	-->
+	<div class="modal fade" id="GenericModal" role="dialog">
+		<div class="modal-dialog">
+	 		<div class="modal-content">
+	      		<div class="modal-header">
+               		<button type="button" class="close" data-dismiss="modal" aria-label="close">&times;</button>
+	        		<h4 class="modal-title" id="ModalTitle">TITLE</h4>
+	      		</div>
+	      		<div class="modal-body">
+	          		<div id="ModalBody">
+	          			<span>BODY</span>
+	          		</div>
+	      		</div>
+	      		<div class="modal-footer">
+					<div id="ModalFooter">
+			      			<div id="byu-logo-container">
+			      				<img src="{% static 'wellhead/images/byu-medallion.png' %}"/>
+			      				<span><i>Developed by Prof. Norm Jones and Jacob Fullerton, Brigham Young University</i></span>
+			      			</div>
+	      			</div>
+	        		<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	      		</div>
+	    	</div>
+	  	</div>
+	</div>
+	<!-- End Modal -->
 {% endblock %}
 
 {% block app_actions %}
