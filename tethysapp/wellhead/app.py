@@ -1,5 +1,5 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
-
+from tethys_sdk.stores import PersistentStore
 
 class WellheadProtection(TethysAppBase):
     """
@@ -12,7 +12,7 @@ class WellheadProtection(TethysAppBase):
     package = 'wellhead'
     root_url = 'wellhead'
     color = '#34495e'
-    description = "neric groundwater modeling implementing Mark Bakker's TimML software package. Users can delineate wellhead protection zones using this software to identify potential risks to municipal wells."
+    description = "Generic groundwater modeling implementing Mark Bakker's TimML software package. Users can delineate wellhead protection zones using this software to identify potential risks to municipal wells."
     tags = '"Hydrology","Environmental","Groundwater"'
     enable_feedback = False
     feedback_emails = []
@@ -30,3 +30,11 @@ class WellheadProtection(TethysAppBase):
         )
 
         return url_maps
+    def persistent_stores(self):
+        stores = (PersistentStore(name ='stream_gage_db',
+                                  initializer='wellhead.init_stores.init_stream_gage_db',
+                                  spatial=True
+                  ),
+        )
+
+        return stores
