@@ -1,8 +1,8 @@
 /*****************************************************************************
  * FILE:    Main
  * DATE:    2/2/2016
- * AUTHOR:  Shawn Crawley
- * COPYRIGHT: (c) 2015 Brigham Young University
+ * AUTHOR:  Shawn Crawley and Jacob Fullerton
+ * COPYRIGHT: (c) 2016 Brigham Young University
  * LICENSE: BSD 2-Clause
  * CONTRIBUTIONS:   http://openlayers.org/
  *
@@ -11,6 +11,7 @@
 /*****************************************************************************
  *                      Gizmo Function Initializer
  *****************************************************************************/
+var readLayers;
 var createLayerListItem;
 var addListenersToListItem;
 var editLayerDisplayName;
@@ -33,32 +34,51 @@ var TOCLoop = function()
     };
 };
 
-createLayerListItem = function (position, layerIndex, layerId, resType, geomType, layerAttributes, visible, layerName, bandInfo, resId, publicFilename, disableChkbx) {
+readLayers = function (){
+    var map;
+    var layers;
+    var position;
+
+    //Get the map object to read in initial layers on map
+    map = TETHYS_MAP_VIEW.getMap();
+    layers = map.getLayers();
+
+    //First layer is the first child of the list
+    position = "prepend";
+    for (layer in layers){
+        createLayerListItem(position,layer);
+        position = "";
+    }
+
+}
+
+
+createLayerListItem = function (position,layer) {
         var $newLayerListItem;
         var chkbxHtml;
-        if (disableChkbx === true) {
+        if (layer.getProperties().visible === true) {
             chkbxHtml = '<input class="chkbx-layer" type="checkbox" disabled>';
         } else {
             chkbxHtml = '<input class="chkbx-layer" type="checkbox">';
         }
         var listHtmlString =
             '<li class="ui-state-default" ' +
-            'data-layer-index="' + layerIndex + '" ' +
-            'data-layer-id="' + layerId + '" ' +
-            'data-res-id="' + resId + '" ' +
-            'data-res-type="' + resType + '" ' +
-            'data-geom-type="' + geomType + '" ' +
-            'data-public-fname="' + publicFilename + '" ' +
-            'data-layer-attributes="' + layerAttributes + '" ' +
-            'data-band-variable="' + (bandInfo ? bandInfo.variable : undefined) + '" ' +
-            'data-band-units="' + (bandInfo ? bandInfo.units : undefined) + '" ' +
-            'data-band-min="' + (bandInfo ? bandInfo.min : undefined) + '" ' +
-            'data-band-max="' + (bandInfo ? bandInfo.max : undefined) + '" ' +
-            'data-band-nd="' + (bandInfo ? bandInfo.nd : undefined) + '">' +
-            chkbxHtml +
-            '<span class="layer-name">' + layerName + '</span>' +
-            '<input type="text" class="edit-layer-name hidden" value="' + layerName + '">' +
-            '<div class="hmbrgr-div"><img src="/static/hydroshare_gis/images/hamburger-menu.svg"></div>' +
+//            'data-layer-index="' + layerIndex + '" ' +
+//            'data-layer-id="' + layerId + '" ' +
+//            'data-res-id="' + resId + '" ' +
+//            'data-res-type="' + resType + '" ' +
+//            'data-geom-type="' + geomType + '" ' +
+//            'data-public-fname="' + publicFilename + '" ' +
+//            'data-layer-attributes="' + layerAttributes + '" ' +
+//            'data-band-variable="' + (bandInfo ? bandInfo.variable : undefined) + '" ' +
+//            'data-band-units="' + (bandInfo ? bandInfo.units : undefined) + '" ' +
+//            'data-band-min="' + (bandInfo ? bandInfo.min : undefined) + '" ' +
+//            'data-band-max="' + (bandInfo ? bandInfo.max : undefined) + '" ' +
+//            'data-band-nd="' + (bandInfo ? bandInfo.nd : undefined) + '">' +
+//            chkbxHtml +
+            '<span class="layer-name">' + layer.tethys_legend_title + '</span>' +
+            '<input type="text" class="edit-layer-name hidden" value="' + layer.tethys_legend_title + '">' +
+            '<div class="hmbrgr-div"><img src="/static/wellhead/images/hamburger-menu.png"></div>' +
             '</li>';
 
         if (position === 'prepend') {
@@ -70,7 +90,7 @@ createLayerListItem = function (position, layerIndex, layerId, resType, geomType
         }
 
         $newLayerListItem.find('.chkbx-layer').prop('checked', visible);
-    };
+};
 
 addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
         var $layerNameInput;
@@ -183,13 +203,14 @@ onClickRenameLayer = function (e) {
 
 initializeLayersContextMenus = function () {
     layersContextMenuBase = [
+//        {
+//            name: 'Open in HydroShare',
+//            title: 'Open in HydroShare',
+//            fun: function (e) {
+//                onClickOpenInHS(e);
+//            }
+//        },
         {
-            name: 'Open in HydroShare',
-            title: 'Open in HydroShare',
-            fun: function (e) {
-                onClickOpenInHS(e);
-            }
-        }, {
             name: 'Rename',
             title: 'Rename',
             fun: function (e) {
@@ -204,14 +225,14 @@ initializeLayersContextMenus = function () {
         }
     ];
 
-    layersContextMenuViewFile = layersContextMenuBase.slice();
-    layersContextMenuViewFile.unshift({
-        name: 'View file',
-        title: 'View file',
-        fun: function (e) {
-            onClickViewFile(e);
-        }
-    });
+//    layersContextMenuViewFile = layersContextMenuBase.slice();
+//    layersContextMenuViewFile.unshift({
+//        name: 'View file',
+//        title: 'View file',
+//        fun: function (e) {
+//            onClickViewFile(e);
+//        }
+//    });
 
     layersContextMenuGeospatialBase = layersContextMenuBase.slice();
     layersContextMenuGeospatialBase.unshift({
@@ -229,19 +250,21 @@ initializeLayersContextMenus = function () {
         fun: function (e) {
             onClickModifySymbology(e);
         }
-    }, {
-        name: 'View legend',
-        title: 'View legend',
-        fun: function (e) {
-            onClickViewLegend(e);
-        }
-    }, {
-        name: 'Get pixel value on click',
-        title: 'Get pixel value on click',
-        fun: function (e) {
-            onClickViewGetPixelVal(e);
-        }
-    });
+    },
+//    {
+//        name: 'View legend',
+//        title: 'View legend',
+//        fun: function (e) {
+//            onClickViewLegend(e);
+//        }
+//    },
+//        {
+//        name: 'Get pixel value on click',
+//        title: 'Get pixel value on click',
+//        fun: function (e) {
+//            onClickViewGetPixelVal(e);
+//        }
+//    });
 
     layersContextMenuVector = layersContextMenuRaster.slice();
     layersContextMenuVector.unshift({
@@ -252,20 +275,20 @@ initializeLayersContextMenus = function () {
         }
     });
 
-    layersContextMenuTimeSeries = layersContextMenuGeospatialBase.slice();
-    layersContextMenuTimeSeries.unshift({
-        name: 'View time series',
-        title: 'View time series',
-        fun: function (e) {
-            onClickViewFile(e);
-        }
-    });
-
-    contextMenuDict = {
-        'GenericResource': layersContextMenuViewFile,
-        'GeographicFeatureResource': layersContextMenuVector,
-        'TimeSeriesResource': layersContextMenuTimeSeries,
-        'RefTimeSeriesResource': layersContextMenuTimeSeries,
-        'RasterResource': layersContextMenuRaster
-    };
+//    layersContextMenuTimeSeries = layersContextMenuGeospatialBase.slice();
+//    layersContextMenuTimeSeries.unshift({
+//        name: 'View time series',
+//        title: 'View time series',
+//        fun: function (e) {
+//            onClickViewFile(e);
+//        }
+//    });
+//
+//    contextMenuDict = {
+//        'GenericResource': layersContextMenuViewFile,
+//        'GeographicFeatureResource': layersContextMenuVector,
+//        'TimeSeriesResource': layersContextMenuTimeSeries,
+//        'RefTimeSeriesResource': layersContextMenuTimeSeries,
+//        'RasterResource': layersContextMenuRaster
+//    };
 };
