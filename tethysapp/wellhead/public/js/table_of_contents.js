@@ -9,7 +9,7 @@
  *****************************************************************************/
 
 /*****************************************************************************
- *                      Gizmo Function Initializer
+ *                          Gizmo Functions
  *****************************************************************************/
 var readLayers;
 var createLayerListItem;
@@ -18,11 +18,16 @@ var editLayerDisplayName;
 var closeLyrEdtInpt;
 var onClickRenameLayer;
 var initializeLayersContextMenus;
+var initializeJqueryVariables;
 
+/*****************************************************************************
+ *                          JQUERY Variables
+ *****************************************************************************/
+ var $tocLayersList;
 /*****************************************************************************
  *                           Main Script
  *****************************************************************************/
-//    Give listeners to each item in Table of Contents (Used for debugging, will not likely
+//  Give listeners to each item in Table of Contents (Used for debugging, will not likely be part of the final gizmo
 var TOCLoop = function()
 {
     var TOCList = document.getElementById("toc-layers-list");
@@ -34,26 +39,29 @@ var TOCLoop = function()
     };
 };
 
+//  Initialize JQUERY Variables
+initializeJqueryVariables = function(){
+    $tocLayersList = $('#toc-layers-list');
+}
+
+//  Read in the layers from the map_view gizmo
 readLayers = function (){
     var map;
     var layers;
-    var position;
 
     //Get the map object to read in initial layers on map
     map = TETHYS_MAP_VIEW.getMap();
     layers = map.getLayers();
 
     //First layer is the first child of the list
-    position = "prepend";
-    for (layer in layers){
-        createLayerListItem(position,layer);
-        position = "";
+    for (layer in layers.array_){
+        createLayerListItem(layers.item(layer));
     }
 
 }
 
 
-createLayerListItem = function (position,layer) {
+createLayerListItem = function (layer,position) {
         var $newLayerListItem;
         var chkbxHtml;
         if (layer.getProperties().visible === true) {
@@ -82,14 +90,16 @@ createLayerListItem = function (position,layer) {
             '</li>';
 
         if (position === 'prepend') {
-            $currentLayersList.prepend(listHtmlString);
-            $newLayerListItem = $currentLayersList.find('li:first-child');
+            $tocLayersList.prepend(listHtmlString);
+            $newLayerListItem = $tocLayersList.find('li:first-child');
         } else {
-            $currentLayersList.append(listHtmlString);
-            $newLayerListItem = $currentLayersList.find(':last-child');
+            $tocLayersList.append(listHtmlString);
+            $newLayerListItem = $tocLayersList.find(':last-child');
         }
 
-        $newLayerListItem.find('.chkbx-layer').prop('checked', visible);
+        if (layer.getProperties().visible === true){
+            $newLayerListItem.find('.chkbx-layer').prop('checked', layer.getProperties().visible);
+        }
 };
 
 addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
@@ -250,7 +260,7 @@ initializeLayersContextMenus = function () {
         fun: function (e) {
             onClickModifySymbology(e);
         }
-    },
+    }),
 //    {
 //        name: 'View legend',
 //        title: 'View legend',
