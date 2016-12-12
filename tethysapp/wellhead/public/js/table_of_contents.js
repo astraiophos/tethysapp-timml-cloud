@@ -9,7 +9,7 @@
  *****************************************************************************/
 
 /*****************************************************************************
- *                          Gizmo Functions
+ *                           Gizmo Functions
  *****************************************************************************/
 var readLayers;
 var createLayerListItem;
@@ -21,21 +21,21 @@ var initializeLayersContextMenus;
 var initializeJqueryVariables;
 
 /*****************************************************************************
- *                          JQUERY Variables
+ *                             Variables
  *****************************************************************************/
  var $tocLayersList;
+ var projectInfo;
 /*****************************************************************************
- *                           Main Script
+ *                            Main Script
  *****************************************************************************/
-//  Give listeners to each item in Table of Contents (Used for debugging, will not likely be part of the final gizmo
-var TOCLoop = function()
+//  Add listeners to the initial table of contents as read in from the map view gizmo layers
+var addListenersToInitialLayers = function()
 {
-    var TOCList = document.getElementById("toc-layers-list");
-    var $myList = $(TOCList).find('li');
-    var $myItem;
-    for (i=0; i < $myList.length; i++){
-        $myItem = $(TOCList).find('li:nth-child(' + (i+1) + ')');
-        addListenersToListItem($myItem);
+    var $myList = $tocLayersList;
+    var $list;
+    for (i=0; i < $list.length; i++){
+        $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
+        addListenersToListItem($listItem);
     };
 };
 
@@ -45,7 +45,7 @@ initializeJqueryVariables = function(){
 }
 
 //  Read in the layers from the map_view gizmo
-readLayers = function (){
+readInitialLayers = function (){
     var map;
     var layers;
 
@@ -53,10 +53,13 @@ readLayers = function (){
     map = TETHYS_MAP_VIEW.getMap();
     layers = map.getLayers();
 
-    //First layer is the first child of the list
+    //Read through layers and sift out only the layers that are wanted for the Table of Contents
     for (layer in layers.array_){
-        createLayerListItem(layers.item(layer));
+        if (layers.item(layer).tethys_toc === true || String(layers.item(layer).tethys_toc) === "undefined"){
+            createLayerListItem(layers.item(layer));
+        }
     }
+    addListenersToInitialLayers();
 
 }
 
@@ -64,26 +67,12 @@ readLayers = function (){
 createLayerListItem = function (layer,position) {
         var $newLayerListItem;
         var chkbxHtml;
-        if (layer.getProperties().visible === true) {
-            chkbxHtml = '<input class="chkbx-layer" type="checkbox" disabled>';
-        } else {
-            chkbxHtml = '<input class="chkbx-layer" type="checkbox">';
-        }
         var listHtmlString =
             '<li class="ui-state-default" ' +
-//            'data-layer-index="' + layerIndex + '" ' +
-//            'data-layer-id="' + layerId + '" ' +
-//            'data-res-id="' + resId + '" ' +
-//            'data-res-type="' + resType + '" ' +
-//            'data-geom-type="' + geomType + '" ' +
-//            'data-public-fname="' + publicFilename + '" ' +
-//            'data-layer-attributes="' + layerAttributes + '" ' +
-//            'data-band-variable="' + (bandInfo ? bandInfo.variable : undefined) + '" ' +
-//            'data-band-units="' + (bandInfo ? bandInfo.units : undefined) + '" ' +
-//            'data-band-min="' + (bandInfo ? bandInfo.min : undefined) + '" ' +
-//            'data-band-max="' + (bandInfo ? bandInfo.max : undefined) + '" ' +
-//            'data-band-nd="' + (bandInfo ? bandInfo.nd : undefined) + '">' +
-//            chkbxHtml +
+            'data-editable="' + layer.editable + '" ' +
+            'data-???="' + layer.editable + '" ' +
+            'data-geom-type="' + layer.geometry_attribute + '"> ' +
+            '<input class="chkbx-layer" type="checkbox">' +
             '<span class="layer-name">' + layer.tethys_legend_title + '</span>' +
             '<input type="text" class="edit-layer-name hidden" value="' + layer.tethys_legend_title + '">' +
             '<div class="hmbrgr-div"><img src="/static/wellhead/images/hamburger-menu.png"></div>' +
@@ -100,6 +89,7 @@ createLayerListItem = function (layer,position) {
         if (layer.getProperties().visible === true){
             $newLayerListItem.find('.chkbx-layer').prop('checked', layer.getProperties().visible);
         }
+        projectInfo.
 };
 
 addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
@@ -176,17 +166,17 @@ closeLyrEdtInpt = function ($layerNameSpan, $layerNameInput) {
     $(document).off('click.edtLyrNm');
 };
 
-    projectInfo = {
-        'resId': null,
-        'map': {
-            'baseMap': 'None',
-            'showInset': false,
-            'layers': {},
-            'zoomLevel': 2,
-            'center': [0, 0],
-            'geoserverUrl': null
-        }
-    };
+projectInfo = {
+    'resId': null,
+    'map': {
+        'baseMap': 'None',
+        'showInset': false,
+        'layers': {},
+        'zoomLevel': 2,
+        'center': [0, 0],
+        'geoserverUrl': null
+    }
+};
 
 onClickRenameLayer = function (e) {
     var clickedElement = e.trigger.context;
@@ -302,3 +292,12 @@ initializeLayersContextMenus = function () {
 //        'RasterResource': layersContextMenuRaster
 //    };
 };
+
+/*****************************************************************************
+ *                           To be executed on load
+ *****************************************************************************/
+
+$(document).ready(function(){
+    initializeJqueryVariables();
+
+});
