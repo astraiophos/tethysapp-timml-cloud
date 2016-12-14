@@ -39,17 +39,24 @@ initializeJqueryVariables = function(){
 readInitialLayers = function (){
     var map;
     var layers;
+    var i;
 
-    //Get the map object to read in initial layers on map
+    //  Get the map object to read in initial layers on map
     map = TETHYS_MAP_VIEW.getMap();
     layers = map.getLayers();
 
-    //Read through layers and sift out only the layers that are wanted for the Table of Contents
-    for (layer in layers.array_){
+    //  Start 'i' counter and count backwards in reverse order to obtain the correct map index for the layer
+    i = layers.array_.length - 1;
+
+    //  Read through layers and sift out only the layers that are wanted for the Table of Contents
+    for (layer in layers.array_.reverse()){
         if (layers.item(layer).tethys_toc === true || String(layers.item(layer).tethys_toc) === "undefined"){
-            createLayerListItem(layers.item(layer),layer);
+            createLayerListItem(layers.item(layer),i);
         }
+        i -= 1
     }
+    //  Put layers back in original order and add listeners
+    layers.array_.reverse();
     addListenersToInitialLayers();
 }
 
@@ -106,11 +113,33 @@ createLayerListItem = function (layer,mapIndex,position) {
 
         projectInfo.map.layers[layer.tethys_legend_title] = {
             displayName: layer.tethys_legend_title,
-            TethysMapIndex: mapIndex,
+            TethysMapIndex: Number(mapIndex),
             layerListIndex: zIndex,
             extents: layer.getSource().getExtent
         };
+//        drawLayersInListOrder();
 };
+
+    addContextMenuToListItem = function ($listItem, resType) {
+        var contextMenuId;
+
+        $listItem.find('.hmbrgr-div img')
+            .contextMenu('menu', contextMenuDict[resType], {
+                'triggerOn': 'click',
+                'displayAround': 'trigger',
+                'mouseClick': 'left',
+                'position': 'right',
+                'onOpen': function (e) {
+                    $('.hmbrgr-div').removeClass('hmbrgr-open');
+                    $(e.trigger.context).parent().addClass('hmbrgr-open');
+                },
+                'onClose': function (e) {
+                    $(e.trigger.context).parent().removeClass('hmbrgr-open');
+                }
+            });
+        contextMenuId = $('.iw-contextMenu:last-child').attr('id');
+        $listItem.data('context-menu', contextMenuId);
+    }
 
 addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
         var $layerNameInput;
@@ -322,18 +351,22 @@ drawLayersInListOrder = function () {
     var displayName;
     var numLayers;
     var zIndex;
+    var map;
+
+    //  Define map as TETHYS_MAP
+    map = TETHYS_MAP_VIEW.getMap();
 
     numLayers = $tocLayersList.children().length;
-    for (i = 3; i <= numLayers; i += 1) {
-        layer = $tocLayersList.find('li:nth-child(' + i + ')');
-        displayName = layer.tethys_legend_title;
-        index = Number(layer.data('layer-index'));
+    for (i = 1; i <= numLayers; i += 1) {
+        layer = $tocLayersList.find('li:nth-child(' + (i) + ')');
+        displayName = layer.text().trim();
+        index = Number(projectInfo.map.layers[layer.text().trim()].TethysMapIndex);
         if (index < 1000) {
             zIndex = numLayers - i;
             map.getLayers().item(index).setZIndex(zIndex);
         }
-        projectInfo.map.layers[displayName].listOrder = i - 2;
-        $btnSaveProject.prop('disabled', false);
+        projectInfo.map.layers[displayName].layerListIndex = i;
+//        $btnSaveProject.prop('disabled', false);
     }
 };
 
