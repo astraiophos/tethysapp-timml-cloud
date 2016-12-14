@@ -10,7 +10,7 @@ app_class = 'wellhead.app:WellheadProtection'
 app_package_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tethysapp', app_package)
 
 ### Python Dependencies ###
-dependencies = []
+dependencies = ["numpy","scipy","matplotlib"]
 
 setup(
     name=release_package,

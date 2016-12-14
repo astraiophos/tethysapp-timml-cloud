@@ -11,7 +11,7 @@
 /*****************************************************************************
  *                           Gizmo Functions
  *****************************************************************************/
-var readLayers;
+var readInitialLayers;
 var createLayerListItem;
 var addListenersToListItem;
 var editLayerDisplayName;
@@ -19,6 +19,7 @@ var closeLyrEdtInpt;
 var onClickRenameLayer;
 var initializeLayersContextMenus;
 var initializeJqueryVariables;
+var addListenersToInitialLayers;
 
 /*****************************************************************************
  *                             Variables
@@ -28,16 +29,6 @@ var initializeJqueryVariables;
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
-//  Add listeners to the initial table of contents as read in from the map view gizmo layers
-var addListenersToInitialLayers = function()
-{
-    var $myList = $tocLayersList;
-    var $list;
-    for (i=0; i < $list.length; i++){
-        $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
-        addListenersToListItem($listItem);
-    };
-};
 
 //  Initialize JQUERY Variables
 initializeJqueryVariables = function(){
@@ -56,21 +47,40 @@ readInitialLayers = function (){
     //Read through layers and sift out only the layers that are wanted for the Table of Contents
     for (layer in layers.array_){
         if (layers.item(layer).tethys_toc === true || String(layers.item(layer).tethys_toc) === "undefined"){
-            createLayerListItem(layers.item(layer));
+            createLayerListItem(layers.item(layer),layer);
         }
     }
     addListenersToInitialLayers();
-
 }
 
+//  Add listeners to the initial table of contents as read in from the map view gizmo layers
+addListenersToInitialLayers = function()
+{
+    // Reinitialize the variables to make sure the list is up-to-date
+    initializeJqueryVariables();
+    var $list = $tocLayersList;
+    var $listItem;
+    for (i=0; i < $list.children().length; i++){
+        $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
+        addListenersToListItem($listItem);
+    };
+};
 
-createLayerListItem = function (layer,position) {
+projectInfo = {
+    'resId': null,
+    'map': {
+        'baseMap': 'None',
+        'layers': {},
+    }
+};
+
+createLayerListItem = function (layer,mapIndex,position) {
         var $newLayerListItem;
+        var zIndex;
         var chkbxHtml;
         var listHtmlString =
             '<li class="ui-state-default" ' +
             'data-editable="' + layer.editable + '" ' +
-            'data-???="' + layer.editable + '" ' +
             'data-geom-type="' + layer.geometry_attribute + '"> ' +
             '<input class="chkbx-layer" type="checkbox">' +
             '<span class="layer-name">' + layer.tethys_legend_title + '</span>' +
@@ -89,7 +99,17 @@ createLayerListItem = function (layer,position) {
         if (layer.getProperties().visible === true){
             $newLayerListItem.find('.chkbx-layer').prop('checked', layer.getProperties().visible);
         }
-        projectInfo.
+
+        // Get the count and assign the initial list order value to the new layer in the TOC
+        initializeJqueryVariables();
+        zIndex = $tocLayersList.children().length;
+
+        projectInfo.map.layers[layer.tethys_legend_title] = {
+            displayName: layer.tethys_legend_title,
+            TethysMapIndex: mapIndex,
+            layerListIndex: zIndex,
+            extents: layer.getSource().getExtent
+        };
 };
 
 addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
@@ -133,20 +153,22 @@ addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
 
 editLayerDisplayName = function (e, $layerNameInput, $layerNameSpan) {
     var newDisplayName;
+    var map = TETHYS_MAP_VIEW.getMap();
     var nameB4Change = $layerNameSpan.text();
     if (e.which === 13) {  // Enter key
         newDisplayName = $layerNameInput.val();
         if (nameB4Change !== newDisplayName) {
             // Make sure the user does not rename a layer the same name as an existing layer
             if (projectInfo.map.layers[newDisplayName] !== undefined) {
-                $('#modalUserMessages-messsage').text('A layer already exists with that name. Please choose a different name');
-                $('#modalUserMessages').modal('show');
+                error_message('A layer already exists with that name. Please choose a different name');
             } else {
                 $layerNameSpan.text(newDisplayName);
-//                    projectInfo.map.layers[nameB4Change].displayName = newDisplayName;
-//                    projectInfo.map.layers[newDisplayName] = projectInfo.map.layers[nameB4Change];
-//                    delete projectInfo.map.layers[nameB4Change];
-//                    $btnSaveProject.prop('disabled', false);
+                projectInfo.map.layers[nameB4Change].displayName = newDisplayName;
+                map.getLayers().item(projectInfo.map.layers[nameB4Change].TethysMapIndex).tethys_legend_title = newDisplayName;
+                projectInfo.map.layers[newDisplayName] = projectInfo.map.layers[nameB4Change];
+                delete projectInfo.map.layers[nameB4Change];
+                TETHYS_MAP_VIEW.updateLegend();
+//                $btnSaveProject.prop('disabled', false);
                 closeLyrEdtInpt($layerNameSpan, $layerNameInput);
             }
         } else {
@@ -293,11 +315,47 @@ initializeLayersContextMenus = function () {
 //    };
 };
 
+drawLayersInListOrder = function () {
+    var i;
+    var index;
+    var layer;
+    var displayName;
+    var numLayers;
+    var zIndex;
+
+    numLayers = $tocLayersList.children().length;
+    for (i = 3; i <= numLayers; i += 1) {
+        layer = $tocLayersList.find('li:nth-child(' + i + ')');
+        displayName = layer.tethys_legend_title;
+        index = Number(layer.data('layer-index'));
+        if (index < 1000) {
+            zIndex = numLayers - i;
+            map.getLayers().item(index).setZIndex(zIndex);
+        }
+        projectInfo.map.layers[displayName].listOrder = i - 2;
+        $btnSaveProject.prop('disabled', false);
+    }
+};
+
 /*****************************************************************************
  *                           To be executed on load
  *****************************************************************************/
 
 $(document).ready(function(){
     initializeJqueryVariables();
+    readInitialLayers();
+
+    $tocLayersList.sortable({
+    placeholder: "ui-state-highlight",
+    stop: drawLayersInListOrder
+    });
 
 });
+
+/*****************************************************************************
+ *                           To be executed on load
+ *****************************************************************************/
+
+var TETHYS_TOC;
+
+TETHYS_TOC = {projectInfo: projectInfo}
