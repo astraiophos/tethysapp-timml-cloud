@@ -26,6 +26,7 @@ var addListenersToInitialLayers;
  *****************************************************************************/
  var $tocLayersList;
  var projectInfo;
+ var contextMenuDict;
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
@@ -57,11 +58,11 @@ readInitialLayers = function (){
     }
     //  Put layers back in original order and add listeners
     layers.array_.reverse();
-    addListenersToInitialLayers();
+    addMenus_and_ListenersToInitialLayers();
 }
 
 //  Add listeners to the initial table of contents as read in from the map view gizmo layers
-addListenersToInitialLayers = function()
+addMenus_and_ListenersToInitialLayers = function()
 {
     // Reinitialize the variables to make sure the list is up-to-date
     initializeJqueryVariables();
@@ -70,6 +71,7 @@ addListenersToInitialLayers = function()
     for (i=0; i < $list.children().length; i++){
         $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
         addListenersToListItem($listItem);
+        addContextMenuToListItem($listItem,'GeographicFeatureResource');
     };
 };
 
@@ -117,29 +119,28 @@ createLayerListItem = function (layer,mapIndex,position) {
             layerListIndex: zIndex,
             extents: layer.getSource().getExtent
         };
-//        drawLayersInListOrder();
 };
 
-    addContextMenuToListItem = function ($listItem, resType) {
-        var contextMenuId;
+addContextMenuToListItem = function ($listItem, resType) {
+    var contextMenuId;
 
-        $listItem.find('.hmbrgr-div img')
-            .contextMenu('menu', contextMenuDict[resType], {
-                'triggerOn': 'click',
-                'displayAround': 'trigger',
-                'mouseClick': 'left',
-                'position': 'right',
-                'onOpen': function (e) {
-                    $('.hmbrgr-div').removeClass('hmbrgr-open');
-                    $(e.trigger.context).parent().addClass('hmbrgr-open');
-                },
-                'onClose': function (e) {
-                    $(e.trigger.context).parent().removeClass('hmbrgr-open');
-                }
-            });
-        contextMenuId = $('.iw-contextMenu:last-child').attr('id');
-        $listItem.data('context-menu', contextMenuId);
-    }
+    $listItem.find('.hmbrgr-div img')
+        .contextMenu('menu', contextMenuDict[resType], {
+            'triggerOn': 'click',
+            'displayAround': 'trigger',
+            'mouseClick': 'left',
+            'position': 'right',
+            'onOpen': function (e) {
+                $('.hmbrgr-div').removeClass('hmbrgr-open');
+                $(e.trigger.context).parent().addClass('hmbrgr-open');
+            },
+            'onClose': function (e) {
+                $(e.trigger.context).parent().removeClass('hmbrgr-open');
+            }
+        });
+    contextMenuId = $('.iw-contextMenu:last-child').attr('id');
+    $listItem.data('context-menu', contextMenuId);
+};
 
 addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
         var $layerNameInput;
@@ -271,7 +272,8 @@ initializeLayersContextMenus = function () {
             name: 'Delete',
             title: 'Delete',
             fun: function (e) {
-                onClickDeleteLayer(e);
+//                onClickDeleteLayer(e);
+                console.log("Deleting the layer sir...")
             }
         }
     ];
@@ -290,7 +292,8 @@ initializeLayersContextMenus = function () {
         name: 'Zoom to',
         title: 'Zoom to',
         fun: function (e) {
-            onClickZoomToLayer(e);
+//            onClickZoomToLayer(e);
+            console.log("Zoomin' to the layer captain...I'm giving it all she's got captain!")
         }
     });
 
@@ -299,7 +302,8 @@ initializeLayersContextMenus = function () {
         name: 'Modify symbology',
         title: 'Modify symbology',
         fun: function (e) {
-            onClickModifySymbology(e);
+//            onClickModifySymbology(e);
+            console.log("Modifying the symbology!...oh wait...")
         }
     }),
 //    {
@@ -322,7 +326,8 @@ initializeLayersContextMenus = function () {
         name: 'View attribute table',
         title: 'View attribute table',
         fun: function (e) {
-            onClickShowAttrTable(e);
+//            onClickShowAttrTable(e);
+            console.log("Here's the table!...for now")
         }
     });
 
@@ -335,13 +340,13 @@ initializeLayersContextMenus = function () {
 //        }
 //    });
 //
-//    contextMenuDict = {
+    contextMenuDict = {
 //        'GenericResource': layersContextMenuViewFile,
-//        'GeographicFeatureResource': layersContextMenuVector,
+        'GeographicFeatureResource': layersContextMenuVector,
 //        'TimeSeriesResource': layersContextMenuTimeSeries,
 //        'RefTimeSeriesResource': layersContextMenuTimeSeries,
 //        'RasterResource': layersContextMenuRaster
-//    };
+    };
 };
 
 drawLayersInListOrder = function () {
@@ -376,6 +381,7 @@ drawLayersInListOrder = function () {
 
 $(document).ready(function(){
     initializeJqueryVariables();
+    initializeLayersContextMenus();
     readInitialLayers();
 
     $tocLayersList.sortable({
