@@ -20,6 +20,7 @@ var onClickRenameLayer;
 var initializeLayersContextMenus;
 var initializeJqueryVariables;
 var addListenersToInitialLayers;
+var addInitialEventListeners;
 
 /*****************************************************************************
  *                             Variables
@@ -375,6 +376,21 @@ drawLayersInListOrder = function () {
     }
 };
 
+addInitialEventListeners = function(){
+    var map;
+
+    //  Initialize the map object
+    map = TETHYS_MAP_VIEW.getMap();
+
+    //  Add a listener for all checkbox layers
+    $(document).on('change', '.chkbx-layer', function () {
+        var layerName = $(this).next().text().trim();
+        var index = projectInfo.map.layers[layerName].TethysMapIndex;
+
+        map.getLayers().item(index).setVisible($(this).is(':checked'));
+    });
+};
+
 /*****************************************************************************
  *                           To be executed on load
  *****************************************************************************/
@@ -383,6 +399,7 @@ $(document).ready(function(){
     initializeJqueryVariables();
     initializeLayersContextMenus();
     readInitialLayers();
+    addInitialEventListeners();
 
     $tocLayersList.sortable({
     placeholder: "ui-state-highlight",

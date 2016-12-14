@@ -23,7 +23,8 @@ def home(request):
     drawing_options = MVDraw(
         controls=['Delete', 'Move', 'Point', 'Box','Polygon','LineString', 'Modify'],
         initial='Box',
-        output_format='WKT'
+        output_format='WKT',
+        lineColor='#663399'
     )
 
     # Define map view options
