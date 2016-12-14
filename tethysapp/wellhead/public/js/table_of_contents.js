@@ -5,6 +5,9 @@
  * COPYRIGHT: (c) 2016 Brigham Young University
  * LICENSE: BSD 2-Clause
  * CONTRIBUTIONS:   http://openlayers.org/
+ * FURTHER SOURCES: Source code for the original Table of Contents tool is
+ *      located at https://github.com/hydroshare/tethysapp-hydroshare_gis,
+ *      extracted from the main.js page in tethysapp/hydroshare_gis/public/js
  *
  *****************************************************************************/
 
@@ -165,21 +168,21 @@ addListenersToListItem = function ($listItem) {/*, layerIndex) {*/
             });
         });
 
-//        $listItem.find('.hmbrgr-div img').on('click', function (e) {
-//            var clickedObj = $(e.currentTarget);
-//            var contextmenuId;
-//            var menuObj;
-//            var newStyle;
-//            contextmenuId = $listItem.data('context-menu');
-//            menuObj = $('#' + contextmenuId);
-//            if (menuObj.attr('style') !== undefined && menuObj.attr('style').indexOf('display: none;') === -1) {
-//                window.setTimeout(function () {
-//                    newStyle = menuObj.attr('style').replace('inline-block', 'none');
-//                    menuObj.attr('style', newStyle);
-//                    clickedObj.parent().removeClass('hmbrgr-open');
-//                }, 50);
-//            }
-//        });
+        $listItem.find('.hmbrgr-div img').on('click', function (e) {
+            var clickedObj = $(e.currentTarget);
+            var contextmenuId;
+            var menuObj;
+            var newStyle;
+            contextmenuId = $listItem.data('context-menu');
+            menuObj = $('#' + contextmenuId);
+            if (menuObj.attr('style') !== undefined && menuObj.attr('style').indexOf('display: none;') === -1) {
+                window.setTimeout(function () {
+                    newStyle = menuObj.attr('style').replace('inline-block', 'none');
+                    menuObj.attr('style', newStyle);
+                    clickedObj.parent().removeClass('hmbrgr-open');
+                }, 50);
+            }
+        });
     };
 
 editLayerDisplayName = function (e, $layerNameInput, $layerNameSpan) {
@@ -210,62 +213,18 @@ editLayerDisplayName = function (e, $layerNameInput, $layerNameSpan) {
     }
 };
 
-closeLyrEdtInpt = function ($layerNameSpan, $layerNameInput) {
-    $layerNameInput
-        .addClass('hidden')
-        .off('keyup')
-        .off('click');
-    $layerNameSpan.removeClass('hidden');
-    $(document).off('click.edtLyrNm');
-};
-
-projectInfo = {
-    'resId': null,
-    'map': {
-        'baseMap': 'None',
-        'showInset': false,
-        'layers': {},
-        'zoomLevel': 2,
-        'center': [0, 0],
-        'geoserverUrl': null
-    }
-};
-
-onClickRenameLayer = function (e) {
-    var clickedElement = e.trigger.context;
-    var $lyrListItem = $(clickedElement).parent().parent();
-    var $layerNameInput = $lyrListItem.find('input[type=text]');
-    var $LayerNameSpan = $lyrListItem.find('span');
-    // layerIndex = $lyrListItem.data('layer-index');
-
-    $LayerNameSpan.addClass('hidden');
-    $lyrListItem.find('input')
-        .removeClass('hidden')
-        .select()
-        .on('keyup', function (e) {
-            editLayerDisplayName(e, $(this), $LayerNameSpan);/*, layerIndex);*/
-        })
-        .on('click', function (e) {
-            e.stopPropagation();
-        });
-
-    $(document).on('click.edtLyrNm', function () {
-        closeLyrEdtInpt($LayerNameSpan, $layerNameInput);
-    });
-};
-
 initializeLayersContextMenus = function () {
     layersContextMenuBase = [
-//        {
-//            name: 'Open in HydroShare',
-//            title: 'Open in HydroShare',
-//            fun: function (e) {
-//                onClickOpenInHS(e);
-//            }
-//        },
         {
-            name: 'Rename',
-            title: 'Rename',
+            name: 'Isolate Layer',
+            title: 'Isolate Layer',
+            fun: function (e) {
+                onClickisolateLayer(e);
+            }
+        },
+        {
+            name: 'Rename Layer',
+            title: 'Rename Layer',
             fun: function (e) {
                 onClickRenameLayer(e);
             }
@@ -278,15 +237,6 @@ initializeLayersContextMenus = function () {
             }
         }
     ];
-
-//    layersContextMenuViewFile = layersContextMenuBase.slice();
-//    layersContextMenuViewFile.unshift({
-//        name: 'View file',
-//        title: 'View file',
-//        fun: function (e) {
-//            onClickViewFile(e);
-//        }
-//    });
 
     layersContextMenuGeospatialBase = layersContextMenuBase.slice();
     layersContextMenuGeospatialBase.unshift({
@@ -332,15 +282,7 @@ initializeLayersContextMenus = function () {
         }
     });
 
-//    layersContextMenuTimeSeries = layersContextMenuGeospatialBase.slice();
-//    layersContextMenuTimeSeries.unshift({
-//        name: 'View time series',
-//        title: 'View time series',
-//        fun: function (e) {
-//            onClickViewFile(e);
-//        }
-//    });
-//
+
     contextMenuDict = {
 //        'GenericResource': layersContextMenuViewFile,
         'GeographicFeatureResource': layersContextMenuVector,
@@ -390,6 +332,69 @@ addInitialEventListeners = function(){
         map.getLayers().item(index).setVisible($(this).is(':checked'));
     });
 };
+
+/*****************************************************************************
+ *                           Context Menu Functions
+ *****************************************************************************/
+
+onClickRenameLayer = function (e) {
+    var clickedElement = e.trigger.context;
+    var $lyrListItem = $(clickedElement).parent().parent();
+    var $layerNameInput = $lyrListItem.find('input[type=text]');
+    var $LayerNameSpan = $lyrListItem.find('span');
+
+    $LayerNameSpan.addClass('hidden');
+    $lyrListItem.find('input')
+        .removeClass('hidden')
+        .select()
+        .on('keyup', function (e) {
+            editLayerDisplayName(e, $(this), $LayerNameSpan);/*, layerIndex);*/
+        })
+        .on('click', function (e) {
+            e.stopPropagation();
+        });
+
+    $(document).on('click.edtLyrNm', function () {
+        closeLyrEdtInpt($LayerNameSpan, $layerNameInput);
+    });
+};
+
+closeLyrEdtInpt = function ($layerNameSpan, $layerNameInput) {
+    $layerNameInput
+        .addClass('hidden')
+        .off('keyup')
+        .off('click');
+    $layerNameSpan.removeClass('hidden');
+    $(document).off('click.edtLyrNm');
+};
+
+onClickisolateLayer = function(e) {
+    var clickedElement = e.trigger.context;
+    var $lyrListItem = $(clickedElement).parent().parent();
+    var layerName = $lyrListItem.find('span').text().trim();
+    var i;
+    var numLayers;
+    var map;
+    var mapIndex;
+
+    //  Use the projectInfo for finding the mapIndex and initialize map
+    mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
+    map = TETHYS_MAP_VIEW.getMap();
+
+    //  Find the number of layers in the map object
+    numLayers = map.getLayers().getArray().length;
+
+    //  Set layer visibility state, leaving only the 'clicked' layer as visible
+    for (i=0; i < numLayers; i++){
+        if (i != mapIndex){
+            map.getLayers().item(i).setVisible(false);
+        }
+        else{
+            map.getLayers().item(i).setVisible(true);
+        }
+    }
+
+}
 
 /*****************************************************************************
  *                           To be executed on load
