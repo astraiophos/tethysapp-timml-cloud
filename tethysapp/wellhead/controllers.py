@@ -27,6 +27,8 @@ def home(request):
         lineColor='#663399'
     )
 
+    # Define TimML layers to represent the element groups
+    modelLayer = MVLayer
     # Define map view options
     map_view_options = MapView(
             height='600px',
