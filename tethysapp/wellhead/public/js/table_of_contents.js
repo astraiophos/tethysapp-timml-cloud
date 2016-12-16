@@ -500,7 +500,6 @@ $(document).ready(function(){
     initializeLayersContextMenus();
     readInitialLayers();
     addInitialEventListeners();
-    exit_edit_mode();
 
     $tocLayersList.sortable({
     placeholder: "ui-state-highlight",

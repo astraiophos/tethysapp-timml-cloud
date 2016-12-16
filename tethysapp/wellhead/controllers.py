@@ -22,7 +22,7 @@ def home(request):
     # Define drawing options
     drawing_options = MVDraw(
         controls=['Delete', 'Move', 'Point', 'Box','Polygon','LineString', 'Modify'],
-        initial='Box',
+        initial='Point',
         output_format='WKT',
         lineColor='#663399'
     )
@@ -37,8 +37,7 @@ def home(request):
             layers=[],
             view=view_options,
             basemap='OpenStreetMap',
-            draw=drawing_options,
-            legend=True
+            draw=drawing_options
     )
 
     context = {'map_view_options': map_view_options}

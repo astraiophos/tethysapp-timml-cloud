@@ -111,5 +111,13 @@ $(document).ready(function(){
 // layer.getSource().getExtent(),
 // this will return the extents of a layer, returns the coordinates of the bottom right corner and the top left corner
 //
+//  // Copy original feature
+//  var clone = map.getLayers().item(i).features[0].clone();
+//  // Get the ID of a feature in openalayers
+//  layers.item(i).getSource().getFeatures()[j].getId();
+//  // Set the feature ID
+//  layers.item(i).getSource().getFeature()[j].setId();
+//  // Get the Feature by its ID
+//  layers.item(i).getSource().getFeatureById(j);
 //
 // /
