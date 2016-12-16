@@ -1,11 +1,11 @@
 /*****************************************************************************
- * FILE:    Main
- * DATE:    2/2/2016
+ * FILE:    table_of_contents.js
+ * DATE:    12/16/2016
  * AUTHOR:  Shawn Crawley and Jacob Fullerton
  * COPYRIGHT: (c) 2016 Brigham Young University
  * LICENSE: BSD 2-Clause
  * CONTRIBUTIONS:   http://openlayers.org/
- * FURTHER SOURCES: Source code for the original Table of Contents tool is
+ * OTHER SOURCES: Source code for the original Table of Contents tool is
  *      located at https://github.com/hydroshare/tethysapp-hydroshare_gis,
  *      extracted from the main.js page in tethysapp/hydroshare_gis/public/js
  *
@@ -121,7 +121,7 @@ createLayerListItem = function (layer,mapIndex,position) {
             displayName: layer.tethys_legend_title,
             TethysMapIndex: Number(mapIndex),
             layerListIndex: zIndex,
-            extents: layer.getSource().getExtent
+            extents: layer.legend_extent
         };
 };
 
@@ -397,6 +397,101 @@ onClickisolateLayer = function(e) {
 }
 
 /*****************************************************************************
+ *                           Utility Functions
+ *****************************************************************************/
+
+enter_edit_mode = function(layerType){
+    //  Show the Draw/Edit tools in the Map View Gizmo
+    //  If the layer in question is a point layer, only turn on pertinent tools
+    if (layerType === "point"){
+        try{
+            $('#tethys_delete').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#tethys_move').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_Point').removeClass('hidden')}
+        catch(err){}
+    }
+    else if (layerType === "line"){
+        try{
+            $('#tethys_modify').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#tethys_delete').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_LineString').removeClass('hidden')}
+        catch(err){}
+    }
+    else if (layerType === "polygon"){
+        try{
+            $('#tethys_modify').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#tethys_delete').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_Box').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_Polygon').removeClass('hidden')}
+        catch(err){}
+    }
+        //  If there is not a definition of the object type in the layer, turn them all on
+    else {
+        try{
+            $('#tethys_modify').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#tethys_delete').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#tethys_move').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_Point').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_Box').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_Polygon').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#draw_LineString').removeClass('hidden')}
+        catch(err){}
+    }
+};
+
+exit_edit_mode = function(){
+    //  Hide all of the Draw/Edit tools in the Map View Gizmo
+    try{
+        $('#tethys_modify').addClass('hidden')}
+    catch(err){}
+    try{
+        $('#tethys_delete').addClass('hidden')}
+    catch(err){}
+    try{
+        $('#tethys_move').addClass('hidden')}
+    catch(err){}
+    try{
+        $('#draw_Point').addClass('hidden')}
+    catch(err){}
+    try{
+        $('#draw_Box').addClass('hidden')}
+    catch(err){}
+    try{
+        $('#draw_Polygon').addClass('hidden')}
+    catch(err){}
+    try{
+        $('#draw_LineString').addClass('hidden')}
+    catch(err){}
+
+};
+
+/*****************************************************************************
  *                           To be executed on load
  *****************************************************************************/
 
@@ -405,6 +500,7 @@ $(document).ready(function(){
     initializeLayersContextMenus();
     readInitialLayers();
     addInitialEventListeners();
+    exit_edit_mode();
 
     $tocLayersList.sortable({
     placeholder: "ui-state-highlight",
@@ -419,4 +515,7 @@ $(document).ready(function(){
 
 var TETHYS_TOC;
 
-TETHYS_TOC = {projectInfo: projectInfo}
+TETHYS_TOC =    {   projectInfo: projectInfo,
+                    enter_edit_mode: enter_edit_mode,
+                    exit_edit_mode: exit_edit_mode
+                }
