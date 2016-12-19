@@ -19,12 +19,15 @@ var createLayerListItem;
 var addListenersToListItem;
 var editLayerDisplayName;
 var closeLyrEdtInpt;
-var onClickRenameLayer;
+
 var initializeLayersContextMenus;
 var initializeJqueryVariables;
 var addListenersToInitialLayers;
 var addInitialEventListeners;
 var select_list_item;
+
+var onClickRenameLayer;
+var onClickEditLayer;
 
 /*****************************************************************************
  *                             Variables
@@ -56,7 +59,7 @@ readInitialLayers = function (){
 
     //  Read through layers and sift out only the layers that are wanted for the Table of Contents
     for (layer in layers.array_.reverse()){
-        if (layers.item(layer).tethys_toc === true || String(layers.item(layer).tethys_toc) === "undefined"){
+        if (layers.item(layer).tethys_table_of_contents === true || String(layers.item(layer).tethys_toc) === "undefined"){
             createLayerListItem(layers.item(layer),i);
         }
         i -= 1
@@ -76,7 +79,12 @@ addMenus_and_ListenersToInitialLayers = function()
     for (i=0; i < $list.children().length; i++){
         $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
         addListenersToListItem($listItem);
-        addContextMenuToListItem($listItem,'GeographicFeatureResource');
+        if ($listItem.find('.layer-name').text().trim() === "Basemap"){
+            addContextMenuToListItem($listItem,'Basemap');
+        }
+        else{
+            addContextMenuToListItem($listItem,'GeographicFeatureResource');
+        };
     };
 };
 
@@ -122,8 +130,9 @@ createLayerListItem = function (layer,mapIndex,position) {
             displayName: layer.tethys_legend_title,
             TethysMapIndex: Number(mapIndex),
             layerListIndex: zIndex,
-            extents: layer.legend_extent,
-            editable: layer.editable
+            extents: layer.tethys_legend_extent,
+            editable: layer.tethys_editable,
+            geomType: layer.getProperties().geometry_attribute
         };
 };
 
@@ -230,14 +239,15 @@ initializeLayersContextMenus = function () {
             fun: function (e) {
                 onClickRenameLayer(e);
             }
-        }, {
-            name: 'Delete',
-            title: 'Delete',
-            fun: function (e) {
-//                onClickDeleteLayer(e);
-                console.log("Deleting the layer sir...")
-            }
         }
+//        {
+//            name: 'Delete',
+//            title: 'Delete',
+//            fun: function (e) {
+////                onClickDeleteLayer(e);
+//                console.log("Deleting the layer sir...")
+//            }
+//        }
     ];
 
     layersContextMenuGeospatialBase = layersContextMenuBase.slice();
@@ -275,19 +285,29 @@ initializeLayersContextMenus = function () {
 //    });
 
     layersContextMenuVector = layersContextMenuRaster.slice();
-    layersContextMenuVector.unshift({
+    layersContextMenuVector.unshift(
+    {
         name: 'Attribute Table',
         title: 'Attribute Table',
         fun: function (e) {
 //            onClickShowAttrTable(e);
             console.log("Here's the table!...for now")
         }
-    });
+    },
+    {
+        name: 'Edit Features',
+        title: 'Edit Features',
+        fun: function (e) {
+            onClickEditLayer(e);
+        }
+    }
+    );
 
 
     contextMenuDict = {
 //        'GenericResource': layersContextMenuViewFile,
         'GeographicFeatureResource': layersContextMenuVector,
+        'Basemap':layersContextMenuBase
 //        'TimeSeriesResource': layersContextMenuTimeSeries,
 //        'RefTimeSeriesResource': layersContextMenuTimeSeries,
 //        'RasterResource': layersContextMenuRaster
@@ -395,8 +415,34 @@ onClickisolateLayer = function(e) {
             map.getLayers().item(i).setVisible(true);
         }
     }
+};
 
-}
+onClickEditLayer = function(e){
+    var clickedElement = e.trigger.context;
+    var $lyrListItem = $(clickedElement).parent().parent();
+    var layerName = $lyrListItem.find('span').text().trim();
+    var i;
+    var numLayers;
+    var map;
+    var mapIndex;
+
+    //  Use the projectInfo for finding the mapIndex and initialize map
+    mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
+    map = TETHYS_MAP_VIEW.getMap();
+
+    //  Find the number of layers in the map object
+    numLayers = map.getLayers().getArray().length;
+
+    //  Set layer visibility state, leaving only the 'clicked' layer as visible
+    for (i=0; i < numLayers; i++){
+        if (i != mapIndex){
+            map.getLayers().item(i).setVisible(false);
+        }
+        else{
+            map.getLayers().item(i).setVisible(true);
+        }
+    }
+};
 
 /*****************************************************************************
  *                           Utility Functions

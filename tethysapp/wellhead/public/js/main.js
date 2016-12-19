@@ -56,9 +56,11 @@ edit_layer = function(){
     //  Initialize the map object
     map = TETHYS_MAP_VIEW.getMap();
     //  Get the mapIndex for layer selection
-    layerIndex = projectInfo.map.layers[layerName].mapIndex;
+    layerIndex = projectInfo.map.layers[layerName].TethysMapIndex;
     //  Get the layer from the map
-    layer = map.getLayers().item(layerIndex)
+    layer = map.getLayers().item(layerIndex);
+
+    enter_edit_mode()
 }
 
 
@@ -107,13 +109,68 @@ initialize_timml_layers = function(){
 
         // Add drawing layer legend properites
         timml_layer.tethys_legend_title = String(layer[0]);
-        timml_layer.editable = true;
-        timml_layer.tethys_toc = true;
+        timml_layer.tethys_editable = true;
+        timml_layer.tethys_table_of_contents = true;
 
         // Add drawing layer to the map
         map.addLayer(timml_layer);
     }
+    map.getLayers().item(2).setProperties({'geometry_attribute': 'polygon'});
+    map.getLayers().item(3).setProperties({'geometry_attribute': 'line'});
+    map.getLayers().item(4).setProperties({'geometry_attribute': 'line'});
+    map.getLayers().item(5).setProperties({'geometry_attribute': 'line'});
+    map.getLayers().item(6).setProperties({'geometry_attribute': 'line'});
+    map.getLayers().item(7).setProperties({'geometry_attribute': 'line'});
+    map.getLayers().item(8).setProperties({'geometry_attribute': 'point'});
+    map.getLayers().item(9).setProperties({'geometry_attribute': 'point'});
 };
+/*****************************************************************************
+ *                       Add Select Interactions to Map
+ *****************************************************************************/
+//$(document).ready(function(){
+//    var map = TETHYS_MAP_VIEW.getMap();
+//    //  Credits for the map "select" interactions to Drag Box Selection Openlayers 3 Example
+//    //  http://openlayers.org/en/latest/examples/box-selection.html?q=select
+//    // a normal select interaction to handle click
+//    var select = new ol.interaction.Select();
+//    map.addInteraction(select);
+//
+//    var selectedFeatures = select.getFeatures();
+//
+//    // a DragBox interaction used to select features by drawing boxes
+//    var dragBox = new ol.interaction.DragBox({
+//    condition: ol.events.condition.platformModifierKeyOnly
+//    });
+//
+//    map.addInteraction(dragBox);
+//
+//    var infoBox = document.getElementById('info');
+//
+//    dragBox.on('boxend', function() {
+//    // features that intersect the box are added to the collection of
+//    // selected features, and their names are displayed in the "info"
+//    // div
+//    var info = [];
+//    var extent = dragBox.getGeometry().getExtent();
+//    vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+//      selectedFeatures.push(feature);
+//      info.push(feature.get('name'));
+//    });
+//    if (info.length > 0) {
+//      infoBox.innerHTML = info.join(', ');
+//    }
+//    });
+//
+//    // clear selection when drawing a new box and when clicking on the map
+//    dragBox.on('boxstart', function() {
+//    selectedFeatures.clear();
+//    infoBox.innerHTML = '&nbsp;';
+//    });
+//    map.on('click', function() {
+//    selectedFeatures.clear();
+//    infoBox.innerHTML = '&nbsp;';
+//    });
+//});
 
 /*****************************************************************************
  *                        To be executed on load
