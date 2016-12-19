@@ -88,11 +88,6 @@ initialize_timml_layers = function(){
     }
 };
 
-exit_edit_mode = function(){
-    //  Hide all of the Draw/Edit tools in the Map View Gizmo
-
-};
-
 /*****************************************************************************
  *                        To be executed on load
  *****************************************************************************/
