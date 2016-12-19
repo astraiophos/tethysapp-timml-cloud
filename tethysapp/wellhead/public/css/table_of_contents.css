@@ -52,6 +52,10 @@
     height: 1.5em;
     line-height: 1.2em;
 }
+.ui-selected{
+    background: #ffff00;
+    opacity: 0.5;
+}
 .chkbx-layer {
     margin: 0 5px 0 0 !important;
 }

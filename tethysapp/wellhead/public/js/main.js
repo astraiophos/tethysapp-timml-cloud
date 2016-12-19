@@ -13,6 +13,7 @@
  *****************************************************************************/
 
 var initialize_timml_layers;
+var edit_layer;
 
 /*****************************************************************************
  *                             Variables
@@ -28,11 +29,37 @@ var line_sink_ditch_layer;
 var polygon_inhom_layer;
 var wells_layer;
 
-//  Layer options and attributes
+
 
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
+
+//  Edit the selected layer
+edit_layer = function(){
+    var map
+    var layerName
+    var layerIndex
+    var layer
+
+    layerName = $('.ui-selected').find('.layer-name').text().trim();
+
+    if (layerName === ""){
+        error_message("Make sure that you have a layer selected");
+        return false
+    }
+    if (projectInfo.map.layers[layerName].editable === false){
+        error_message("The selected layer is not editable");
+        return false
+    }
+
+    //  Initialize the map object
+    map = TETHYS_MAP_VIEW.getMap();
+    //  Get the mapIndex for layer selection
+    layerIndex = projectInfo.map.layers[layerName].mapIndex;
+    //  Get the layer from the map
+    layer = map.getLayers().item(layerIndex)
+}
 
 
 /*****************************************************************************

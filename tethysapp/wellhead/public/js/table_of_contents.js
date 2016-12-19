@@ -24,6 +24,7 @@ var initializeLayersContextMenus;
 var initializeJqueryVariables;
 var addListenersToInitialLayers;
 var addInitialEventListeners;
+var select_list_item;
 
 /*****************************************************************************
  *                             Variables
@@ -121,7 +122,8 @@ createLayerListItem = function (layer,mapIndex,position) {
             displayName: layer.tethys_legend_title,
             TethysMapIndex: Number(mapIndex),
             layerListIndex: zIndex,
-            extents: layer.legend_extent
+            extents: layer.legend_extent,
+            editable: layer.editable
         };
 };
 
@@ -215,16 +217,16 @@ editLayerDisplayName = function (e, $layerNameInput, $layerNameSpan) {
 
 initializeLayersContextMenus = function () {
     layersContextMenuBase = [
+//        {
+//            name: 'Isolate',
+//            title: 'Isolate',
+//            fun: function (e) {
+//                onClickisolateLayer(e);
+//            }
+//        },
         {
-            name: 'Isolate Layer',
-            title: 'Isolate Layer',
-            fun: function (e) {
-                onClickisolateLayer(e);
-            }
-        },
-        {
-            name: 'Rename Layer',
-            title: 'Rename Layer',
+            name: 'Rename',
+            title: 'Rename',
             fun: function (e) {
                 onClickRenameLayer(e);
             }
@@ -274,8 +276,8 @@ initializeLayersContextMenus = function () {
 
     layersContextMenuVector = layersContextMenuRaster.slice();
     layersContextMenuVector.unshift({
-        name: 'View attribute table',
-        title: 'View attribute table',
+        name: 'Attribute Table',
+        title: 'Attribute Table',
         fun: function (e) {
 //            onClickShowAttrTable(e);
             console.log("Here's the table!...for now")
@@ -491,6 +493,14 @@ exit_edit_mode = function(){
 
 };
 
+select_list_item = function(){
+    //  Make layers highlight when clicked on
+    $('.layer-name').parent().on('click',function(){
+        $('.layer-name').parent().removeClass('ui-selected');
+        $(this).addClass('ui-selected');
+    });
+};
+
 /*****************************************************************************
  *                           To be executed on load
  *****************************************************************************/
@@ -500,6 +510,7 @@ $(document).ready(function(){
     initializeLayersContextMenus();
     readInitialLayers();
     addInitialEventListeners();
+    select_list_item();
 
     $tocLayersList.sortable({
     placeholder: "ui-state-highlight",
