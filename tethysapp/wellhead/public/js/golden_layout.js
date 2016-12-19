@@ -20,46 +20,64 @@
 
 var config;
 var myLayout
-var $domDiv;
+var $innerApp;
+var $mapContainer;
+var $mapWrapper;
+var window_height;
+var layoutDiv;
 
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
 
 $(document).ready(function(){
+//    initializeJqueryVars;
+    $innerApp = $('#inner-app-content');
+    $mapContainer = $('#map_view_outer_container');
+    $mapWrapper = $('#map_wrapper');
+
     config = {
         settings:{hasHeaders:false},
         content: [{
-            type: 'row',
+            type: 'column',
             content:[{
                 type: 'component',
-                componentName: 'testComponent',
-                componentState: { label: 'A' },
-                id: 'window1'
+                componentName: 'Map',
+                componentState: { myId: 'map_view_layout' },
+            id: 'map'
             },
+
             {
             type: 'column',
             content:[{
                 type: 'component',
-                componentName: 'testComponent',
-                componentState: { label: 'B' },
-                id: 'window2'
-                },
-                {
-                type: 'component',
-                componentName: 'testComponent',
-                componentState: { label: 'C' },
-                id: 'window3'
-                }]
+                componentName: 'Table',
+                componentState: { myId: 'attribute_table_layout' }
+                }],
+            id: 'table',
+            height:0
             }]
-        }],
-        id:'myWindow'
+        }]
     };
 
-    $domDiv = $('#inner-app-content')
-    myLayout = new GoldenLayout( config,$domDiv );
-    myLayout.registerComponent( 'testComponent', function( container, componentState ){
-        container.getElement().html( '<h2>' + componentState.label + '</h2>' );
+    //  To resize the layout to fit
+    window_height = $(window).height();
+    $innerApp.height(window_height-220);
+
+    myLayout = new GoldenLayout( config,$innerApp );
+    myLayout.registerComponent( 'Map', function( container, componentState ){
+        container.getElement().addClass('id');
+        container.getElement().attr('id',componentState.myId);
+    });
+        myLayout.registerComponent( 'Table', function( container, componentState ){
+        container.getElement().addClass('id');
+        container.getElement().attr('id',componentState.myId);
     });
     myLayout.init();
+
+    $layoutDiv = $('#map_view_layout');
+
+    $mapContainer.appendTo($layoutDiv);
+    //  Resize map div to be 100% so that map always fills the space inside layout container
+    $mapWrapper.height('100%');
 })
