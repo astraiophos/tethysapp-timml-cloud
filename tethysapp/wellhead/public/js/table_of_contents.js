@@ -425,10 +425,13 @@ onClickEditLayer = function(e){
     var numLayers;
     var map;
     var mapIndex;
+    var layer;
+    var clone;
 
     //  Use the projectInfo for finding the mapIndex and initialize map
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
     map = TETHYS_MAP_VIEW.getMap();
+    layer = map.getLayers().item(mapIndex);
 
     //  Find the number of layers in the map object
     numLayers = map.getLayers().getArray().length;
@@ -442,6 +445,17 @@ onClickEditLayer = function(e){
             map.getLayers().item(i).setVisible(true);
         }
     }
+
+    try{
+        //  Copy all features to Tethys Drawing Layer
+        for (feature in layer.getSource().getFeatures()){
+            clone = layer.getSource().getFeatures()[feature].clone();
+            map.getLayers().item(1).getSource().addFeatures([clone]);
+        }
+    }
+    catch(err){
+    }
+
 };
 
 /*****************************************************************************

@@ -48,7 +48,7 @@ edit_layer = function(){
         error_message("Make sure that you have a layer selected");
         return false
     }
-    if (projectInfo.map.layers[layerName].editable === false){
+    if (projectInfo.map.layers[layerName].tethys_editable === false){
         error_message("The selected layer is not editable");
         return false
     }
@@ -115,6 +115,8 @@ initialize_timml_layers = function(){
         // Add drawing layer to the map
         map.addLayer(timml_layer);
     }
+
+    //  Assign Geometry type to layers, used to initialize the right state of edit mode later on
     map.getLayers().item(2).setProperties({'geometry_attribute': 'polygon'});
     map.getLayers().item(3).setProperties({'geometry_attribute': 'line'});
     map.getLayers().item(4).setProperties({'geometry_attribute': 'line'});
@@ -123,6 +125,8 @@ initialize_timml_layers = function(){
     map.getLayers().item(7).setProperties({'geometry_attribute': 'line'});
     map.getLayers().item(8).setProperties({'geometry_attribute': 'point'});
     map.getLayers().item(9).setProperties({'geometry_attribute': 'point'});
+
+
 };
 /*****************************************************************************
  *                       Add Select Interactions to Map
@@ -192,7 +196,7 @@ $(document).ready(function(){
 //
 //  // Copy original feature
 //  var clone = map.getLayers().item(i).features[0].clone();
-//  // Get the ID of a feature in openalayers
+//  // Get the ID of a feature in openlayers
 //  layers.item(i).getSource().getFeatures()[j].getId();
 //  // Set the feature ID
 //  layers.item(i).getSource().getFeature()[j].setId();
