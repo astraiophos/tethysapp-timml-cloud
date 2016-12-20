@@ -427,6 +427,10 @@ onClickEditLayer = function(e){
     var mapIndex;
     var layer;
     var clone;
+    var copyFeatures=[];
+    var copied;
+    var newSource;
+    var newStyle;
 
     //  Use the projectInfo for finding the mapIndex and initialize map
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
@@ -436,29 +440,20 @@ onClickEditLayer = function(e){
     //  Find the number of layers in the map object
     numLayers = map.getLayers().getArray().length;
 
-    //  Check if basemap is turned off
-    baseMap = map.getLayers().item(0).getProperties().visible;
-
-    //  Set layer visibility state, leaving only the 'clicked' layer as visible
+    //  Make all layers except for Drawing Layer not-editable
     for (i=0; i < numLayers; i++){
-        if (i != mapIndex){
-            map.getLayers().item(i).setVisible(false);
+        if (i != 1){
+            map.getLayers().item(i).tethys_editable = false;
         }
         else{
-            map.getLayers().item(i).setVisible(true);
+            map.getLayers().item(i).tethys_editable = true;
         }
     }
 
     try{
-//        //  Copy all features to Tethys Drawing Layer
-//        for (feature in layer.getSource().getFeatures()){
-//            clone = layer.getSource().getFeatures()[feature];
-//            clone.setId(feature);
-//            map.getLayers().item(1).getSource().addFeatures([clone]);
-//        }
-        var copyFeatures=[];
-        var copied;
-        var newSource;
+        copyFeatures=[];
+        copied;
+        newSource;
         for (feature in layer.getSource().getFeatures()){
             copyFeatures.push({
                 'type': 'Feature',
@@ -466,11 +461,9 @@ onClickEditLayer = function(e){
                     'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
                     'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
                 },
-//                {
-//                'properties': {
-//                    ''
-//                    }
-//                }
+                {
+                'properties': {layer.getSource().getFeatures()[feature].getProperties()}
+                }
             });
             copied = {
                 'type': 'FeatureCollection',
@@ -497,9 +490,12 @@ onClickEditLayer = function(e){
         map.getLayers().item(1).setVisible(true);
     }
     catch(err){
-        console.log("No Features!")
+        newStyle = layer.getStyle();
+        map.getLayers().item(1).setStyle(newStyle);
     }
-
+    //  Cache the source features in the event user discards changes during edit mode to bring back original features
+    localStorage.setItem(layerName,newSource);
+    layer.getSource().clear()
 };
 
 /*****************************************************************************
