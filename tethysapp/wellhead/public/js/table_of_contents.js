@@ -461,9 +461,7 @@ onClickEditLayer = function(e){
                     'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
                     'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
                 },
-                {
-                'properties': {layer.getSource().getFeatures()[feature].getProperties()}
-                }
+                'properties': layer.getSource().getFeatures()[feature].getProperties(),
             });
             copied = {
                 'type': 'FeatureCollection',
