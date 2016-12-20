@@ -436,6 +436,9 @@ onClickEditLayer = function(e){
     //  Find the number of layers in the map object
     numLayers = map.getLayers().getArray().length;
 
+    //  Check if basemap is turned off
+    baseMap = map.getLayers().item(0).getProperties().visible;
+
     //  Set layer visibility state, leaving only the 'clicked' layer as visible
     for (i=0; i < numLayers; i++){
         if (i != mapIndex){
@@ -447,13 +450,54 @@ onClickEditLayer = function(e){
     }
 
     try{
-        //  Copy all features to Tethys Drawing Layer
+//        //  Copy all features to Tethys Drawing Layer
+//        for (feature in layer.getSource().getFeatures()){
+//            clone = layer.getSource().getFeatures()[feature];
+//            clone.setId(feature);
+//            map.getLayers().item(1).getSource().addFeatures([clone]);
+//        }
+        var copyFeatures=[];
+        var copied;
+        var newSource;
         for (feature in layer.getSource().getFeatures()){
-            clone = layer.getSource().getFeatures()[feature].clone();
-            map.getLayers().item(1).getSource().addFeatures([clone]);
+            copyFeatures.push({
+                'type': 'Feature',
+                'geometry':{
+                    'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
+                    'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+                },
+//                {
+//                'properties': {
+//                    ''
+//                    }
+//                }
+            });
+            copied = {
+                'type': 'FeatureCollection',
+                'crs': {
+                    'type': 'name',
+                    'properties': {
+                        'name':'EPSG:4326'
+                    }
+                },
+                'features': copyFeatures
+            }
         }
+        //  Create a new source to be used by the Drawing Layer
+        newSource = new ol.source.Vector({features: new ol.format.GeoJSON().readFeatures(copied,
+            {featureProjection:"EPSG:4326"})});
+        newStyle = layer.getStyle();
+        map.getLayers().item(1).setSource(newSource);
+        map.getLayers().item(1).setStyle(newStyle);
+
+        //  Make basemap visible if turned on prior to clicking 'edit features' and turn on Drawing Layer
+        if (baseMap){
+            map.getLayers().item(0).setVisible(baseMap);
+        }
+        map.getLayers().item(1).setVisible(true);
     }
     catch(err){
+        console.log("No Features!")
     }
 
 };
