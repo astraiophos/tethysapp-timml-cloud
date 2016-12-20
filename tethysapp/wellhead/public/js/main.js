@@ -202,5 +202,7 @@ $(document).ready(function(){
 //  layers.item(i).getSource().getFeature()[j].setId();
 //  // Get the Feature by its ID
 //  layers.item(i).getSource().getFeatureById(j);
+//  // Remove a layers attribute
+//  delete map.getLayers().item(1)['tag']
 //
 // /

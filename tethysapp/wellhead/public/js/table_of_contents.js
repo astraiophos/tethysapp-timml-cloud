@@ -28,6 +28,7 @@ var select_list_item;
 
 var onClickRenameLayer;
 var onClickEditLayer;
+var onClickSaveEdits;
 
 /*****************************************************************************
  *                             Variables
@@ -428,14 +429,24 @@ onClickEditLayer = function(e){
     var layer;
     var clone;
     var copyFeatures=[];
+    var featureProps=[[]];
     var copied;
     var newSource;
     var newStyle;
+    var cacheFeatures;
 
     //  Use the projectInfo for finding the mapIndex and initialize map
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
     map = TETHYS_MAP_VIEW.getMap();
     layer = map.getLayers().item(mapIndex);
+
+    //  Make sure that the layer being edited is actually editable
+    if (layer.tethys_editable === false){
+        error_message("This layer is locked and cannot be edited," +
+            " make sure that you aren't already editing another layer." +
+            " Otherwise, contact the administrator.");
+        return false
+    }
 
     //  Find the number of layers in the map object
     numLayers = map.getLayers().getArray().length;
@@ -461,7 +472,96 @@ onClickEditLayer = function(e){
                     'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
                     'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
                 },
-                'properties': layer.getSource().getFeatures()[feature].getProperties(),
+                'properties':'',
+            });
+            //  Gather the properties for each element
+            for (property in layer.getSource().getFeatures()[feature].getProperties()){
+                if (String(property) === 'geometry'){}
+                else{
+                    featureProps.push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
+                    console.log(property);
+                }
+            };
+            //  This copies the features to the drawinglayer
+            map.getLayers().item(1).getSource().addFeature(layer.getSource().getFeatures()[feature].clone())
+        };
+//        copied = {
+//            'type': 'FeatureCollection',
+//            'crs': {
+//                'type': 'name',
+//                'properties': {
+//                    'name':'EPSG:4326'
+//                }
+//            },
+//            'features': copyFeatures
+//        };
+//        //  Create a new source to be used by the Drawing Layer
+//        newSource = new ol.source.Vector({features: new ol.format.GeoJSON().readFeatures(copied,
+//            {featureProjection:"EPSG:4326"})});
+        newStyle = layer.getStyle();
+        map.getLayers().item(1).setStyle(newStyle);
+
+    }
+    catch(err){
+        console.log(err);
+        newStyle = layer.getStyle();
+        map.getLayers().item(1).setStyle(newStyle);
+    }
+    //  Cache the source features in the event user discards changes during edit mode to bring back original features
+//    newStyle = JSON.stringify(newStyle);
+//    cacheFeatures = JSON.stringify(copyFeatures);
+//    localStorage.setItem(String(layerName + "_Features"),cacheFeatures);
+//    localStorage.setItem(String(layerName + "_Style"),newStyle);
+    layer.getSource().clear();
+    map.getLayers().item(1).tag = layerName;
+};
+
+onClickSaveEdits = function(){
+    var layerName;
+    var i;
+    var numLayers;
+    var map;
+    var mapIndex;
+    var layer;
+    var clone;
+    var copyFeatures=[];
+    var copied;
+    var newSource;
+    var newStyle;
+    var cacheFeatures;
+
+    //  Initialize map object
+    map = TETHYS_MAP_VIEW.getMap();
+    layerName = map.getLayers().item(1).tag;
+
+    //  Use the projectInfo for finding the mapIndex
+    mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
+
+    //  Set the layer to the edit layer
+    layer = map.getLayers().item(1);
+
+    //  Return all layers to their original editable state based on ProjectInfo
+    for (mapObj in projectInfo.map.layers){
+        if (projectInfo.map.layers[mapObj].editable === true){
+            map.getLayers().item(projectInfo.map.layers[mapObj].TethysMapIndex).tethys_editable = true;
+        }
+        else{
+            map.getLayers().item(projectInfo.map.layers[mapObj].TethysMapIndex).tethys_editable = false;
+        }
+    };
+
+    try{
+        copyFeatures=[];
+        copied;
+        newSource;
+        for (feature in layer.getSource().getFeatures()){
+            copyFeatures.push({
+                'type': 'Feature',
+                'geometry':{
+                    'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
+                    'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+                },
+//                'properties': layer.getSource().getFeatures()[feature].getProperties(),
             });
             copied = {
                 'type': 'FeatureCollection',
@@ -473,27 +573,31 @@ onClickEditLayer = function(e){
                 },
                 'features': copyFeatures
             }
-        }
+        };
         //  Create a new source to be used by the Drawing Layer
         newSource = new ol.source.Vector({features: new ol.format.GeoJSON().readFeatures(copied,
             {featureProjection:"EPSG:4326"})});
-        newStyle = layer.getStyle();
-        map.getLayers().item(1).setSource(newSource);
-        map.getLayers().item(1).setStyle(newStyle);
+        map.getLayers().item(mapIndex).setSource(newSource);
+        delete map.getLayers().item(1)['tag'];
 
         //  Make basemap visible if turned on prior to clicking 'edit features' and turn on Drawing Layer
         if (baseMap){
             map.getLayers().item(0).setVisible(baseMap);
         }
-        map.getLayers().item(1).setVisible(true);
+        map.getLayers().item(mapIndex).setVisible(false);
     }
     catch(err){
-        newStyle = layer.getStyle();
-        map.getLayers().item(1).setStyle(newStyle);
-    }
+//        newStyle = layer.getStyle();
+//        map.getLayers().item(mapIndex).setStyle(newStyle);
+    };
     //  Cache the source features in the event user discards changes during edit mode to bring back original features
-    localStorage.setItem(layerName,newSource);
-    layer.getSource().clear()
+//    cacheFeatures = JSON.stringify(copyFeatures);
+//    localStorage.setItem(String(layerName + "_Features"),cacheFeatures);
+    layer.getSource().clear();
+//    //  Delete all features from the drawinglayer
+//    for (feature in layer.getSource().getFeatures()){
+//        map.getLayers().item(1).getSource().removeFeature(map.getLayers().item(1).getSource().getFeatures()[0]);
+//    };
 };
 
 /*****************************************************************************
