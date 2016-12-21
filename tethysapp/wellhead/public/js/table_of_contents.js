@@ -532,6 +532,7 @@ onClickEditLayer = function(e){
 
     layer.getSource().clear();
     map.getLayers().item(1).tag = layerName;
+    enter_edit_mode(projectInfo.map.layers[layerName].geomType);
 };
 
 onClickSaveEdits = function(){
@@ -642,6 +643,9 @@ onClickSaveEdits = function(){
     layer.getSource().clear();
     delete map.getLayers().item(1).tag;
     layer.tethys_editable = false;
+    layer.setVisible(false);
+
+    exit_edit_mode();
 };
 
 /*****************************************************************************
@@ -757,6 +761,7 @@ $(document).ready(function(){
     readInitialLayers();
     addInitialEventListeners();
     select_list_item();
+    exit_edit_mode();
 
     $tocLayersList.sortable({
     placeholder: "ui-state-highlight",
