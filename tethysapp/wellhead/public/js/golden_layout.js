@@ -22,9 +22,11 @@ var config;
 var myLayout
 var $innerApp;
 var $mapContainer;
+var $tableContainer;
 var $mapWrapper;
 var window_height;
-var layoutDiv;
+var $mapLayoutDiv;
+var $tableLayoutDiv;
 
 /*****************************************************************************
  *                            Main Script
@@ -34,6 +36,7 @@ $(document).ready(function(){
 //    initializeJqueryVars;
     $innerApp = $('#inner-app-content');
     $mapContainer = $('#map_view_outer_container');
+    $tableContainer = $('#attr-table');
     $mapWrapper = $('#map_wrapper');
 
     config = {
@@ -55,7 +58,7 @@ $(document).ready(function(){
                 componentState: { myId: 'attribute_table_layout' }
                 }],
             id: 'table',
-            height:0
+            height:10
             }]
         }]
     };
@@ -75,9 +78,11 @@ $(document).ready(function(){
     });
     myLayout.init();
 
-    $layoutDiv = $('#map_view_layout');
+    $mapLayoutDiv = $('#map_view_layout');
+    $tableLayoutDiv = $('#attribute_table_layout');
 
-    $mapContainer.appendTo($layoutDiv);
+    $mapContainer.appendTo($mapLayoutDiv);
+    $tableContainer.appendTo($tableLayoutDiv);
     //  Resize map div to be 100% so that map always fills the space inside layout container
     $mapWrapper.height('100%');
 })

@@ -15,7 +15,7 @@
     </div>
   </div>
 
-<button type="button" class="btn btn-primary" onclick="onClickSaveEdits();">Edit Selected Layer</button>
+<!--<button type="button" class="btn btn-primary" onclick="onClickSaveEdits();">Edit Selected Layer</button>-->
 {% endblock %}
 
 {% block app_content %}
@@ -23,6 +23,7 @@
   {{ block.super }}
 
   {% gizmo map_view map_view_options %}
+  {% gizmo table_view table_view_edit %}
 
 {% endblock %}
 

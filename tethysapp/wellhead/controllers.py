@@ -40,6 +40,20 @@ def home(request):
             draw=drawing_options
     )
 
-    context = {'map_view_options': map_view_options}
+    #   Initialize the Bootstraps table
+    table_view_edit = TableView(column_names=('Name', 'Age', 'Job'),
+                            rows=[('Bill', 30, 'contractor'),
+                                  ('Fred', 18, 'programmer'),
+                                  ('Bob', 26, 'boss')],
+                            hover=True,
+                            striped=True,
+                            bordered=False,
+                            condensed=False,
+                            editable_columns=(False, 'ageInput', 'jobInput'),
+                            row_ids=[21, 25, 31],
+                            attributes={'id':'attr-table'})
+
+    context = {'map_view_options': map_view_options,
+               'table_view_edit': table_view_edit}
 
     return render(request, 'wellhead/home.html', context)

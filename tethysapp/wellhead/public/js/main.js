@@ -206,3 +206,20 @@ $(document).ready(function(){
 //  delete map.getLayers().item(1)['tag']
 //
 // /
+
+//  Need to build the table using jquery
+//  Bootstrap classes: table, table-hover
+//  Custom Classes: striped (main.css)
+//  Thanks to @Shelvin on stacoverflow.com
+//function stripes () {
+//            $("tr").each(function () {
+//                $(this).removeClass("striped");
+//            });
+//            $("tr:even").each(function () {
+//                $(this).addClass("striped");
+//            });
+//        }
+//
+//  Also need to attach jquery listeners so that every new object drawn triggers a new row with the same columns
+//  as generated for the layer.
+//  Persists and loads will be done through JSON to and from the map MVLayers

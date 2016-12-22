@@ -29,6 +29,7 @@ var select_list_item;
 var onClickRenameLayer;
 var onClickEditLayer;
 var onClickSaveEdits;
+var onClickShowAttrTable;
 
 /*****************************************************************************
  *                             Variables
@@ -298,8 +299,7 @@ initializeLayersContextMenus = function () {
         name: 'Attribute Table',
         title: 'Attribute Table',
         fun: function (e) {
-//            onClickShowAttrTable(e);
-            console.log("Here's the table!...for now")
+            onClickShowAttrTable(e);
         }
     },
     {
@@ -443,14 +443,13 @@ onClickEditLayer = function(e){
             var $lyrListItem = $('.ui-selected');
         }
     }
-    catch(err){error_message("You have not selected a layer, please select one for editing");};
+    catch(err){console.log(err);};
     if ($lyrListItem[0] === undefined){
         error_message("You have not selected a layer, please select one for editing");
         return false;
     }
 
     var layerName = $lyrListItem.find('span').text().trim();
-    var i;
     var numLayers;
     var map;
     var mapIndex;
@@ -554,12 +553,11 @@ onClickEditLayer = function(e){
 
     layer.getSource().clear();
     map.getLayers().item(1).tag = layerName;
-    enter_edit_mode(projectInfo.map.layers[layerName].geomType);
+    enter_edit_mode(projectInfo.map.layers[layerName].geomType,'#attr-table input');
 };
 
 onClickSaveEdits = function(){
     var layerName;
-    var i;
     var numLayers;
     var map;
     var mapIndex;
@@ -681,14 +679,78 @@ onClickSaveEdits = function(){
     layer.tethys_editable = false;
     layer.setVisible(false);
 
-    exit_edit_mode();
+    exit_edit_mode('#attr-table input');
+};
+
+onClickShowAttrTable = function(e){
+    //  Initialize the layer item variables, use a try/catch to make a button available as an option for layer editing.
+    try{
+        if (e){
+            var clickedElement = e.trigger.context;
+            var $lyrListItem = $(clickedElement).parent().parent();
+        }
+        else{
+            var $lyrListItem = $('.ui-selected');
+        }
+    }
+    catch(err){console.log(err);};
+    if ($lyrListItem[0] === undefined){
+        error_message("No layer selected");
+        return false;
+    }
+    var layerName = $lyrListItem.find('span').text().trim();
+    var numLayers;
+    var map;
+    var mapIndex;
+    var layer;
+    var copyFeatures=[];
+    var featureProps=[];
+
+    //  Use the projectInfo for finding the mapIndex and initialize map
+    mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
+    map = TETHYS_MAP_VIEW.getMap();
+    layer = map.getLayers().item(mapIndex);
+
+    try{
+        for (feature in layer.getSource().getFeatures()){
+            copyFeatures.push({
+                'type': 'Feature',
+                'geometry':{
+                    'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
+                    'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+                }
+            });
+            //  Gather the properties for each element
+            featureProps[feature] = [];
+            for (property in layer.getSource().getFeatures()[feature].getProperties()){
+                if (String(property) === 'geometry'){}
+                else{
+                    featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
+                    console.log(property);
+                }
+            };
+        };
+        //  Add Properties to feature list
+        for (feature in copyFeatures){
+            for (prop in featureProps[feature]){
+                copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
+            }
+        };
+
+    }
+    catch(err){
+        console.log(err);
+    }
+    if (copyFeatures.length === 0){
+        error_message("There aren't any features in the selected layer");
+    }
 };
 
 /*****************************************************************************
  *                           Utility Functions
  *****************************************************************************/
 
-enter_edit_mode = function(layerType){
+enter_edit_mode = function(layerType,attrTableId){
     //  Show the Draw/Edit tools in the Map View Gizmo
     //  If the layer in question is a point layer, only turn on pertinent tools
     if (layerType === "point"){
@@ -710,6 +772,9 @@ enter_edit_mode = function(layerType){
             $('#tethys_delete').removeClass('hidden')}
         catch(err){}
         try{
+            $('#tethys_move').removeClass('hidden')}
+        catch(err){}
+        try{
             $('#draw_LineString').removeClass('hidden')}
         catch(err){}
     }
@@ -719,6 +784,9 @@ enter_edit_mode = function(layerType){
         catch(err){}
         try{
             $('#tethys_delete').removeClass('hidden')}
+        catch(err){}
+        try{
+            $('#tethys_move').removeClass('hidden')}
         catch(err){}
         try{
             $('#draw_Box').removeClass('hidden')}
@@ -751,9 +819,10 @@ enter_edit_mode = function(layerType){
             $('#draw_LineString').removeClass('hidden')}
         catch(err){}
     }
+    $(attrTableId).prop("disabled",false)
 };
 
-exit_edit_mode = function(){
+exit_edit_mode = function(attrTableId){
     //  Hide all of the Draw/Edit tools in the Map View Gizmo
     try{
         $('#tethys_modify').addClass('hidden')}
@@ -779,7 +848,7 @@ exit_edit_mode = function(){
     try{
         $('#tethys_pan').find('div:first-child').click()}
     catch(err){}
-
+    $(attrTableId).prop("disabled",true)
 };
 
 select_list_item = function(){
@@ -800,7 +869,7 @@ $(document).ready(function(){
     readInitialLayers();
     addInitialEventListeners();
     select_list_item();
-    exit_edit_mode();
+    exit_edit_mode('#attr-table input');
 
     $tocLayersList.sortable({
     placeholder: "ui-state-highlight",
@@ -819,5 +888,6 @@ TETHYS_TOC =    {   projectInfo: projectInfo,
                     enter_edit_mode: enter_edit_mode,
                     exit_edit_mode: exit_edit_mode,
                     onClickEditLayer: onClickEditLayer,
-                    onClickSaveEdits: onClickSaveEdits
+                    onClickSaveEdits: onClickSaveEdits,
+                    onClickShowAttrTable: onClickShowAttrTable
                 }
