@@ -310,8 +310,8 @@ initializeLayersContextMenus = function () {
         }
     },
     {
-        name: 'Save Features',
-        title: 'Save Features',
+        name: 'Save Edits',
+        title: 'Save Edits',
         fun: function (e) {
             onClickSaveEdits(e);
         }
