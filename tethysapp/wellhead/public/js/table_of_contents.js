@@ -546,7 +546,9 @@ onClickSaveEdits = function(){
     var copyFeatures=[];
     var featureProps=[];
     var copied;
+    var format;
     var newStyle;
+    var newSource;
     var jsonFeatures;
     var jsonStyle;
 
@@ -597,7 +599,7 @@ onClickSaveEdits = function(){
                 }
             };
             //  This copies the features to the drawinglayer
-            map.getLayers().item(mapIndex).getSource().addFeature(layer.getSource().getFeatures()[feature].clone())
+//            map.getLayers().item(mapIndex).getSource().addFeature(layer.getSource().getFeatures()[feature].clone())
         };
         //  Add Properties to feature list
         for (feature in copyFeatures){
@@ -617,6 +619,15 @@ onClickSaveEdits = function(){
         };
         newStyle = layer.getStyle();
 
+        //  Establish the format as GeoJSON
+        format = new ol.format.GeoJSON();
+
+        //  Create new layer source for the layer receiving the features
+        newSource = new ol.source.Vector({
+        features: format.readFeatures(copied,
+        {featureProjection:"EPSG:4326"})
+        });
+
         //  Read features and style to string for localStorage and then store features and style
         jsonFeatures = JSON.stringify(copied);
         jsonStyle = JSON.stringify(newStyle);
@@ -625,7 +636,10 @@ onClickSaveEdits = function(){
         localStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
-        map.getLayers().item(1).setStyle(newStyle);
+        map.getLayers().item(mapIndex).setStyle(newStyle);
+
+        //  Set the save layer to the new source
+        map.getLayers().item(mapIndex).setSource(newSource);
 
     }
     catch(err){
@@ -637,7 +651,7 @@ onClickSaveEdits = function(){
         localStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
-        map.getLayers().item(1).setStyle(newStyle);
+        map.getLayers().item(mapIndex).setStyle(newStyle);
     }
 
     layer.getSource().clear();
