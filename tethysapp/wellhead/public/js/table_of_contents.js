@@ -424,10 +424,24 @@ onClickisolateLayer = function(e) {
         }
     }
 };
-
+//**Need to select drawing layer regardless of index, right now it's hard coded to be layer 1
 onClickEditLayer = function(e){
-    var clickedElement = e.trigger.context;
-    var $lyrListItem = $(clickedElement).parent().parent();
+    //  Initialize the layer item variables, use a try/catch to make a button available as an option for layer editing.
+    try{
+        if (e){
+            var clickedElement = e.trigger.context;
+            var $lyrListItem = $(clickedElement).parent().parent();
+        }
+        else{
+            var $lyrListItem = $('.ui-selected');
+        }
+    }
+    catch(err){error_message("You have not selected a layer, please select one for editing");};
+    if ($lyrListItem[0] === undefined){
+        error_message("You have not selected a layer, please select one for editing");
+        return false;
+    }
+
     var layerName = $lyrListItem.find('span').text().trim();
     var i;
     var numLayers;
@@ -465,6 +479,7 @@ onClickEditLayer = function(e){
         }
         else{
             map.getLayers().item(i).tethys_editable = true;
+            map.getLayers().item(i).setVisible(true);
         }
     }
 
@@ -754,6 +769,9 @@ exit_edit_mode = function(){
     try{
         $('#draw_LineString').addClass('hidden')}
     catch(err){}
+    try{
+        $('#tethys_pan').find('div:first-child').click()}
+    catch(err){}
 
 };
 
@@ -792,5 +810,7 @@ var TETHYS_TOC;
 
 TETHYS_TOC =    {   projectInfo: projectInfo,
                     enter_edit_mode: enter_edit_mode,
-                    exit_edit_mode: exit_edit_mode
+                    exit_edit_mode: exit_edit_mode,
+                    onClickEditLayer: onClickEditLayer,
+                    onClickSaveEdits: onClickSaveEdits
                 }
