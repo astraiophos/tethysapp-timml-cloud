@@ -24,7 +24,7 @@ var initializeLayersContextMenus;
 var initializeJqueryVariables;
 var addListenersToInitialLayers;
 var addInitialEventListeners;
-var select_list_item;
+var initialize_listeners;
 
 var onClickRenameLayer;
 var onClickEditLayer;
@@ -684,6 +684,8 @@ onClickSaveEdits = function(){
     exit_edit_mode('#attr-table input');
     $('#editSave').addClass("hidden");
     $('#editCancel').addClass("hidden");
+
+    build_table(layerName,copyFeatures);
 };
 
 onClickShowAttrTable = function(e){
@@ -741,7 +743,6 @@ onClickShowAttrTable = function(e){
                 copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
             }
         };
-
     }
     catch(err){
         console.log(err);
@@ -749,7 +750,10 @@ onClickShowAttrTable = function(e){
     if (copyFeatures.length === 0){
         $('#attr-table tbody').empty()
         $('#attr-table tbody').append("<tr><td align='center'>No Features on Selected Layer</td></tr>")
+        return
     }
+
+    build_table(layerName,copyFeatures);
 };
 
 /*****************************************************************************
@@ -857,11 +861,11 @@ exit_edit_mode = function(attrTableId){
     $(attrTableId).prop("disabled",true)
 };
 
-select_list_item = function(){
+initialize_listeners = function(){
     //  Make layers highlight when clicked on
     $('.layer-name').parent().on('click',function(){
         $('.layer-name').parent().removeClass('ui-selected');
-        $(this).addClass('ui-selected');
+        $(this).addClass('ui-selected').trigger('select_change');
         onClickShowAttrTable();
     });
 };
@@ -875,7 +879,7 @@ $(document).ready(function(){
     initializeLayersContextMenus();
     readInitialLayers();
     addInitialEventListeners();
-    select_list_item();
+    initialize_listeners();
     exit_edit_mode('#attr-table input');
 
     $tocLayersList.sortable({

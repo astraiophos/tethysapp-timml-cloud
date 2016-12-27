@@ -13,13 +13,16 @@
  *****************************************************************************/
 
 var initialize_timml_layers;
-var edit_layer;
+var drawing_listener;
+var build_table;
+var addRow;
+var deleteRow;
 
 /*****************************************************************************
  *                             Variables
  *****************************************************************************/
 
-//  TimML Layers
+//  TimML Layers, header lists
 var model_constant_layer;
 var line_sink_layer;
 var head_line_sink_layer;
@@ -30,39 +33,194 @@ var polygon_inhom_layer;
 var wells_layer;
 
 
-
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
 
-//  Edit the selected layer
-edit_layer = function(){
-    var map
-    var layerName
-    var layerIndex
-    var layer
+////  Edit the selected layer
+//edit_layer = function(){
+//    var map
+//    var layerName
+//    var layerIndex
+//    var layer
+//
+//    layerName = $('.ui-selected').find('.layer-name').text().trim();
+//
+//    if (layerName === ""){
+//        error_message("Make sure that you have a layer selected");
+//        return false
+//    }
+//    if (projectInfo.map.layers[layerName].tethys_editable === false){
+//        error_message("The selected layer is not editable");
+//        return false
+//    }
+//
+//    //  Initialize the map object
+//    map = TETHYS_MAP_VIEW.getMap();
+//    //  Get the mapIndex for layer selection
+//    layerIndex = projectInfo.map.layers[layerName].TethysMapIndex;
+//    //  Get the layer from the map
+//    layer = map.getLayers().item(layerIndex);
+//
+//    enter_edit_mode()
+//}
 
-    layerName = $('.ui-selected').find('.layer-name').text().trim();
+//  Add listeners for every new object created
+drawing_listener = function(){
+    var map;
+    var $layer;
+    var added_feature;
+    var deleted_feature;
 
-    if (layerName === ""){
-        error_message("Make sure that you have a layer selected");
-        return false
-    }
-    if (projectInfo.map.layers[layerName].tethys_editable === false){
-        error_message("The selected layer is not editable");
-        return false
-    }
-
-    //  Initialize the map object
+    //  Select the drawing layer
     map = TETHYS_MAP_VIEW.getMap();
-    //  Get the mapIndex for layer selection
-    layerIndex = projectInfo.map.layers[layerName].TethysMapIndex;
-    //  Get the layer from the map
-    layer = map.getLayers().item(layerIndex);
+    for (i=0;i < map.getLayers().getArray().length;i++){
+        if (map.getLayers().item(i).tethys_legend_title === "Drawing Layer"){
+            $layer = map.getLayers().item(i);
+        }
+    };
 
-    enter_edit_mode()
+    //  These are the function to be called by the listener
+    added_feature = function(e){
+        var feature;
+        var layerName;
+
+        feature = e.target.getSource().getFeatures().slice(-1)[0];
+        layerName = e.target.tag
+
+        //  Use if/else statments to specify which attributes to add to the feature
+        if (layerName === 'Constant and Model'){
+            for (i=0;i<model_constant_layer.length;i++){
+                feature.set(model_constant_layer[i],"");
+            }
+        }
+        else if (layerName === 'Wells'){
+            for (i=0;i<wells_layer.length;i++){
+                feature.set(wells_layer[i],"");
+            };
+        }
+        else if (layerName === 'Line Sinks'){
+            for (i=0;i<line_sink_layer.length;i++){
+                feature.set(line_sink_layer[i],"");
+            };
+        }
+        else if (layerName === 'Head Line Sinks'){
+            for (i=0;i<head_line_sink_layer.length;i++){
+                feature.set(head_line_sink_layer[i],"");
+            };
+        }
+        else if (layerName === 'Res Line Sinks'){
+            for (i=0;i<res_line_sink_layer.length;i++){
+                feature.set(res_line_sink_layer[i],"");
+            };
+        }
+        else if (layerName === 'Line Doublet Imp'){
+            for (i=0;i<line_doublet_imp_layer.length;i++){
+                feature.set(line_doublet_imp_layer[i],"");
+            };
+        }
+        else if (layerName === 'Line Sink Ditch'){
+            for (i=0;i<line_sink_ditch_layer.length;i++){
+                feature.set(line_sink_ditch_layer[i],"");
+            };
+        }
+        else if (layerName === 'Polygon Inhom'){
+            for (i=0;i<polygon_inhom_layer.length;i++){
+                feature.set(polygon_inhom_layer[i],"");
+            };
+        }
+        console.log(feature);
+
+        $layer.once('change',added_feature);
+
+        addRow(layerName,feature);
+    };
+    deleted_feature = function(e){
+        feature = e.target.getSource().getFeatures().slice(-1)[0];
+        console.log(feature);
+//        deleteRow(layerName,feature);
+    };
+
+    //  Add Listeners only to the drawing layer while draw/delete tools are active/in-use
+    $('#draw_Point').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+        $layer.once('change',added_feature);
+    });
+    $('#draw_Box').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+        $layer.once('change',added_feature);
+    });
+    $('#draw_Polygon').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+        $layer.once('change',added_feature);
+    });
+    $('#draw_LineString').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+        $layer.once('change',added_feature);
+    });
+
+    //  Remove Listeners if any other map tool is in use
+    $('#tethys_pan').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+    });
+    $('#tethys_modify').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+    });
+    $('#tethys_delete').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+        $layer.once('change',deleted_feature);
+    });
+    $('#tethys_move').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+    });
+
 }
 
+//  Build the attribute table (called by table_of_contents.js)
+build_table = function(layerName,features){
+
+//    //  Empty out the attribute table before rebuilding
+//    $('#attr-table tbody').empty();
+//
+//    //  Build Table from features and properties
+//    for (feature in features){
+//        for (prop in feature.getProperties())
+//
+//            $('#attr-table tbody').append("");
+//    };
+
+};
+
+addRow = function(layerName,feature){
+    var table;
+    var row;
+    var cell;
+
+    if ($('#attr-table tbody').text() === "No Features on Selected Layer"){
+        //  Clear out the table and initialize table and row variables
+        $('#attr-table tbody').empty();
+        table = document.getElementById('attr-table');
+        row = table.insertRow(-1)
+            for (property in feature.getProperties()){
+                if (String(property) === 'geometry'){}
+                else{
+                    cell = row.insertCell();
+                    cell.innerHTML = String(property);
+                }
+            };
+    }
+
+    
+
+};
 
 /*****************************************************************************
  *                            TimML Layers
@@ -72,6 +230,18 @@ initialize_timml_layers = function(){
     var timml_layer;
     var numLayers;
     var layers = [];
+
+    //  Initialize the headers for each layer
+    model_constant_layer = ["Label","head (Constant)","layer (Constant)","k","zb","zt","c",
+        "n=[]","nll=[]"];
+    wells_layer = ["label","Qw","rw","layers"];
+    line_sink_layer = ["label","sigma","layers"];
+    head_line_sink_layer = ["label","head","layers"];
+    res_line_sink_layer = ["label","head","res","width","layers","bottomelev"];
+    line_doublet_imp_layer = ["label","order","layers"];
+    line_sink_ditch_layer = ["label","Q","res","width","layers"];
+    polygon_inhom_layer = ["label","Naquifers","k","zb","zt","c","n=[]","nll=[]","order (inhom side)"];
+
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
     layers.push(['Polygon Inhom','#fff00']);
@@ -186,7 +356,17 @@ $(document).ready(function(){
     map.getLayers().item(1).tethys_toc=false;
     //  Initialize the TimML layers to be used
     initialize_timml_layers();
+    //  Add Listeners
+    drawing_listener();
 });
+
+/*****************************************************************************
+ *                              Public
+ *****************************************************************************/
+
+ var app;
+
+ app = {build_table:build_table}
 
 ///*****************************************************************************
 // *                          Useful snippets of code
