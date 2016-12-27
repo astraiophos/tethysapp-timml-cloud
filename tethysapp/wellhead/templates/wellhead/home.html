@@ -23,11 +23,17 @@
   {{ block.super }}
 
   {% gizmo map_view map_view_options %}
-  {% gizmo table_view table_view_edit %}
+
+  <!--Add Attribute Table here, to be appended to golden layout window after html render-->
+  <table class="table table-hover table-striped" id="attr-table">
+    <tbody><tr><td align="center">No Features on Selected Layer</td></tr></tbody>
+  </table>
+  <!--{% gizmo table_view table_view_edit %}-->
 
 {% endblock %}
 
 {% block app_actions %}
-  <a href="" class="btn btn-default">Next</a>
-  <a href="" class="btn btn-default">Back</a>
+  <a id="editCancel" class="btn btn-default hidden">Cancel</a>
+  <a id="editSave" class="btn btn-default hidden" onclick="onClickSaveEdits();">Save</a>
+
 {% endblock %}

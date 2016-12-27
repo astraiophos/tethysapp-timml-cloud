@@ -295,27 +295,27 @@ initializeLayersContextMenus = function () {
 
     layersContextMenuVector = layersContextMenuRaster.slice();
     layersContextMenuVector.unshift(
-    {
-        name: 'Attribute Table',
-        title: 'Attribute Table',
-        fun: function (e) {
-            onClickShowAttrTable(e);
-        }
-    },
+//    {
+//        name: 'Attribute Table',
+//        title: 'Attribute Table',
+//        fun: function (e) {
+//            onClickShowAttrTable(e);
+//        }
+//    },
     {
         name: 'Edit Features',
         title: 'Edit Features',
         fun: function (e) {
             onClickEditLayer(e);
         }
-    },
-    {
-        name: 'Save Edits',
-        title: 'Save Edits',
-        fun: function (e) {
-            onClickSaveEdits(e);
-        }
     }
+//    {
+//        name: 'Save Edits',
+//        title: 'Save Edits',
+//        fun: function (e) {
+//            onClickSaveEdits(e);
+//        }
+//    }
     );
 
 
@@ -431,7 +431,7 @@ onClickisolateLayer = function(e) {
         }
     }
 };
-//**Need to select drawing layer regardless of index, right now it's hard coded to be layer 1
+//*TODO*Need to select drawing layer regardless of index, right now it's hard coded to be layer 1 = Drawing Layer
 onClickEditLayer = function(e){
     //  Initialize the layer item variables, use a try/catch to make a button available as an option for layer editing.
     try{
@@ -554,6 +554,8 @@ onClickEditLayer = function(e){
     layer.getSource().clear();
     map.getLayers().item(1).tag = layerName;
     enter_edit_mode(projectInfo.map.layers[layerName].geomType,'#attr-table input');
+    $('#editSave').removeClass("hidden");
+    $('#editCancel').removeClass("hidden");
 };
 
 onClickSaveEdits = function(){
@@ -680,6 +682,8 @@ onClickSaveEdits = function(){
     layer.setVisible(false);
 
     exit_edit_mode('#attr-table input');
+    $('#editSave').addClass("hidden");
+    $('#editCancel').addClass("hidden");
 };
 
 onClickShowAttrTable = function(e){
@@ -710,6 +714,7 @@ onClickShowAttrTable = function(e){
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
     map = TETHYS_MAP_VIEW.getMap();
     layer = map.getLayers().item(mapIndex);
+    console.log(layerName + " Attr Table Coming Up!");
 
     try{
         for (feature in layer.getSource().getFeatures()){
@@ -742,7 +747,8 @@ onClickShowAttrTable = function(e){
         console.log(err);
     }
     if (copyFeatures.length === 0){
-        error_message("There aren't any features in the selected layer");
+        $('#attr-table tbody').empty()
+        $('#attr-table tbody').append("<tr><td align='center'>No Features on Selected Layer</td></tr>")
     }
 };
 
@@ -856,6 +862,7 @@ select_list_item = function(){
     $('.layer-name').parent().on('click',function(){
         $('.layer-name').parent().removeClass('ui-selected');
         $(this).addClass('ui-selected');
+        onClickShowAttrTable();
     });
 };
 

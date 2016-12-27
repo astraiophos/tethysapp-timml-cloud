@@ -208,18 +208,9 @@ $(document).ready(function(){
 // /
 
 //  Need to build the table using jquery
-//  Bootstrap classes: table, table-hover
-//  Custom Classes: striped (main.css)
-//  Thanks to @Shelvin on stacoverflow.com
-//function stripes () {
-//            $("tr").each(function () {
-//                $(this).removeClass("striped");
-//            });
-//            $("tr:even").each(function () {
-//                $(this).addClass("striped");
-//            });
-//        }
-//
+//  Bootstrap classes: table, table-hover, table-striped
+//  AddRows
+//  $('#myTable tbody').append("<tr> <td style="width:auto;">Bill</td> <td><input id="ageInput21" name="ageInput21" type="text" class="form-control input-sm" value="30" style = width: auto;margin-bottom:0;"</td><td>cell3</td></tr>")
 //  Also need to attach jquery listeners so that every new object drawn triggers a new row with the same columns
 //  as generated for the layer.
 //  Persists and loads will be done through JSON to and from the map MVLayers
