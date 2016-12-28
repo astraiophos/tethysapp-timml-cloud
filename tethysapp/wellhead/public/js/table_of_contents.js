@@ -617,11 +617,10 @@ onClickSaveEdits = function(){
                 if (String(property) === 'geometry'){}
                 else{
                     featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
-                    console.log(property);
+//                    console.log(property);
+//                    console.log(layer.getSource().getFeatures()[feature].getProperties()[property]);
                 }
             };
-            //  This copies the features to the drawinglayer
-//            map.getLayers().item(mapIndex).getSource().addFeature(layer.getSource().getFeatures()[feature].clone())
         };
         //  Add Properties to feature list
         for (feature in copyFeatures){
@@ -629,6 +628,7 @@ onClickSaveEdits = function(){
                 copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
             }
         };
+//        console.log(copyFeatures);
         copied = {
             'type': 'FeatureCollection',
             'crs': {
@@ -649,6 +649,13 @@ onClickSaveEdits = function(){
         features: format.readFeatures(copied,
         {featureProjection:"EPSG:4326"})
         });
+
+        //  Add Properties to feature list because openlayers doesn't preserve custom property tags
+        for (feature in newSource.getFeatures()){
+            for (prop in featureProps[feature]){
+                newSource.getFeatures()[feature].set(String(featureProps[feature][prop][0]),featureProps[feature][prop][1])
+            };
+        };
 
         //  Read features and style to string for localStorage and then store features and style
         jsonFeatures = JSON.stringify(copied);
@@ -890,7 +897,17 @@ $(document).ready(function(){
 });
 
 /*****************************************************************************
- *                           To be executed on load
+ *                       Functions *NOT* for Gizmo
+ *****************************************************************************/
+
+////  Bind listeners to the map whenever the 'edit features' command is clicked
+//$(document).ready(function(){
+//    $("[title='Edit Features']").click(function(){
+//        drawing_listener();
+//    });
+//});
+/*****************************************************************************
+ *                              Public
  *****************************************************************************/
 
 var TETHYS_TOC;

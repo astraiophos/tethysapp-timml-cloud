@@ -84,56 +84,82 @@ drawing_listener = function(){
     added_feature = function(e){
         var feature;
         var layerName;
+        var id
 
-        feature = e.target.getSource().getFeatures().slice(-1)[0];
-        layerName = e.target.tag
+        try{
+            feature = e.target.getSource().getFeatures().slice(-1)[0];
+            layerName = e.target.tag;
+            id = feature.id_;
 
-        //  Use if/else statments to specify which attributes to add to the feature
-        if (layerName === 'Constant and Model'){
-            for (i=0;i<model_constant_layer.length;i++){
-                feature.set(model_constant_layer[i],"");
+            if (id === undefined){
+                $layer.once('change',added_feature);
+                return;
             }
-        }
-        else if (layerName === 'Wells'){
-            for (i=0;i<wells_layer.length;i++){
-                feature.set(wells_layer[i],"");
-            };
-        }
-        else if (layerName === 'Line Sinks'){
-            for (i=0;i<line_sink_layer.length;i++){
-                feature.set(line_sink_layer[i],"");
-            };
-        }
-        else if (layerName === 'Head Line Sinks'){
-            for (i=0;i<head_line_sink_layer.length;i++){
-                feature.set(head_line_sink_layer[i],"");
-            };
-        }
-        else if (layerName === 'Res Line Sinks'){
-            for (i=0;i<res_line_sink_layer.length;i++){
-                feature.set(res_line_sink_layer[i],"");
-            };
-        }
-        else if (layerName === 'Line Doublet Imp'){
-            for (i=0;i<line_doublet_imp_layer.length;i++){
-                feature.set(line_doublet_imp_layer[i],"");
-            };
-        }
-        else if (layerName === 'Line Sink Ditch'){
-            for (i=0;i<line_sink_ditch_layer.length;i++){
-                feature.set(line_sink_ditch_layer[i],"");
-            };
-        }
-        else if (layerName === 'Polygon Inhom'){
-            for (i=0;i<polygon_inhom_layer.length;i++){
-                feature.set(polygon_inhom_layer[i],"");
-            };
-        }
-        console.log(feature);
 
-        $layer.once('change',added_feature);
+            //  Use if/else statments to specify which attributes to add to the feature
+            if (layerName === 'Constant and Model'){
+                for (i=0;i<model_constant_layer.length;i++){
+                    feature.set(model_constant_layer[i]," ");
+                }
+                var label = "Constant_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Wells'){
+                for (i=0;i<wells_layer.length;i++){
+                    feature.set(wells_layer[i]," ");
+                };
+                var label = "Well_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Line Sinks'){
+                for (i=0;i<line_sink_layer.length;i++){
+                    feature.set(line_sink_layer[i]," ");
+                };
+                var label = "LineSink_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Head Line Sinks'){
+                for (i=0;i<head_line_sink_layer.length;i++){
+                    feature.set(head_line_sink_layer[i]," ");
+                };
+                var label = "HeadLineSink_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Res Line Sinks'){
+                for (i=0;i<res_line_sink_layer.length;i++){
+                    feature.set(res_line_sink_layer[i]," ");
+                };
+                var label = "ResLineSink_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Line Doublet Imp'){
+                for (i=0;i<line_doublet_imp_layer.length;i++){
+                    feature.set(line_doublet_imp_layer[i]," ");
+                };
+                var label = "LineDoubletImp_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Line Sink Ditch'){
+                for (i=0;i<line_sink_ditch_layer.length;i++){
+                    feature.set(line_sink_ditch_layer[i]," ");
+                };
+                var label = "LineSinkDitch_" + id;
+                feature.set("Label",label);
+            }
+            else if (layerName === 'Polygon Inhom'){
+                for (i=0;i<polygon_inhom_layer.length;i++){
+                    feature.set(polygon_inhom_layer[i]," ");
+                };
+                var label = "PolygonInhom_" + id;
+                feature.set("Label",label);
+            }
+            console.log(feature);
 
-        addRow(layerName,feature);
+            $layer.once('change',added_feature);
+
+            addRow(layerName,feature);
+        }
+        catch(err){}
     };
     deleted_feature = function(e){
         feature = e.target.getSource().getFeatures().slice(-1)[0];
@@ -182,20 +208,56 @@ drawing_listener = function(){
         $layer.un('change',deleted_feature);
     });
 
-}
+    //  Remove Listeners altogether when saving or canceling
+    $('#editSave').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+    });
+    $('#editCancel').click(function(){
+        $layer.un('change',added_feature);
+        $layer.un('change',deleted_feature);
+    });
+};
+
+remove_draw_listeners = function(){
+    //  When saving or canceling, remove the listener from the map drawing layer
+
+};
 
 //  Build the attribute table (called by table_of_contents.js)
 build_table = function(layerName,features){
+    var table;
+    var row;
+    var cell;
+    var feature;
 
-//    //  Empty out the attribute table before rebuilding
-//    $('#attr-table tbody').empty();
-//
-//    //  Build Table from features and properties
-//    for (feature in features){
-//        for (prop in feature.getProperties())
-//
-//            $('#attr-table tbody').append("");
-//    };
+    //  Empty out the attribute table before rebuilding
+    $('#attr-table tbody').empty();
+
+    //  Build Table from features and properties
+    table = document.getElementById('attr-table');
+    row = table.insertRow(-1)
+    for (property in features[0]){
+        if (String(property) === 'geometry'){}
+        else if (String(property) === 'type'){}
+        else{
+            cell = row.insertCell();
+            cell.innerHTML = String(property);
+        }
+    };
+
+    for (i=0;i<features.length;i++){
+        feature = features[0];
+        row = table.insertRow(-1);
+        for (property in feature){
+            if (String(property) === 'geometry'){}
+            else if (String(property) === 'type'){}
+            else{
+                cell = row.insertCell();
+                cell.innerHTML = feature[property];
+            }
+        };
+    };
 
 };
 
@@ -217,8 +279,23 @@ addRow = function(layerName,feature){
                 }
             };
     }
+    table = document.getElementById('attr-table');
+    row = table.insertRow(-1)
+        for (property in feature.getProperties()){
+            if (String(property) === 'geometry'){}
+            else if (String(property) === 'Label'){
+                cell = row.insertCell();
+                cell.innerHTML = feature.getProperties()["Label"];
+            }
 
-    
+            else{
+                cell = row.insertCell();
+                cell.innerHTML = feature.getProperties()[property];
+            }
+        };
+
+//    ("<tr> <td style="width:auto;">Bill</td> <td><input id="ageInput21" name="ageInput21" type="text" class="form-control input-sm" value="30" style = width: auto;margin-bottom:0;"</td><td>cell3</td></tr>")
+
 
 };
 
@@ -234,13 +311,13 @@ initialize_timml_layers = function(){
     //  Initialize the headers for each layer
     model_constant_layer = ["Label","head (Constant)","layer (Constant)","k","zb","zt","c",
         "n=[]","nll=[]"];
-    wells_layer = ["label","Qw","rw","layers"];
-    line_sink_layer = ["label","sigma","layers"];
-    head_line_sink_layer = ["label","head","layers"];
-    res_line_sink_layer = ["label","head","res","width","layers","bottomelev"];
-    line_doublet_imp_layer = ["label","order","layers"];
-    line_sink_ditch_layer = ["label","Q","res","width","layers"];
-    polygon_inhom_layer = ["label","Naquifers","k","zb","zt","c","n=[]","nll=[]","order (inhom side)"];
+    wells_layer = ["Label","Qw","rw","layers"];
+    line_sink_layer = ["Label","sigma","layers"];
+    head_line_sink_layer = ["Label","head","layers"];
+    res_line_sink_layer = ["Label","head","res","width","layers","bottomelev"];
+    line_doublet_imp_layer = ["Label","order","layers"];
+    line_sink_ditch_layer = ["Label","Q","res","width","layers"];
+    polygon_inhom_layer = ["Label","Naquifers","k","zb","zt","c","n=[]","nll=[]","order (inhom side)"];
 
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
@@ -356,7 +433,7 @@ $(document).ready(function(){
     map.getLayers().item(1).tethys_toc=false;
     //  Initialize the TimML layers to be used
     initialize_timml_layers();
-    //  Add Listeners
+    //  Bind listeners to map drawing tools
     drawing_listener();
 });
 
@@ -366,7 +443,8 @@ $(document).ready(function(){
 
  var app;
 
- app = {build_table:build_table}
+ app = {build_table:build_table,
+        drawing_listener:drawing_listener}
 
 ///*****************************************************************************
 // *                          Useful snippets of code
