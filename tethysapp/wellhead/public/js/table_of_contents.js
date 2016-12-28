@@ -109,6 +109,12 @@ createLayerListItem = function (layer,mapIndex,position) {
         var $newLayerListItem;
         var zIndex;
         var chkbxHtml;
+        var featureCount;
+
+        //  Get the feature count for updating the layers
+        try{featureCount = layer.getSource().getFeatures().length;}
+        catch(err){featureCount = 0;}
+
         var listHtmlString =
             '<li class="ui-state-default" ' +
             'data-editable="' + layer.editable + '" ' +
@@ -116,6 +122,7 @@ createLayerListItem = function (layer,mapIndex,position) {
             '<input class="chkbx-layer" type="checkbox">' +
             '<span class="layer-name">' + layer.tethys_legend_title + '</span>' +
             '<input type="text" class="edit-layer-name hidden" value="' + layer.tethys_legend_title + '">' +
+//            '<span class="feature-count">(' + featureCount + ') </span>' +
             '<div class="hmbrgr-div"><img src="/static/wellhead/images/hamburger-menu.png"></div>' +
             '</li>';
 
@@ -504,7 +511,7 @@ onClickEditLayer = function(e){
                 if (String(property) === 'geometry'){}
                 else{
                     featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
-                    console.log(property);
+//                    console.log(property);
                 }
             };
             //  This copies the features to the drawinglayer
@@ -556,6 +563,14 @@ onClickEditLayer = function(e){
     enter_edit_mode(projectInfo.map.layers[layerName].geomType,'#attr-table input');
     $('#editSave').removeClass("hidden");
     $('#editCancel').removeClass("hidden");
+
+    //  Verify that the layer actually has features before trying to build the table
+    if (copyFeatures.length === 0){
+        $('#attr-table tbody').empty()
+        $('#attr-table tbody').append("<tr><td align='center'>No Features on Selected Layer</td></tr>")
+        return
+    }
+    else{build_table(layerName,copyFeatures,true);}
 };
 
 onClickSaveEdits = function(){
@@ -740,7 +755,7 @@ onClickShowAttrTable = function(e){
                 if (String(property) === 'geometry'){}
                 else{
                     featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
-                    console.log(property);
+//                    console.log(property);
                 }
             };
         };

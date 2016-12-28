@@ -99,56 +99,56 @@ drawing_listener = function(){
             //  Use if/else statments to specify which attributes to add to the feature
             if (layerName === 'Constant and Model'){
                 for (i=0;i<model_constant_layer.length;i++){
-                    feature.set(model_constant_layer[i]," ");
+                    feature.set(model_constant_layer[i],"");
                 }
                 var label = "Constant_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Wells'){
                 for (i=0;i<wells_layer.length;i++){
-                    feature.set(wells_layer[i]," ");
+                    feature.set(wells_layer[i],"");
                 };
                 var label = "Well_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Line Sinks'){
                 for (i=0;i<line_sink_layer.length;i++){
-                    feature.set(line_sink_layer[i]," ");
+                    feature.set(line_sink_layer[i],"");
                 };
                 var label = "LineSink_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Head Line Sinks'){
                 for (i=0;i<head_line_sink_layer.length;i++){
-                    feature.set(head_line_sink_layer[i]," ");
+                    feature.set(head_line_sink_layer[i],"");
                 };
                 var label = "HeadLineSink_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Res Line Sinks'){
                 for (i=0;i<res_line_sink_layer.length;i++){
-                    feature.set(res_line_sink_layer[i]," ");
+                    feature.set(res_line_sink_layer[i],"");
                 };
                 var label = "ResLineSink_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Line Doublet Imp'){
                 for (i=0;i<line_doublet_imp_layer.length;i++){
-                    feature.set(line_doublet_imp_layer[i]," ");
+                    feature.set(line_doublet_imp_layer[i],"");
                 };
                 var label = "LineDoubletImp_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Line Sink Ditch'){
                 for (i=0;i<line_sink_ditch_layer.length;i++){
-                    feature.set(line_sink_ditch_layer[i]," ");
+                    feature.set(line_sink_ditch_layer[i],"");
                 };
                 var label = "LineSinkDitch_" + id;
                 feature.set("Label",label);
             }
             else if (layerName === 'Polygon Inhom'){
                 for (i=0;i<polygon_inhom_layer.length;i++){
-                    feature.set(polygon_inhom_layer[i]," ");
+                    feature.set(polygon_inhom_layer[i],"");
                 };
                 var label = "PolygonInhom_" + id;
                 feature.set("Label",label);
@@ -157,7 +157,7 @@ drawing_listener = function(){
 
             $layer.once('change',added_feature);
 
-            addRow(layerName,feature);
+            addRow(layerName,feature,id);
         }
         catch(err){}
     };
@@ -219,18 +219,80 @@ drawing_listener = function(){
     });
 };
 
-remove_draw_listeners = function(){
-    //  When saving or canceling, remove the listener from the map drawing layer
+save_attributes = function(layerName){
+    var map;
+    var layer;
+    var features;
+    var feature;
+    var selector;
+    var copyFeatures = [];
+    var featureProps = [];
+    var id;
 
+    //  Get the correct layer which the attributes need to be saved to
+    map = TETHYS_MAP_VIEW.getMap();
+    for(i=0;i<map.getLayers().getArray().length;i++){
+        if (map.getLayers().item(i).tethys_legend_title === layerName){
+            layer = map.getLayers().item(i);
+        }
+    };
+
+    //  Loop through each feature and property and set the value of the field to the feature
+    features = layer.getSource().getFeatures();
+    for (i=0;i<features.length;i++){
+        feature = features[i];
+        for (property in feature.getProperties()){
+            if (String(property) === 'geometry'){}
+            else{
+                //  Get the id number from the label
+                id = layer.getSource().getFeatures()[i].getProperties()["Label"].slice(-1);
+                selector = property.replace(/\s+/g,'_') + "_" + id;
+                feature.set(String(property),$('#'+selector)["0"].value);
+            }
+        };
+    };
+
+    //  Update features to have the right attributes
+    for (feature in layer.getSource().getFeatures()){
+        copyFeatures.push({
+            'type': 'Feature',
+            'geometry':{
+                'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
+                'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+            }
+        });
+        //  Gather the properties for each element
+        featureProps[feature] = [];
+        for (property in layer.getSource().getFeatures()[feature].getProperties()){
+            if (String(property) === 'geometry'){}
+            else{
+                featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
+            }
+        };
+    };
+    //  Add Properties to feature list
+    for (feature in copyFeatures){
+        for (prop in featureProps[feature]){
+            copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
+        };
+    };
+    return copyFeatures
 };
 
 //  Build the attribute table (called by table_of_contents.js)
-build_table = function(layerName,features){
+build_table = function(layerName,features,editable){
     var table;
     var row;
     var cell;
     var feature;
+    var id;
+    var featureCount;
 
+    //  Save the attributes before anything else if the table has been edited and needs to be saved
+    if ($('#attr-table.edit')[0] != undefined){
+        features = save_attributes(layerName);
+        $('#attr-table').removeClass('edit')
+    }
     //  Empty out the attribute table before rebuilding
     $('#attr-table tbody').empty();
 
@@ -242,29 +304,63 @@ build_table = function(layerName,features){
         else if (String(property) === 'type'){}
         else{
             cell = row.insertCell();
+            cell.style = "width:auto";
             cell.innerHTML = String(property);
         }
     };
 
-    for (i=0;i<features.length;i++){
-        feature = features[0];
-        row = table.insertRow(-1);
-        for (property in feature){
-            if (String(property) === 'geometry'){}
-            else if (String(property) === 'type'){}
-            else{
-                cell = row.insertCell();
-                cell.innerHTML = feature[property];
-            }
+    if (editable){
+        $('#attr-table').addClass('edit')
+        for (i=0;i<features.length;i++){
+            feature = features[i];
+            row = table.insertRow(-1);
+            id = String(feature["Label"]).slice(-1);
+            for (property in feature){
+                if (String(property) === 'geometry'){}
+                else if (String(property) === 'type'){}
+                else{
+                    cell = row.insertCell();
+                    cell.style = "width:auto";
+                    cell.innerHTML = "<input id=" + property.replace(/\s+/g,'_') + "_" + id +" type='text'" +
+                        "class='form-control input-sm' value=' '" +
+                        "style=width:auto;margin-bottom:0;" + ">";
+                    $(cell).find("input")["0"].value = String(feature[property]);
+                }
+            };
         };
-    };
+    }
 
+    else{
+        for (i=0;i<features.length;i++){
+            feature = features[i];
+            row = table.insertRow(-1);
+            for (property in feature){
+                if (String(property) === 'geometry'){}
+                else if (String(property) === 'type'){}
+                else{
+                    cell = row.insertCell();
+                    cell.style = "width:auto";
+                    cell.innerHTML = feature[property];
+                }
+            };
+        };
+    }
+
+//    //  Update the feature count for each layer
+//    featureCount = features.length;
+//    $('.layer-name').each(function(index){
+//        if($(this).text().trim()===layerName){
+//            $(this).parent().find('.feature-count').html("(" + featureCount + " )");}
+//    })
 };
 
-addRow = function(layerName,feature){
+addRow = function(layerName,feature,id){
     var table;
     var row;
     var cell;
+
+    //  Designates that the table is open for editing and that changes should be saved
+    $('#attr-table').addClass('edit')
 
     if ($('#attr-table tbody').text() === "No Features on Selected Layer"){
         //  Clear out the table and initialize table and row variables
@@ -275,6 +371,7 @@ addRow = function(layerName,feature){
                 if (String(property) === 'geometry'){}
                 else{
                     cell = row.insertCell();
+                    cell.style = "width:auto";
                     cell.innerHTML = String(property);
                 }
             };
@@ -283,20 +380,17 @@ addRow = function(layerName,feature){
     row = table.insertRow(-1)
         for (property in feature.getProperties()){
             if (String(property) === 'geometry'){}
-            else if (String(property) === 'Label'){
-                cell = row.insertCell();
-                cell.innerHTML = feature.getProperties()["Label"];
-            }
 
             else{
                 cell = row.insertCell();
-                cell.innerHTML = feature.getProperties()[property];
+                cell.style = "width:auto";
+                //  Credits to @Deviljho and @SimeVidas on stackoverflow.com for this little trick with removing spaces
+                cell.innerHTML = "<input id=" + property.replace(/\s+/g,'_') + "_" + id +" type='text'" +
+                    "class='form-control input-sm' value=' '" +
+                    "style=width:auto;margin-bottom:0;" + ">";
+                $(cell).find("input")["0"].value = String(feature.getProperties()[property]);
             }
         };
-
-//    ("<tr> <td style="width:auto;">Bill</td> <td><input id="ageInput21" name="ageInput21" type="text" class="form-control input-sm" value="30" style = width: auto;margin-bottom:0;"</td><td>cell3</td></tr>")
-
-
 };
 
 /*****************************************************************************
@@ -309,15 +403,15 @@ initialize_timml_layers = function(){
     var layers = [];
 
     //  Initialize the headers for each layer
-    model_constant_layer = ["Label","head (Constant)","layer (Constant)","k","zb","zt","c",
-        "n=[]","nll=[]"];
+    model_constant_layer = ["Label","constant head","constant layer","k","zb","zt","c",
+        "n","nll"];
     wells_layer = ["Label","Qw","rw","layers"];
     line_sink_layer = ["Label","sigma","layers"];
     head_line_sink_layer = ["Label","head","layers"];
     res_line_sink_layer = ["Label","head","res","width","layers","bottomelev"];
     line_doublet_imp_layer = ["Label","order","layers"];
     line_sink_ditch_layer = ["Label","Q","res","width","layers"];
-    polygon_inhom_layer = ["Label","Naquifers","k","zb","zt","c","n=[]","nll=[]","order (inhom side)"];
+    polygon_inhom_layer = ["Label","Naquifers","k","zb","zt","c","n","nll","inhom side order"];
 
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
