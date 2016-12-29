@@ -252,6 +252,7 @@ save_attributes = function(layerName){
         for (property in feature.getProperties()){
             if (String(property) === 'geometry'){}
             else if (String(property) === 'ID'){}
+            else if (String(property) === 'type'){}
             else{
                 //  Get the id number from the label
                 id = layer.getSource().getFeatures()[i].getProperties()["ID"];
@@ -275,6 +276,7 @@ save_attributes = function(layerName){
         for (property in layer.getSource().getFeatures()[feature].getProperties()){
             if (String(property) === 'geometry'){}
             else if (String(property) === 'ID'){}
+            else if (String(property) === 'type'){}
             else{
                 featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
             }
@@ -383,6 +385,7 @@ addRow = function(layerName,feature,id){
             for (property in feature.getProperties()){
                 if (String(property) === 'geometry'){}
                 else if (String(property) === 'ID'){}
+                else if (String(property) === 'type'){}
                 else{
                     cell = row.insertCell();
                     cell.style = "width:auto";
@@ -395,6 +398,7 @@ addRow = function(layerName,feature,id){
         for (property in feature.getProperties()){
             if (String(property) === 'geometry'){}
             else if (String(property) === 'ID'){}
+            else if (String(property) === 'type'){}
             else{
                 cell = row.insertCell();
                 cell.style = "width:auto";
@@ -429,43 +433,43 @@ initialize_timml_layers = function(){
 
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
-    layers.push(['Polygon Inhom','#fff00']);
-    layers.push(['Line Sink Ditch','#fff00']);
-    layers.push(['Line Doublet Imp','#fff00']);
+    layers.push(['Polygon Inhom','rgba(10,10,10,0.5)']);
+    layers.push(['Line Sink Ditch','#fff000']);
+    layers.push(['Line Doublet Imp','#fff000']);
     layers.push(['Res Line Sinks','#fff00']);
-    layers.push(['Head Line Sinks','#fff00']);
-    layers.push(['Line Sinks','#fff00']);
-    layers.push(['Wells','#fff00']);
-    layers.push(['Constant and Model','#fff00']);
+    layers.push(['Head Line Sinks','#fff000']);
+    layers.push(['Line Sinks','#fff000']);
+    layers.push(['Wells','#fff000']);
+    layers.push(['Constant and Model','#fff000']);
 
     layer_source = new ol.source.Vector({wrapX: false});
 
-    numLayers = layers.length;
-    for (i=0;i<numLayers;i++ in layers){
+    for (i=0;i<layers.length;i++){
         layer = layers[i];
         timml_layer = new ol.layer.Vector({
             source: layer_source,
             style: new ol.style.Style({
-              fill: new ol.style.Fill({
-                color: layer[1]
-                }),
-              stroke: new ol.style.Stroke({
-                color: String(layer[1]),
-                width: 2
-                }),
-              image: new ol.style.Circle({
-                radius: 4,
-                fill: new ol.style.Fill({
-                  color: String(layer[1])
+                    fill: new ol.style.Fill({
+                    color: layer[1]
+                    }),
+                    stroke: new ol.style.Stroke({
+                    color: layer[1],
+                    width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 4,
+                        fill: new ol.style.Fill({
+                          color: layer[1]
+                        })
+                    }),
                 })
-              }),
-            })
         });
 
         // Add drawing layer legend properites
         timml_layer.tethys_legend_title = String(layer[0]);
         timml_layer.tethys_editable = true;
         timml_layer.tethys_table_of_contents = true;
+        timml_layer.color = layer[1];
 
         // Add drawing layer to the map
         map.addLayer(timml_layer);

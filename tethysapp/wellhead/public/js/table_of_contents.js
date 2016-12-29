@@ -29,6 +29,7 @@ var initialize_listeners;
 var onClickRenameLayer;
 var onClickEditLayer;
 var onClickSaveEdits;
+var onClickCancelEdits;
 var onClickShowAttrTable;
 
 /*****************************************************************************
@@ -148,7 +149,8 @@ createLayerListItem = function (layer,mapIndex,position) {
             layerListIndex: zIndex,
             extents: layer.tethys_legend_extent,
             editable: layer.tethys_editable,
-            geomType: layer.getProperties().geometry_attribute
+            geomType: layer.getProperties().geometry_attribute,
+            color: layer.color
         };
 };
 
@@ -468,6 +470,7 @@ onClickEditLayer = function(e){
     var newStyle;
     var jsonFeatures;
     var jsonStyle;
+    var color;
 
     //  Use the projectInfo for finding the mapIndex and initialize map
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
@@ -487,7 +490,7 @@ onClickEditLayer = function(e){
 
     //  Make all layers except for Drawing Layer not-editable
     for (i=0; i < numLayers; i++){
-        if (i != 1){
+        if (map.getLayers().item(i).tethys_legend_title != "Drawing Layer"){
             map.getLayers().item(i).tethys_editable = false;
         }
         else{
@@ -533,16 +536,23 @@ onClickEditLayer = function(e){
             },
             'features': copyFeatures
         };
-        newStyle = layer.getStyle();
+//        newStyle = layer.getStyle();
+        //  Read in the layer color to be stored and to apply new color to edit layer
+        color = projectInfo.map.layers[layerName].color;
 
         //  Read features and style to string for localStorage and then store features and style
         jsonFeatures = JSON.stringify(copied);
-        jsonStyle = JSON.stringify(newStyle);
+        jsonStyle = JSON.stringify(color);
 
         localStorage.setItem(String(layerName + "_Features"),jsonFeatures);
         localStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
+        newStyle = map.getLayers().item(1).getStyle();
+        newStyle.fill_.color_ = color;
+        newStyle.image_.fill_.color_ = color;
+        newStyle.stroke_.color_ = color;
+
         map.getLayers().item(1).setStyle(newStyle);
 
     }
@@ -593,7 +603,12 @@ onClickSaveEdits = function(){
     map = TETHYS_MAP_VIEW.getMap();
 
     //  Set the layer to the edit layer
-    layer = map.getLayers().item(1);
+    map = TETHYS_MAP_VIEW.getMap();
+    for (i=0;i < map.getLayers().getArray().length;i++){
+        if (map.getLayers().item(i).tethys_legend_title === "Drawing Layer"){
+            layer = map.getLayers().item(i);
+        }
+    };
 
     //  Make sure that edit mode is turned on
     if (layer.tethys_editable === false){
@@ -654,15 +669,15 @@ onClickSaveEdits = function(){
             },
             'features': copyFeatures
         };
-        newStyle = layer.getStyle();
+//        newStyle = layer.getStyle();
 
         //  Establish the format as GeoJSON
         format = new ol.format.GeoJSON();
 
         //  Create new layer source for the layer receiving the features
         newSource = new ol.source.Vector({
-        features: format.readFeatures(copied,
-        {featureProjection:"EPSG:4326"})
+            features: format.readFeatures(copied,
+            {featureProjection:"EPSG:4326"})
         });
 
         //  Add Properties to feature list because openlayers doesn't preserve custom property tags
@@ -674,13 +689,13 @@ onClickSaveEdits = function(){
 
         //  Read features and style to string for localStorage and then store features and style
         jsonFeatures = JSON.stringify(copied);
-        jsonStyle = JSON.stringify(newStyle);
+//        jsonStyle = JSON.stringify(newStyle);
 
         localStorage.setItem(String(layerName + "_Features"),jsonFeatures);
-        localStorage.setItem(String(layerName + "_Style"),jsonStyle);
+//        localStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
-        map.getLayers().item(mapIndex).setStyle(newStyle);
+//        map.getLayers().item(mapIndex).setStyle(newStyle);
 
         //  Set the save layer to the new source
         map.getLayers().item(mapIndex).setSource(newSource);
@@ -708,6 +723,110 @@ onClickSaveEdits = function(){
     $('#editCancel').addClass("hidden");
 
     build_table(layerName,copyFeatures);
+};
+
+onClickCancelEdits = function(){
+    var layerName;
+    var map;
+    var mapIndex;
+    var layer;
+    var format;
+    var jsonStyle;
+    var jsonFeatures;
+    var savedStyle;
+    var oldFeatures;
+    var oldStyle;
+    var oldSource;
+
+    //  Initialize map object
+    map = TETHYS_MAP_VIEW.getMap();
+
+    //  Set the layer to the edit layer
+    map = TETHYS_MAP_VIEW.getMap();
+    for (i=0;i < map.getLayers().getArray().length;i++){
+        if (map.getLayers().item(i).tethys_legend_title === "Drawing Layer"){
+            layer = map.getLayers().item(i);
+        }
+    };
+
+    //  Make sure that edit mode is turned on
+    if (layer.tethys_editable === false){
+        error_message("You are not in edit mode.");
+        return false
+    }
+
+    layerName = map.getLayers().item(1).tag;
+
+    //  Use the projectInfo for finding the mapIndex
+    mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
+
+
+    //  Return all layers to their original editable state based on ProjectInfo
+    for (mapObj in projectInfo.map.layers){
+        if (projectInfo.map.layers[mapObj].editable === true){
+            map.getLayers().item(projectInfo.map.layers[mapObj].TethysMapIndex).tethys_editable = true;
+        }
+        else{
+            map.getLayers().item(projectInfo.map.layers[mapObj].TethysMapIndex).tethys_editable = false;
+        }
+    };
+
+    //  Retrieve info from the local storage to restore the layer state before any edits were made
+    try{
+//        jsonStyle = localStorage[String(layerName + "_Style")];
+//        savedStyle = JSON.parse(jsonStyle);
+//        oldStyle = new ol.style.Style();
+//
+//        //  We also can't directly load the style so the new style needs to be set equal to the original style manually
+//        for (style in savedStyle){
+//            oldStyle[String(style)] = savedStyle[String(style)];
+//        };
+
+        //  Because we can't store the source directly, the features need to be read back into a new source.
+        //  After reading the features string and parsing it back into JSON, the features are read into a new source.
+        jsonFeatures = localStorage[String(layerName + "_Features")];
+        oldFeatures = JSON.parse(jsonFeatures);
+
+        //  Establish the format as GeoJSON
+        format = new ol.format.GeoJSON();
+
+        oldSource = new ol.source.Vector({
+            features: format.readFeatures(oldFeatures,
+            {featureProjection:"EPSG:4326"})
+        });
+
+        //  Because Openlayers 3 doesn't preserve custom property tags we need to reset
+        //  the properties as they were stored.
+        for (feature in oldSource.getFeatures()){
+            for (prop in oldFeatures["features"][feature]){
+                if (prop === "geometry"){}
+                else{oldSource.getFeatures()[feature].set(String(prop),
+                    oldFeatures["features"][feature][prop])
+                }
+            };
+        };
+
+        //  Set drawing layer style to match the layer to be edited
+//        map.getLayers().item(mapIndex).setStyle(oldStyle);
+
+        //  Set the save layer to the new source
+        map.getLayers().item(mapIndex).setSource(oldSource);
+
+    }
+    catch(err){
+        console.log(err);
+    }
+
+    layer.getSource().clear();
+    delete layer.tag;
+    layer.tethys_editable = false;
+    layer.setVisible(false);
+
+    exit_edit_mode('#attr-table input');
+    $('#editSave').addClass("hidden");
+    $('#editCancel').addClass("hidden");
+
+    onClickShowAttrTable();
 };
 
 onClickShowAttrTable = function(e){
