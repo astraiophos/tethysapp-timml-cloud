@@ -103,6 +103,7 @@ drawing_listener = function(){
                 }
                 var label = "Constant_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Wells'){
                 for (i=0;i<wells_layer.length;i++){
@@ -110,6 +111,7 @@ drawing_listener = function(){
                 };
                 var label = "Well_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Line Sinks'){
                 for (i=0;i<line_sink_layer.length;i++){
@@ -117,6 +119,7 @@ drawing_listener = function(){
                 };
                 var label = "LineSink_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Head Line Sinks'){
                 for (i=0;i<head_line_sink_layer.length;i++){
@@ -124,6 +127,7 @@ drawing_listener = function(){
                 };
                 var label = "HeadLineSink_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Res Line Sinks'){
                 for (i=0;i<res_line_sink_layer.length;i++){
@@ -131,6 +135,7 @@ drawing_listener = function(){
                 };
                 var label = "ResLineSink_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Line Doublet Imp'){
                 for (i=0;i<line_doublet_imp_layer.length;i++){
@@ -138,6 +143,7 @@ drawing_listener = function(){
                 };
                 var label = "LineDoubletImp_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Line Sink Ditch'){
                 for (i=0;i<line_sink_ditch_layer.length;i++){
@@ -145,6 +151,7 @@ drawing_listener = function(){
                 };
                 var label = "LineSinkDitch_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
             else if (layerName === 'Polygon Inhom'){
                 for (i=0;i<polygon_inhom_layer.length;i++){
@@ -152,8 +159,9 @@ drawing_listener = function(){
                 };
                 var label = "PolygonInhom_" + id;
                 feature.set("Label",label);
+                feature.set("ID",id);
             }
-            console.log(feature);
+//            console.log(feature);
 
             $layer.once('change',added_feature);
 
@@ -243,9 +251,10 @@ save_attributes = function(layerName){
         feature = features[i];
         for (property in feature.getProperties()){
             if (String(property) === 'geometry'){}
+            else if (String(property) === 'ID'){}
             else{
                 //  Get the id number from the label
-                id = layer.getSource().getFeatures()[i].getProperties()["Label"].slice(-1);
+                id = layer.getSource().getFeatures()[i].getProperties()["ID"];
                 selector = property.replace(/\s+/g,'_') + "_" + id;
                 feature.set(String(property),$('#'+selector)["0"].value);
             }
@@ -265,6 +274,7 @@ save_attributes = function(layerName){
         featureProps[feature] = [];
         for (property in layer.getSource().getFeatures()[feature].getProperties()){
             if (String(property) === 'geometry'){}
+            else if (String(property) === 'ID'){}
             else{
                 featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
             }
@@ -302,6 +312,7 @@ build_table = function(layerName,features,editable){
     for (property in features[0]){
         if (String(property) === 'geometry'){}
         else if (String(property) === 'type'){}
+        else if (String(property) === 'ID'){}
         else{
             cell = row.insertCell();
             cell.style = "width:auto";
@@ -314,10 +325,11 @@ build_table = function(layerName,features,editable){
         for (i=0;i<features.length;i++){
             feature = features[i];
             row = table.insertRow(-1);
-            id = String(feature["Label"]).slice(-1);
+            id = feature["ID"];
             for (property in feature){
                 if (String(property) === 'geometry'){}
                 else if (String(property) === 'type'){}
+                else if (String(property) === 'ID'){}
                 else{
                     cell = row.insertCell();
                     cell.style = "width:auto";
@@ -337,6 +349,7 @@ build_table = function(layerName,features,editable){
             for (property in feature){
                 if (String(property) === 'geometry'){}
                 else if (String(property) === 'type'){}
+                else if (String(property) === 'ID'){}
                 else{
                     cell = row.insertCell();
                     cell.style = "width:auto";
@@ -346,12 +359,12 @@ build_table = function(layerName,features,editable){
         };
     }
 
-//    //  Update the feature count for each layer
-//    featureCount = features.length;
-//    $('.layer-name').each(function(index){
-//        if($(this).text().trim()===layerName){
-//            $(this).parent().find('.feature-count').html("(" + featureCount + " )");}
-//    })
+    //  Update the feature count for each layer
+    featureCount = features.length;
+    $('.layer-name').each(function(index){
+        if($(this).text().trim()===layerName){
+            $(this).parent().find('.feature-count').html("(" + featureCount + ")");}
+    })
 };
 
 addRow = function(layerName,feature,id){
@@ -369,6 +382,7 @@ addRow = function(layerName,feature,id){
         row = table.insertRow(-1)
             for (property in feature.getProperties()){
                 if (String(property) === 'geometry'){}
+                else if (String(property) === 'ID'){}
                 else{
                     cell = row.insertCell();
                     cell.style = "width:auto";
@@ -380,7 +394,7 @@ addRow = function(layerName,feature,id){
     row = table.insertRow(-1)
         for (property in feature.getProperties()){
             if (String(property) === 'geometry'){}
-
+            else if (String(property) === 'ID'){}
             else{
                 cell = row.insertCell();
                 cell.style = "width:auto";

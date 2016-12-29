@@ -36,7 +36,8 @@ def home(request):
                       {'ZoomToExtent': {'projection': 'EPSG:4326', 'extent': [-130, 22, -65, 54]}}],
             layers=[],
             view=view_options,
-            basemap='OpenStreetMap',
+            basemap={'Bing': {'key': 'AnOW7YhvlSoT5teH6u7HmKhs2BJWeh5QNzp5CBU-4su1K1XI98TGIONClI22jpbk',
+                              'imagerySet': 'AerialWithLabels'}},
             draw=drawing_options
     )
 

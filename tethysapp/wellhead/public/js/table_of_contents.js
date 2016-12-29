@@ -122,7 +122,7 @@ createLayerListItem = function (layer,mapIndex,position) {
             '<input class="chkbx-layer" type="checkbox">' +
             '<span class="layer-name">' + layer.tethys_legend_title + '</span>' +
             '<input type="text" class="edit-layer-name hidden" value="' + layer.tethys_legend_title + '">' +
-//            '<span class="feature-count">(' + featureCount + ') </span>' +
+            '<span class="feature-count">(' + featureCount + ') </span>' +
             '<div class="hmbrgr-div"><img src="/static/wellhead/images/hamburger-menu.png"></div>' +
             '</li>';
 
@@ -339,7 +339,7 @@ initializeLayersContextMenus = function () {
 drawLayersInListOrder = function () {
     var i;
     var index;
-    var layer;
+    var $layer;
     var displayName;
     var numLayers;
     var zIndex;
@@ -350,9 +350,9 @@ drawLayersInListOrder = function () {
 
     numLayers = $tocLayersList.children().length;
     for (i = 1; i <= numLayers; i += 1) {
-        layer = $tocLayersList.find('li:nth-child(' + (i) + ')');
-        displayName = layer.text().trim();
-        index = Number(projectInfo.map.layers[layer.text().trim()].TethysMapIndex);
+        $layer = $tocLayersList.find('li:nth-child(' + (i) + ')');
+        displayName = $layer.find('.layer-name').text().trim();
+        index = Number(projectInfo.map.layers[$layer.find('.layer-name').text().trim()].TethysMapIndex);
         if (index < 1000) {
             zIndex = numLayers - i;
             map.getLayers().item(index).setZIndex(zIndex);
@@ -385,7 +385,7 @@ onClickRenameLayer = function (e) {
     var clickedElement = e.trigger.context;
     var $lyrListItem = $(clickedElement).parent().parent();
     var $layerNameInput = $lyrListItem.find('input[type=text]');
-    var $LayerNameSpan = $lyrListItem.find('span');
+    var $LayerNameSpan = $lyrListItem.find('.layer-name');
 
     $LayerNameSpan.addClass('hidden');
     $lyrListItem.find('input')
@@ -415,7 +415,7 @@ closeLyrEdtInpt = function ($layerNameSpan, $layerNameInput) {
 onClickisolateLayer = function(e) {
     var clickedElement = e.trigger.context;
     var $lyrListItem = $(clickedElement).parent().parent();
-    var layerName = $lyrListItem.find('span').text().trim();
+    var layerName = $lyrListItem.find('.layer-name').text().trim();
     var i;
     var numLayers;
     var map;
@@ -456,7 +456,7 @@ onClickEditLayer = function(e){
         return false;
     }
 
-    var layerName = $lyrListItem.find('span').text().trim();
+    var layerName = $lyrListItem.find('.layer-name').text().trim();
     var numLayers;
     var map;
     var mapIndex;
@@ -726,7 +726,7 @@ onClickShowAttrTable = function(e){
         error_message("No layer selected");
         return false;
     }
-    var layerName = $lyrListItem.find('span').text().trim();
+    var layerName = $lyrListItem.find('.layer-name').text().trim();
     var numLayers;
     var map;
     var mapIndex;
@@ -738,7 +738,6 @@ onClickShowAttrTable = function(e){
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
     map = TETHYS_MAP_VIEW.getMap();
     layer = map.getLayers().item(mapIndex);
-    console.log(layerName + " Attr Table Coming Up!");
 
     try{
         for (feature in layer.getSource().getFeatures()){
@@ -767,7 +766,7 @@ onClickShowAttrTable = function(e){
         };
     }
     catch(err){
-        console.log(err);
+//        console.log(err);
     }
     if (copyFeatures.length === 0){
         $('#attr-table tbody').empty()
