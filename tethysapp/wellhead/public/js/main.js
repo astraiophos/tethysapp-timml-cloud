@@ -228,7 +228,7 @@ save_attributes = function(layerName){
     var selector;
     var copyFeatures = [];
     var featureProps = [];
-    var id;
+    var id = 0;
 
     //  Get the correct layer which the attributes need to be saved to
     map = TETHYS_MAP_VIEW.getMap();
@@ -240,6 +240,10 @@ save_attributes = function(layerName){
 
     //  Loop through each feature and property and set the value of the field to the feature
     features = layer.getSource().getFeatures();
+    //  Make sure that the features are in the right order so that the ID's match the table field
+    features.sort(function(a,b){
+	    return a.getProperties()["ID"] - b.getProperties()["ID"];
+    });
     for (i=0;i<features.length;i++){
         feature = features[i];
         for (property in feature.getProperties()){
@@ -268,7 +272,6 @@ save_attributes = function(layerName){
         featureProps[feature] = [];
         for (property in layer.getSource().getFeatures()[feature].getProperties()){
             if (String(property) === 'geometry'){}
-            else if (String(property) === 'ID'){}
             else if (String(property) === 'type'){}
             else{
                 featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
@@ -300,6 +303,11 @@ build_table = function(layerName,features,editable){
     }
     //  Empty out the attribute table before rebuilding
     $('#attr-table tbody').empty();
+    
+    //  Features will be reorganized by their ID attribute to preserve the original drawing order
+    features.sort(function(a,b){
+	    return a["ID"] - b["ID"];
+    });
 
     //  Build Table from features and properties
     table = document.getElementById('attr-table');
@@ -374,7 +382,7 @@ addRow = function(layerName,feature,id){
         //  Clear out the table and initialize table and row variables
         $('#attr-table tbody').empty();
         table = document.getElementById('attr-table');
-        row = table.insertRow(-1)
+        row = table.insertRow(0)
             for (property in feature.getProperties()){
                 if (String(property) === 'geometry'){}
                 else if (String(property) === 'ID'){}

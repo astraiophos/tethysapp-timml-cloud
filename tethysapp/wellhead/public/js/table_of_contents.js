@@ -472,6 +472,10 @@ onClickEditLayer = function(e){
     var jsonStyle;
     var color;
 
+    //  Make sure that the user cannot change the selected layer or pull up another attribute table while in
+    //  edit mode.
+    $('.layer-name').parent().off('click');
+
     //  Use the projectInfo for finding the mapIndex and initialize map
     mapIndex = projectInfo.map.layers[layerName].TethysMapIndex;
     map = TETHYS_MAP_VIEW.getMap();
@@ -723,6 +727,8 @@ onClickSaveEdits = function(){
     $('#editCancel').addClass("hidden");
 
     build_table(layerName,copyFeatures);
+    //  Re-enable the layer select functionality
+    initialize_listeners();
 };
 
 onClickCancelEdits = function(){
@@ -827,6 +833,8 @@ onClickCancelEdits = function(){
     $('#editCancel').addClass("hidden");
 
     onClickShowAttrTable();
+    //  Re-enable the layer select functionality
+    initialize_listeners();
 };
 
 onClickShowAttrTable = function(e){
