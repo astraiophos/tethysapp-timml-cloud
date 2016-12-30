@@ -31,39 +31,12 @@ var line_doublet_imp_layer;
 var line_sink_ditch_layer;
 var polygon_inhom_layer;
 var wells_layer;
+var $id = 0;
 
 
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
-
-////  Edit the selected layer
-//edit_layer = function(){
-//    var map
-//    var layerName
-//    var layerIndex
-//    var layer
-//
-//    layerName = $('.ui-selected').find('.layer-name').text().trim();
-//
-//    if (layerName === ""){
-//        error_message("Make sure that you have a layer selected");
-//        return false
-//    }
-//    if (projectInfo.map.layers[layerName].tethys_editable === false){
-//        error_message("The selected layer is not editable");
-//        return false
-//    }
-//
-//    //  Initialize the map object
-//    map = TETHYS_MAP_VIEW.getMap();
-//    //  Get the mapIndex for layer selection
-//    layerIndex = projectInfo.map.layers[layerName].TethysMapIndex;
-//    //  Get the layer from the map
-//    layer = map.getLayers().item(layerIndex);
-//
-//    enter_edit_mode()
-//}
 
 //  Add listeners for every new object created
 drawing_listener = function(){
@@ -87,12 +60,32 @@ drawing_listener = function(){
         var id
 
         try{
-            feature = e.target.getSource().getFeatures().slice(-1)[0];
             layerName = e.target.tag;
-            id = feature.id_;
+            //  This id is unique to the editing layer, as you draw with the editing layer it will increment
+            //  an "id_" variable for each feature. the $id is used as a selector to ensure that the right
+            //  feature is grabbed for putting information together for the table.
+            $id = $id + 1;
+            //  Sets a new id for the object and is unique to the object within the layer being edited.
+            //  If there are no objects in the edit layer then the id will be set to 1. If there are existing
+            //  features then the id will be +1 of whatever the previous object's id was.
+            if (e.target.getSource().getFeatures().length === 1){
+                id = 1;
+            }
+            else {
+                for (i=0;i < e.target.getSource().getFeatures().length; i++){
+                    if (e.target.getSource().getFeatures()[i].getProperties()["ID"] === undefined){}
+                    else if (e.target.getSource().getFeatures()[i].getProperties()["ID"] < id){}
+                    else{
+                        id = e.target.getSource().getFeatures()[i].getProperties()["ID"];
+                    }
+                };
+                id = id + 1;
+            }
+            feature = e.target.getSource().getFeatureById($id);
 
-            if (id === undefined){
+            if (feature === null){
                 $layer.once('change',added_feature);
+                $id = $id - 1;
                 return;
             }
 
@@ -254,8 +247,8 @@ save_attributes = function(layerName){
             else if (String(property) === 'ID'){}
             else if (String(property) === 'type'){}
             else{
-                //  Get the id number from the label
-                id = layer.getSource().getFeatures()[i].getProperties()["ID"];
+                //  id number represents the row number in this case
+                id = i+1;
                 selector = property.replace(/\s+/g,'_') + "_" + id;
                 feature.set(String(property),$('#'+selector)["0"].value);
             }
@@ -409,6 +402,10 @@ addRow = function(layerName,feature,id){
                 $(cell).find("input")["0"].value = String(feature.getProperties()[property]);
             }
         };
+};
+
+deleteRow = function(){
+
 };
 
 /*****************************************************************************
