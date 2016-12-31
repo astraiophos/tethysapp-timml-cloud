@@ -165,6 +165,7 @@ drawing_listener = function(){
     deleted_feature = function(e){
         var id=0;
         var counter;
+        var features;
 
         //  Find the ID of the feature that was deleted and pass the number to the deleteRow
         for (i=0;i<e.target.getSource().getFeatures().length;i++){
@@ -186,7 +187,11 @@ drawing_listener = function(){
                 { break; }
             }
         };
-        deleteRow(id);
+        if (id === 0){
+            id = 1;
+        }
+        features = e.target.getSource().getFeatures();
+        deleteRow(id,features);
         $layer.once('change',deleted_feature);
     };
 
@@ -434,8 +439,25 @@ addRow = function(layerName,feature,id){
         };
 };
 
-deleteRow = function(id){
+deleteRow = function(id,features){
+    var counter;
     console.log("This is the id of the feature that was deleted: " + id);
+
+    //  Delete the appropriate row in the table
+    $('#attr-table tbody').find('tr')[id].remove()
+
+    //  Renumber the id's of the features
+    for (i=0;i<features.length;i++){
+        if (features[i].getProperties()["ID"] < id){}
+        else if ((features[i].getProperties()["ID"] - id)===1){
+            features[i].set("ID",Number(id));
+            counter = 1;
+        }
+        else{
+            features[i].set("ID",Number(id+counter));
+            counter += 1;
+        }
+    };
 };
 
 /*****************************************************************************
