@@ -163,9 +163,30 @@ drawing_listener = function(){
         catch(err){}
     };
     deleted_feature = function(e){
-        feature = e.target.getSource().getFeatures().slice(-1)[0];
-        console.log(feature);
-//        deleteRow(layerName,feature);
+        var id=0;
+        var counter;
+
+        //  Find the ID of the feature that was deleted and pass the number to the deleteRow
+        for (i=0;i<e.target.getSource().getFeatures().length;i++){
+            counter = e.target.getSource().getFeatures()[i].getProperties()["ID"] - id;
+            if (counter === 1){
+                id = e.target.getSource().getFeatures()[i].getProperties()["ID"];
+            }
+            else{
+                id += 1;
+                { break; }
+            }
+        };
+        //  Check if the feature was the last feature on the layer, add one to the id if true
+        if (id === e.target.getSource().getFeatures().length){
+            id += 1;
+        }
+        //  If the id is greater than the length of the feature array after check, then it is the first object
+        else if(id > e.target.getSource().getFeatures().length){
+            id = 1;
+        }
+        deleteRow(id);
+        $layer.once('change',deleted_feature);
     };
 
     //  Add Listeners only to the drawing layer while draw/delete tools are active/in-use
@@ -303,7 +324,7 @@ build_table = function(layerName,features,editable){
     }
     //  Empty out the attribute table before rebuilding
     $('#attr-table tbody').empty();
-    
+
     //  Features will be reorganized by their ID attribute to preserve the original drawing order
     features.sort(function(a,b){
 	    return a["ID"] - b["ID"];
@@ -395,7 +416,7 @@ addRow = function(layerName,feature,id){
             };
     }
     table = document.getElementById('attr-table');
-    row = table.insertRow(-1)
+    row = table.insertRow(-1);
         for (property in feature.getProperties()){
             if (String(property) === 'geometry'){}
             else if (String(property) === 'ID'){}
@@ -412,8 +433,8 @@ addRow = function(layerName,feature,id){
         };
 };
 
-deleteRow = function(){
-
+deleteRow = function(id){
+    console.log("This is the id of the feature that was deleted: " + id);
 };
 
 /*****************************************************************************
