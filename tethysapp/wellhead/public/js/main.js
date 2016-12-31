@@ -171,20 +171,21 @@ drawing_listener = function(){
             counter = e.target.getSource().getFeatures()[i].getProperties()["ID"] - id;
             if (counter === 1){
                 id = e.target.getSource().getFeatures()[i].getProperties()["ID"];
+                //  Check if the feature was the last feature on the layer, add one to the id if true
+                if (id === e.target.getSource().getFeatures().length){
+                    id += 1;
+                }
+            }
+            //  If the id is greater than the length of the feature array, then it is the first object
+            else if(id > e.target.getSource().getFeatures().length){
+                id = 1;
+                { break; }
             }
             else{
                 id += 1;
                 { break; }
             }
         };
-        //  Check if the feature was the last feature on the layer, add one to the id if true
-        if (id === e.target.getSource().getFeatures().length){
-            id += 1;
-        }
-        //  If the id is greater than the length of the feature array after check, then it is the first object
-        else if(id > e.target.getSource().getFeatures().length){
-            id = 1;
-        }
         deleteRow(id);
         $layer.once('change',deleted_feature);
     };
