@@ -545,7 +545,7 @@ onClickEditLayer = function(e){
         color = projectInfo.map.layers[layerName].color;
 
         //  Read features and style to string for sessionStorage and then store features and style
-        jsonFeatures = JSON.stringify(copied);
+        jsonFeatures = JSON.stringify(copyFeatures);
         jsonStyle = JSON.stringify(color);
 
         sessionStorage.setItem(String(layerName + "_Features"),jsonFeatures);
@@ -554,7 +554,12 @@ onClickEditLayer = function(e){
         //  Set drawing layer style to match the layer to be edited
         newStyle = map.getLayers().item(1).getStyle();
         newStyle.fill_.color_ = color;
-        newStyle.image_.fill_.color_ = color;
+        newStyle.image_=new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+              color: color
+            })
+        });
         newStyle.stroke_.color_ = color;
 
         map.getLayers().item(1).setStyle(newStyle);
@@ -562,13 +567,23 @@ onClickEditLayer = function(e){
     }
     catch(err){
         console.log(err);
-        newStyle = layer.getStyle();
+        color = map.getLayers().item(mapIndex).getStyle().fill_.color_;
 
         //  Read style to string for sessionStorage and store style
-        jsonStyle = JSON.stringify(newStyle);
+        jsonStyle = JSON.stringify(color);
         sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
-        //  Set drawing layer style to match the layer to be edited
+        //  Set layer style to match
+        newStyle = map.getLayers().item(mapIndex).getStyle();
+        newStyle.fill_.color_ = color;
+        newStyle.image_=new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+              color: color
+            })
+        });
+        newStyle.stroke_.color_ = color;
+
         map.getLayers().item(1).setStyle(newStyle);
     }
 
@@ -598,6 +613,7 @@ onClickSaveEdits = function(){
     var featureProps=[];
     var copied;
     var format;
+    var color;
     var newStyle;
     var newSource;
     var jsonFeatures;
@@ -673,7 +689,6 @@ onClickSaveEdits = function(){
             },
             'features': copyFeatures
         };
-//        newStyle = layer.getStyle();
 
         //  Establish the format as GeoJSON
         format = new ol.format.GeoJSON();
@@ -691,29 +706,51 @@ onClickSaveEdits = function(){
             };
         };
 
-        //  Read features and style to string for sessionStorage and then store features and style
-        jsonFeatures = JSON.stringify(copied);
-//        jsonStyle = JSON.stringify(newStyle);
+        //  Find the layer color
+        color = map.getLayers().item(mapIndex).getStyle().fill_.color_;
+
+        //  Read features and color to string for sessionStorage and then store features and style
+        jsonFeatures = JSON.stringify(copyFeatures);
+        jsonStyle = JSON.stringify(color);
 
         sessionStorage.setItem(String(layerName + "_Features"),jsonFeatures);
-//        sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
+        sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
-        //  Set drawing layer style to match the layer to be edited
-//        map.getLayers().item(mapIndex).setStyle(newStyle);
+        //  Set layer style to match
+        newStyle = map.getLayers().item(mapIndex).getStyle();
+        newStyle.fill_.color_ = color;
+        newStyle.image_=new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+              color: color
+            })
+        });
+        newStyle.stroke_.color_ = color;
 
+        map.getLayers().item(mapIndex).setStyle(newStyle);
         //  Set the save layer to the new source
         map.getLayers().item(mapIndex).setSource(newSource);
 
     }
     catch(err){
         console.log(err);
-        newStyle = layer.getStyle();
+        color = map.getLayers().item(mapIndex).getStyle().fill_.color_;
 
         //  Read style to string for sessionStorage and store style
-        jsonStyle = JSON.stringify(newStyle);
+        jsonStyle = JSON.stringify(color);
         sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
-        //  Set drawing layer style to match the layer to be edited
+        //  Set layer style to match
+        newStyle = map.getLayers().item(mapIndex).getStyle();
+        newStyle.fill_.color_ = color;
+        newStyle.image_=new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+              color: color
+            })
+        });
+        newStyle.stroke_.color_ = color;
+
         map.getLayers().item(mapIndex).setStyle(newStyle);
     }
 
@@ -779,35 +816,52 @@ onClickCancelEdits = function(){
 
     //  Retrieve info from the session storage to restore the layer state before any edits were made
     try{
-//        jsonStyle = sessionStorage[String(layerName + "_Style")];
-//        savedStyle = JSON.parse(jsonStyle);
-//        oldStyle = new ol.style.Style();
-//
-//        //  We also can't directly load the style so the new style needs to be set equal to the original style manually
-//        for (style in savedStyle){
-//            oldStyle[String(style)] = savedStyle[String(style)];
-//        };
+        color = JSON.parse(sessionStorage[String(layerName + "_Style")]);
+        //  Set drawing layer style to match the layer to be edited
+        newStyle = map.getLayers().item(mapIndex).getStyle();
+        newStyle.fill_.color_ = color;
+        newStyle.image_=new ol.style.Circle({
+            radius: 4,
+            fill: new ol.style.Fill({
+              color: color
+            })
+        });
+        newStyle.stroke_.color_ = color;
+
+        map.getLayers().item(mapIndex).setStyle(newStyle);
 
         //  Because we can't store the source directly, the features need to be read back into a new source.
         //  After reading the features string and parsing it back into JSON, the features are read into a new source.
         jsonFeatures = sessionStorage[String(layerName + "_Features")];
         oldFeatures = JSON.parse(jsonFeatures);
 
+        oldCollection = {
+            'type': 'FeatureCollection',
+            'crs': {
+                'type': 'name',
+                'properties': {
+                    'name':'EPSG:4326'
+                }
+            },
+            'features': oldFeatures
+        };
+
         //  Establish the format as GeoJSON
         format = new ol.format.GeoJSON();
 
         oldSource = new ol.source.Vector({
-            features: format.readFeatures(oldFeatures,
+            features: format.readFeatures(oldCollection,
             {featureProjection:"EPSG:4326"})
         });
 
         //  Because Openlayers 3 doesn't preserve custom property tags we need to reset
         //  the properties as they were stored.
         for (feature in oldSource.getFeatures()){
-            for (prop in oldFeatures["features"][feature]){
+            for (prop in oldFeatures[feature]){
                 if (prop === "geometry"){}
-                else{oldSource.getFeatures()[feature].set(String(prop),
-                    oldFeatures["features"][feature][prop])
+                else{
+                    oldSource.getFeatures()[feature].set(String(prop),
+                    oldFeatures[feature][prop])
                 }
             };
         };

@@ -273,6 +273,7 @@ save_attributes = function(layerName){
     var copyFeatures = [];
     var featureProps = [];
     var id = 0;
+    var jsonFeatures;
 
     //  Get the correct layer which the attributes need to be saved to
     map = TETHYS_MAP_VIEW.getMap();
@@ -328,6 +329,10 @@ save_attributes = function(layerName){
             copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
         };
     };
+    //  Read features and color to string for sessionStorage and then store features and style
+    jsonFeatures = JSON.stringify(copyFeatures);
+    sessionStorage.setItem(String(layerName + "_Features"),jsonFeatures);
+
     return copyFeatures
 };
 
@@ -509,6 +514,8 @@ initialize_timml_layers = function(){
     var timml_layer;
     var numLayers;
     var layers = [];
+    var color;
+    var featureCollection;
 
     //  Initialize the headers for each layer
     model_constant_layer = ["Label","constant head","constant layer","k","zb","zt","c",
@@ -524,32 +531,79 @@ initialize_timml_layers = function(){
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
     layers.push(['Polygon Inhom','rgba(10,10,10,0.5)']);
-    layers.push(['Line Sink Ditch','#fff000']);
-    layers.push(['Line Doublet Imp','#fff000']);
-    layers.push(['Res Line Sinks','#fff00']);
-    layers.push(['Head Line Sinks','#fff000']);
-    layers.push(['Line Sinks','#fff000']);
+    layers.push(['Line Sink Ditch','#8B4513']);
+    layers.push(['Line Doublet Imp','#000000']);
+    layers.push(['Res Line Sinks','#008000']);
+    layers.push(['Head Line Sinks','#ADD8E6']);
+    layers.push(['Line Sinks','#0000ff']);
     layers.push(['Wells','#fff000']);
-    layers.push(['Constant and Model','#fff000']);
-
-    layer_source = new ol.source.Vector({wrapX: false});
+    layers.push(['Constant and Model','#ff0000']);
 
     for (i=0;i<layers.length;i++){
         layer = layers[i];
+
+        //  Verify that the session doesn't already have features. Use Session memory first if available.
+        //  Otherwise, if no session memory exists for the layer, build new from scratch.
+        if (sessionStorage[String(layer[0]+"_Features")] != undefined){
+            jsonFeatures = sessionStorage[String(layer[0] + "_Features")];
+            oldFeatures = JSON.parse(jsonFeatures);
+
+            //  Read features into a feature collection object
+            featureCollection = {
+                'type': 'FeatureCollection',
+                'crs': {
+                    'type': 'name',
+                    'properties': {
+                        'name':'EPSG:4326'
+                    }
+                },
+                'features': oldFeatures
+            };
+
+            //  Establish the format as GeoJSON
+            format = new ol.format.GeoJSON();
+
+            layer_source = new ol.source.Vector({
+                features: format.readFeatures(featureCollection,
+                {featureProjection:"EPSG:4326"})
+            });
+            //  Because Openlayers 3 doesn't preserve custom property tags we need to reset
+            //  the properties as they were stored.
+            for (feature in layer_source.getFeatures()){
+                for (prop in oldFeatures[feature]){
+                    if (prop === "geometry"){}
+                    else{
+                        layer_source.getFeatures()[feature].set(String(prop),
+                        oldFeatures[feature][prop])
+                    }
+                };
+            };
+        }
+        else{
+            layer_source = new ol.source.Vector({wrapX: false});
+        }
+
+        if (sessionStorage[String(layer[0]+"_Style")] != undefined){
+            color = JSON.parse(sessionStorage[String(layer[0]+"_Style")]);
+        }
+        else{
+        color = layer[1];
+        }
+
         timml_layer = new ol.layer.Vector({
             source: layer_source,
             style: new ol.style.Style({
                     fill: new ol.style.Fill({
-                    color: layer[1]
+                    color: color
                     }),
                     stroke: new ol.style.Stroke({
-                    color: layer[1],
+                    color: color,
                     width: 2
                     }),
                     image: new ol.style.Circle({
                         radius: 4,
                         fill: new ol.style.Fill({
-                          color: layer[1]
+                          color: color
                         })
                     }),
                 })
@@ -559,7 +613,7 @@ initialize_timml_layers = function(){
         timml_layer.tethys_legend_title = String(layer[0]);
         timml_layer.tethys_editable = true;
         timml_layer.tethys_data = {'tethys_toc':true};
-        timml_layer.color = layer[1];
+        timml_layer.color = color;
 
         // Add drawing layer to the map
         map.addLayer(timml_layer);
@@ -647,7 +701,8 @@ $(document).ready(function(){
  var app;
 
  app = {build_table:build_table,
-        drawing_listener:drawing_listener}
+        drawing_listener:drawing_listener,
+        save_attributes:save_attributes}
 
 ///*****************************************************************************
 // *                          Useful snippets of code
