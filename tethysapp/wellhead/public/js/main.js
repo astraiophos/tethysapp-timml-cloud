@@ -166,6 +166,9 @@ drawing_listener = function(){
         var id=0;
         var counter;
         var features;
+        var layerName;
+        var map;
+        var layer;
 
         //  Find the ID of the feature that was deleted and pass the number to the deleteRow
         for (i=0;i<e.target.getSource().getFeatures().length;i++){
@@ -187,6 +190,20 @@ drawing_listener = function(){
                 { break; }
             }
         };
+        if (id === 0){
+            layerName = e.target.tag;
+            map = TETHYS_MAP_VIEW.getMap();
+            for (i=0;i<map.getLayers().getArray().length;i++){
+                if (map.getLayers().item(i).tethys_legend_title === layerName){
+                    if (map.getLayers().item(i).getSource().getFeatures().length > 0){
+                        console.log("The save button has been pushed");
+                        return;
+                    }
+                    else{}
+                }
+                else{}
+            };
+        }
         if (id === 0){
             id = 1;
         }
@@ -279,7 +296,7 @@ save_attributes = function(layerName){
             else if (String(property) === 'type'){}
             else{
                 //  id number represents the row number in this case
-                id = i+1;
+                id = feature.getProperties()["ID"];
                 selector = property.replace(/\s+/g,'_') + "_" + id;
                 feature.set(String(property),$('#'+selector)["0"].value);
             }
@@ -441,6 +458,10 @@ addRow = function(layerName,feature,id){
 
 deleteRow = function(id,features){
     var counter;
+    var oldID;
+    var selector;
+    var new_input_id;
+
     console.log("This is the id of the feature that was deleted: " + id);
 
     //  Delete the appropriate row in the table
@@ -450,11 +471,31 @@ deleteRow = function(id,features){
     for (i=0;i<features.length;i++){
         if (features[i].getProperties()["ID"] < id){}
         else if ((features[i].getProperties()["ID"] - id)===1){
+            oldID = features[i].getProperties()["ID"];
             features[i].set("ID",Number(id));
             counter = 1;
+            //  Reassign the table input id's per input to match the new feature id
+            for (property in features[i].getProperties()){
+                if (property === 'geometry'){}
+                else if (property === 'type'){}
+                else{
+                    selector = property.replace(/\s+/g,'_') + "_" + oldID;
+                    new_input_id = property.replace(/\s+/g,'_')+ "_" + id;
+                    $('#'+selector).prop('id',new_input_id);
+                }
+            };
         }
         else{
+            oldID = features[i].getProperties()["ID"];
             features[i].set("ID",Number(id+counter));
+            //  Reassign the table input id's per input to match the new feature id
+            for (property in features[i].getProperties()){
+                if (property === 'geometry'){}
+                else if (property === 'type'){}
+                selector = property.replace(/\s+/g,'_') + "_" + oldID;
+                new_input_id = property.replace(/\s+/g,'_')+ "_" + Number(id+counter);
+                $('#'+selector).prop('id',new_input_id);
+            };
             counter += 1;
         }
     };
