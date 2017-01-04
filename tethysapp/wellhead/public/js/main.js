@@ -33,9 +33,16 @@ var polygon_inhom_layer;
 var wells_layer;
 var $id = 0;
 
+/*****************************************************************************
+ *                              Main Script
+ *****************************************************************************/
+
+//  Once the user has defined their features with the corresponding attributes, collect all features and prepare data
+//  for export to timml controller function. When the results are passed back, create two new layers to represent
+//  the groundwater elevations (using contours and a grid, respectively).
 
 /*****************************************************************************
- *                            Main Script
+ *                    User Interaction and Attribute Table
  *****************************************************************************/
 
 //  Add listeners for every new object created
