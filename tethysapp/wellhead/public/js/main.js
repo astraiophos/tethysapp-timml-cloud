@@ -558,7 +558,7 @@ initialize_timml_layers = function(){
         // Add drawing layer legend properites
         timml_layer.tethys_legend_title = String(layer[0]);
         timml_layer.tethys_editable = true;
-        timml_layer.tethys_table_of_contents = true;
+        timml_layer.tethys_data = {'tethys_toc':true};
         timml_layer.color = layer[1];
 
         // Add drawing layer to the map
@@ -631,8 +631,9 @@ initialize_timml_layers = function(){
 
 $(document).ready(function(){
     var map = TETHYS_MAP_VIEW.getMap();
-    //  This will hide the drawing layer from the view of the user
-    map.getLayers().item(1).tethys_toc=false;
+    //  This will hide the drawing layer from the table of contents and add the basemap to the table of contents
+    map.getLayers().item(0).tethys_data={'tethys_toc':true};
+    map.getLayers().item(1).tethys_data={'tethys_toc':false};
     //  Initialize the TimML layers to be used
     initialize_timml_layers();
     //  Bind listeners to map drawing tools

@@ -24,7 +24,7 @@ def home(request):
         controls=['Delete', 'Move', 'Point', 'Box','Polygon','LineString', 'Modify'],
         initial='Point',
         output_format='WKT',
-        lineColor='#663399'
+        line_color='#663399'
     )
 
     # Define map view options

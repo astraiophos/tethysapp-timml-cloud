@@ -69,7 +69,7 @@ readInitialLayers = function (){
 
     //  Read through layers and sift out only the layers that are wanted for the Table of Contents
     for (layer in layers.array_.reverse()){
-        if (layers.item(layer).tethys_table_of_contents === true || String(layers.item(layer).tethys_toc) === "undefined"){
+        if (layers.item(layer).tethys_data.tethys_toc === true){
             createLayerListItem(layers.item(layer),i);
         }
         i -= 1
@@ -455,7 +455,7 @@ onClickEditLayer = function(e){
     catch(err){console.log(err);};
     if ($lyrListItem[0] === undefined){
         error_message("You have not selected a layer, please select one for editing");
-        return false;
+        return;
     }
 
     var layerName = $lyrListItem.find('.layer-name').text().trim();
@@ -486,7 +486,7 @@ onClickEditLayer = function(e){
         error_message("This layer is locked and cannot be edited," +
             " make sure that you aren't already editing another layer." +
             " Otherwise, contact the administrator.");
-        return false
+        return;
     }
 
     //  Find the number of layers in the map object
@@ -544,12 +544,12 @@ onClickEditLayer = function(e){
         //  Read in the layer color to be stored and to apply new color to edit layer
         color = projectInfo.map.layers[layerName].color;
 
-        //  Read features and style to string for localStorage and then store features and style
+        //  Read features and style to string for sessionStorage and then store features and style
         jsonFeatures = JSON.stringify(copied);
         jsonStyle = JSON.stringify(color);
 
-        localStorage.setItem(String(layerName + "_Features"),jsonFeatures);
-        localStorage.setItem(String(layerName + "_Style"),jsonStyle);
+        sessionStorage.setItem(String(layerName + "_Features"),jsonFeatures);
+        sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
         newStyle = map.getLayers().item(1).getStyle();
@@ -564,9 +564,9 @@ onClickEditLayer = function(e){
         console.log(err);
         newStyle = layer.getStyle();
 
-        //  Read style to string for localStorage and store style
+        //  Read style to string for sessionStorage and store style
         jsonStyle = JSON.stringify(newStyle);
-        localStorage.setItem(String(layerName + "_Style"),jsonStyle);
+        sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
         map.getLayers().item(1).setStyle(newStyle);
@@ -582,7 +582,7 @@ onClickEditLayer = function(e){
     if (copyFeatures.length === 0){
         $('#attr-table tbody').empty()
         $('#attr-table tbody').append("<tr><td align='center'>No Features on Selected Layer</td></tr>")
-        return
+        return;
     }
     else{build_table(layerName,copyFeatures,true);}
 };
@@ -617,7 +617,7 @@ onClickSaveEdits = function(){
     //  Make sure that edit mode is turned on
     if (layer.tethys_editable === false){
         error_message("You are not in edit mode.");
-        return false
+        return;
     }
 
     layerName = map.getLayers().item(1).tag;
@@ -691,12 +691,12 @@ onClickSaveEdits = function(){
             };
         };
 
-        //  Read features and style to string for localStorage and then store features and style
+        //  Read features and style to string for sessionStorage and then store features and style
         jsonFeatures = JSON.stringify(copied);
 //        jsonStyle = JSON.stringify(newStyle);
 
-        localStorage.setItem(String(layerName + "_Features"),jsonFeatures);
-//        localStorage.setItem(String(layerName + "_Style"),jsonStyle);
+        sessionStorage.setItem(String(layerName + "_Features"),jsonFeatures);
+//        sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
 //        map.getLayers().item(mapIndex).setStyle(newStyle);
@@ -709,9 +709,9 @@ onClickSaveEdits = function(){
         console.log(err);
         newStyle = layer.getStyle();
 
-        //  Read style to string for localStorage and store style
+        //  Read style to string for sessionStorage and store style
         jsonStyle = JSON.stringify(newStyle);
-        localStorage.setItem(String(layerName + "_Style"),jsonStyle);
+        sessionStorage.setItem(String(layerName + "_Style"),jsonStyle);
 
         //  Set drawing layer style to match the layer to be edited
         map.getLayers().item(mapIndex).setStyle(newStyle);
@@ -727,7 +727,7 @@ onClickSaveEdits = function(){
     $('#editCancel').addClass("hidden");
 
     build_table(layerName,copyFeatures);
-    //  Re-enable the layer select functionality
+    //  Re-enable the layer select functionality in addition to the display of an attribute table
     initialize_listeners();
 };
 
@@ -758,7 +758,7 @@ onClickCancelEdits = function(){
     //  Make sure that edit mode is turned on
     if (layer.tethys_editable === false){
         error_message("You are not in edit mode.");
-        return false
+        return;
     }
 
     layerName = map.getLayers().item(1).tag;
@@ -777,9 +777,9 @@ onClickCancelEdits = function(){
         }
     };
 
-    //  Retrieve info from the local storage to restore the layer state before any edits were made
+    //  Retrieve info from the session storage to restore the layer state before any edits were made
     try{
-//        jsonStyle = localStorage[String(layerName + "_Style")];
+//        jsonStyle = sessionStorage[String(layerName + "_Style")];
 //        savedStyle = JSON.parse(jsonStyle);
 //        oldStyle = new ol.style.Style();
 //
@@ -790,7 +790,7 @@ onClickCancelEdits = function(){
 
         //  Because we can't store the source directly, the features need to be read back into a new source.
         //  After reading the features string and parsing it back into JSON, the features are read into a new source.
-        jsonFeatures = localStorage[String(layerName + "_Features")];
+        jsonFeatures = sessionStorage[String(layerName + "_Features")];
         oldFeatures = JSON.parse(jsonFeatures);
 
         //  Establish the format as GeoJSON
@@ -832,6 +832,8 @@ onClickCancelEdits = function(){
     $('#editSave').addClass("hidden");
     $('#editCancel').addClass("hidden");
 
+    //  Make sure to designate that the attributes table should not be read in for saving
+    $('#attr-table').removeClass('edit');
     onClickShowAttrTable();
     //  Re-enable the layer select functionality
     initialize_listeners();
@@ -851,7 +853,7 @@ onClickShowAttrTable = function(e){
     catch(err){console.log(err);};
     if ($lyrListItem[0] === undefined){
         error_message("No layer selected");
-        return false;
+        return;
     }
     var layerName = $lyrListItem.find('.layer-name').text().trim();
     var numLayers;
