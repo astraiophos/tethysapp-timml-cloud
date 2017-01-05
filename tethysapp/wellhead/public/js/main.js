@@ -63,7 +63,6 @@ timml_solution = function(){
     var linesinkditch_ = {};
     var linedoubletimp_ = {};
     var polygoninhom_ = {};
-    var makeinhompolyside_ = {};
 
     //  Initialize the map object and get map size
     map = TETHYS_MAP_VIEW.getMap();
@@ -104,7 +103,7 @@ timml_solution = function(){
     layer = map.getLayers().item(8);
     features = layer.getSource().getFeatures();
 
-    //  Skip if there aren't any wells to process
+    //  Skip if there aren't any features to process
     if (features.length === 0){}
     else{
         attributes = [];
@@ -123,16 +122,141 @@ timml_solution = function(){
     }
 
     // ***   Line Sink data   *** //
+    layer = map.getLayers().item(7);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'sigma': features[i].getProperties()['sigma'],
+                'layers': features[i].getProperties()['layers'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            linesink_[String("line_sink_" + i)] = attributes[i];
+        };
+    }
 
     // ***   Head Line Sink data   *** //
+    layer = map.getLayers().item(6);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'head': features[i].getProperties()['head'],
+                'layers': features[i].getProperties()['layers'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            headlinesink_[String("head_line_sink_" + i)] = attributes[i];
+        };
+    }
 
     // ***   Res Line Sink data   *** //
+    layer = map.getLayers().item(5);
+    features = layer.getSource().getFeatures();
 
-    // ***   Line Sink Ditch data   *** //
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'head': features[i].getProperties()['head'],
+                'res': features[i].getProperties()['res'],
+                'width': features[i].getProperties()['width'],
+                'layers': features[i].getProperties()['layers'],
+                'bottomelev': features[i].getProperties()['bottomelev'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            reslinesink_[String("res_line_sink_" + i)] = attributes[i];
+        };
+    }
 
     // ***   Line Doublet Imp data   *** //
+    layer = map.getLayers().item(4);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'order': features[i].getProperties()['order'],
+                'layers': features[i].getProperties()['layers'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            linedoubletimp_[String("line_doublet_imp_" + i)] = attributes[i];
+        };
+    }
+
+    // ***   Line Sink Ditch data   *** //
+    layer = map.getLayers().item(3);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'Q': features[i].getProperties()['Q'],
+                'res': features[i].getProperties()['res'],
+                'width': features[i].getProperties()['width'],
+                'layers': features[i].getProperties()['layers'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            linesinkditch_[String("line_sink_ditch_" + i)] = attributes[i];
+        };
+    }
 
     // ***   Polygon Inhom data *** //
+        layer = map.getLayers().item(2);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'Naquifers': features[i].getProperties()['Naquifers'],
+                'k': features[i].getProperties()['k'],
+                'zb': features[i].getProperties()['zb'],
+                'zt': features[i].getProperties()['zt'],
+                'c': features[i].getProperties()['c'],
+                'n': features[i].getProperties()['n'],
+                'nll': features[i].getProperties()['nll'],
+                'order': features[i].getProperties()['order'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            polygoninhom_[String("polygoninhom_" + i)] = attributes[i];
+        };
+    }
 
 
     //  Pass information to controller for processing, to be passed back and read in as two layers
@@ -160,7 +284,6 @@ timml_solution = function(){
             "line_sink_ditch":JSON.stringify(linesinkditch_),
             "line_doublet_imp":JSON.stringify(linedoubletimp_),
             "polygon_inhom":JSON.stringify(polygoninhom_),
-            "make_inhom_side":JSON.stringify(makeinhompolyside_),
             //  Map Information
             "map_corners":JSON.stringify(map_window),
 			},
