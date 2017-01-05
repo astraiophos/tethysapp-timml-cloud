@@ -46,7 +46,8 @@ timml_solution = function(){
     //  Used to read in the information from the interface
     var map;
     var layer;
-    var features
+    var features;
+    var attributes;
 
     //  Need to know the size of the map to the edges
     var map_window;
@@ -74,7 +75,10 @@ timml_solution = function(){
 
     //  Check that the model only has at least one constant, return if false
     if (features.length === 1){}
-    else{return;}
+    else{
+        error_message("Make sure that you have only one constant");
+        return;
+    }
 
     //  Get the properties of the model
     model_["k"] = features[0].getProperties()["k"];
@@ -90,9 +94,11 @@ timml_solution = function(){
     constant_["layer"] = features[0].getProperties()["constant layer"];
     constant_["label"] = features[0].getProperties()["Label"];
 
-    //  Get ambient flow conditions if present
-    uflow_["uflow grad"] = features[0].getProperties()["uflow grad"];
-    uflow_["uflow angle"] = features[0].getProperties()["uflow angle"];
+    //  Get ambient flow conditions if user created input
+    if (features[0].getProperties()['uflow grad'] != "" && features[0].getProperties()["uflow angle"] != ""){
+        uflow_["uflow grad"] = features[0].getProperties()["uflow grad"];
+        uflow_["uflow angle"] = features[0].getProperties()["uflow angle"];
+    }
 
     // ***   Well(s) data   *** //
     layer = map.getLayers().item(8);
@@ -101,11 +107,18 @@ timml_solution = function(){
     //  Skip if there aren't any wells to process
     if (features.length === 0){}
     else{
+        attributes = [];
         for (i=0;i<features.length;i++){
-            wells_[String(i + "_coordinates")] = features[i].getGeometry().getCoordinates();
-            wells_[String(i + "_flow")] = features[i].getProperties()["Qw"];
-            wells_[String(i + "_radius")] = features[i].getProperties()["rw"];
-            wells_[String(i + "_layers")] = features[i].getProperties()["layers"];
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'Qw': features[i].getProperties()['Qw'],
+                'rw': features[i].getProperties()['rw'],
+                'layers': features[i].getProperties()['layers'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            wells_[String("well_" + i)] = attributes[i];
         };
     }
 

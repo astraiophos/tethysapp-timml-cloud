@@ -77,18 +77,38 @@ def timml(request):
     uflow_info = json.loads(get_data['uflow'])
     wells_info = json.loads(get_data['wells'])
 
-    print "Build model"
-    ml = Model(k=[model_info["k"]],zb=[model_info["zb"]],zt=[model_info["zt"]])
+    #   Massage input to be in the right format
+    print "Building model"
+
+    #   Credit to @SilentGhost on stackoverflow for the following code
+    k_list = [float(i) for i in ((model_info['k']).split(','))]
+    zb_list = [float(i) for i in ((model_info['zb']).split(','))]
+    zt_list = [float(i) for i in ((model_info['zt']).split(','))]
+
+    ml = Model(k=k_list,zb=zb_list,zt=zt_list)
+
     print "Build constant"
     rf = Constant(ml,xr=constant_info["coordinates"][0],yr=constant_info["coordinates"][1],
-                  head=constant_info["head"])
-    print "Build uflow"
-    uf = Uflow(ml,grad=uflow_info["grad"],angle=uflow_info["angle"])
+                  head=float(constant_info["head"]))
+
+    if 'uflow grad' in uflow_info:
+        uf = Uflow(ml,grad=float(uflow_info["uflow grad"]),angle=float(uflow_info["uflow angle"]))
+        print "Finished uflow"
+
+    if 'well_0' in wells_info:
+        for index in range(0,len(wells_info)):
+            layers_list = [int(i) for i in (wells_info[str("well_" + str(index))]['layers'].split(','))]
+            Well(ml,
+                 xw=wells_info[str("well_" + str(index))]['coordinates'][0],
+                 yw=wells_info[str("well_" + str(index))]['coordinates'][1],
+                 Qw=float(wells_info[str("well_" + str(index))]['Qw'][0]),
+                 rw=float(wells_info[str("well_" + str(index))]['rw']),
+                 layers=layers_list,label=wells_info[str("well_" + str(index))]['label'])
+        print "Finished wells"
 
     ml.solve()
 
     print "solved!!!"
-
 
     return JsonResponse({
         "sucess": "Data analysis complete!",
