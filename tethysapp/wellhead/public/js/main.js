@@ -474,10 +474,14 @@ deleteRow = function(id,features){
     var selector;
     var new_input_id;
 
-    console.log("This is the id of the feature that was deleted: " + id);
-
     //  Delete the appropriate row in the table
-    $('#attr-table tbody').find('tr')[id].remove()
+    if ($('#attr-table tbody').find('tr')[id] != undefined){
+        $('#attr-table tbody').find('tr')[id].remove();
+    }
+    else{
+        return;
+    }
+
 
     //  Renumber the id's of the features
     for (i=0;i<features.length;i++){
