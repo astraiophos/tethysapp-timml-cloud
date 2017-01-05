@@ -61,19 +61,42 @@ def home(request):
     return render(request, 'wellhead/home.html', context)
 
 def timml(request):
+    #   Make sure that the module loads properly
     try:
         from timml import *
-        print "Successfully loaded TimML"
     except Exception,e:
         print str(e)
-        return JsonResponse({"error":str(e)})
+        return JsonResponse({"error":str(e),
+                             "message":"Check with administrator, timml library is not loading properly"})
 
     get_data = request.GET
 
-    #   Collect the information that was passed
-    test = get_data['test']
-    print test
+    #   Collect the model information
+    model_info = json.loads(get_data['model'])
+    constant_info = json.loads(get_data['constant'])
+    uflow_info = json.loads(get_data['uflow'])
+    wells_info = json.loads(get_data['wells'])
+
+    print "Model information:"
+    print model_info
+    print ""
+
+    print "Constant information:"
+    print constant_info
+    print ""
+
+    print "Uflow information:"
+    print uflow_info
+    print ""
+
+    print "Wells information:"
+    print wells_info
+    print ""
+
 
     return JsonResponse({
         "sucess": "Data analysis complete!",
+        "raster": "Raster data goes here",
+        "contours": "Contour data goes here",
+        "particle": "Particle tracking goes here",
     })

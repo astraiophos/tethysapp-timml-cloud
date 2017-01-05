@@ -9,12 +9,14 @@
   <b>Table of Contents</b>
   <div id="toc-layers">
     <ul id="toc-layers-list" class="ui-sortable"></ul>
-    <div id="div-loading-mask"></div>
-    <div id="div-loading" class="hidden">
-      <img src="{% static 'wellhead/images/ajax-loader-transparent.gif' %}">
-    </div>
   </div>
   <a id="solve" class="btn btn-success" onclick="timml_solution();">Solve</a>
+
+  <div id="loading" class="load">
+      <img id="loading-image" class=""
+      src="{% static 'wellhead/images/ajax-loader-transparent.gif' %}"
+      alt="Loading..."/>
+  </div>
 
 <!--<button type="button" class="btn btn-primary" onclick="onClickSaveEdits();">Edit Selected Layer</button>-->
 {% endblock %}

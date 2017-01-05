@@ -43,53 +43,108 @@ var $id = 0;
 //  the groundwater elevations (using contours and a grid, respectively).
 
 timml_solution = function(){
-    var model_;
-    var constant_;
-    var uflow_;
-    var wells_;
-    var linesink_;
-    var headlinesink_;
-    var reslinesink_;
-    var linesinkditch_;
-    var linedoubletimp_;
-    var polygoninhom_;
-    var makeinhompolyside_;
+    //  Used to read in the information from the interface
+    var map;
+    var layer;
+    var features
+
+    //  Used to store the information and pass to the controller
+    var model_ = {};
+    var constant_ = {};
+    var uflow_ = {};
+    var wells_ = {};
+    var linesink_ = {};
+    var headlinesink_ = {};
+    var reslinesink_ = {};
+    var linesinkditch_ = {};
+    var linedoubletimp_ = {};
+    var polygoninhom_ = {};
+    var makeinhompolyside_ = {};
+
+    //  Initialize the map object for retrieving information
+    map = TETHYS_MAP_VIEW.getMap();
     //  First gather the information into the variables to include coordinates and attributes
 
-    //  Model information
+    // ***   Model information   *** //
+    layer = map.getLayers().item(9);
+    features = layer.getSource().getFeatures();
+
+    //  Check that the model only has at least one constant, return if false
+    if (features.length === 1){}
+    else{return;}
+
+    //  Get the properties of the model
+    model_["k"] = features[0].getProperties()["k"];
+    model_["zb"] = features[0].getProperties()["zb"];
+    model_["zt"] = features[0].getProperties()["zt"];
+    model_["c"] = features[0].getProperties()["c"];
+    model_["n"] = features[0].getProperties()["n"];
+    model_["nll"] = features[0].getProperties()["nll"];
+
+    //  Get the coordinates and properties of the constant
+    constant_["coordinates"] = features[0].getGeometry().getCoordinates();
+    constant_["head"] = features[0].getProperties()["constant head"];
+    constant_["layer"] = features[0].getProperties()["constant layer"];
+    constant_["label"] = features[0].getProperties()["Label"];
+
+    //  Get ambient flow conditions if present
+    uflow_["uflow grad"] = features[0].getProperties()["uflow grad"];
+    uflow_["uflow angle"] = features[0].getProperties()["uflow angle"];
+
+    // ***   Well(s) data   *** //
+    layer = map.getLayers().item(8);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any wells to process
+    if (features.length === 0){}
+    else{
+        for (i=0;i<features.length;i++){
+            wells_[String(i + "_coordinates")] = features[i].getGeometry().getCoordinates();
+            wells_[String(i + "_flow")] = features[i].getProperties()["Qw"];
+            wells_[String(i + "_radius")] = features[i].getProperties()["rw"];
+            wells_[String(i + "_layers")] = features[i].getProperties()["layers"];
+        };
+    }
+
+    // ***   Line Sink data   *** //
+
+    // ***   Head Line Sink data   *** //
+
+    // ***   Res Line Sink data   *** //
+
+    // ***   Line Sink Ditch data   *** //
+
+    // ***   Line Doublet Imp data   *** //
+
+    // ***   Polygon Inhom data *** //
 
 
     //  Pass information to controller for processing, to be passed back and read in as two layers
     //  Also prevent user from clicking and add visual cue that information is being processed
-//    document.getElementById('loading').style.display = "block";
-//
-//    document.addEventListener("click",handler,true);
-//
-//    function handler(e){
-//        e.stopPropagation();
-//        e.preventDefault();
-//    }
+    $('#loading').removeClass("hidden");
+
+    document.addEventListener("click",handler,true);
+
+    function handler(e){
+        e.stopPropagation();
+        e.preventDefault();
+    }
     $.ajax({
 		type: 'GET',
 		url: 'timml',
 		dataType: 'json',
 		data: {
-		    'test':'Here goes!',
-//			'xIndex': JSON.stringify(mapXCoords),
-//			'yIndex': JSON.stringify(mapYCoords),
-//			'wXCoords': JSON.stringify(wXCoords),
-//			'wYCoords': JSON.stringify(wYCoords),
-//			'cellSide': JSON.stringify(cellSide),
-//			'initial': JSON.stringify(iwte.value),
-//			'bedrock': JSON.stringify(bedrock.value),
-//			'q': JSON.stringify(q.value),
-//			'k': JSON.stringify(k.value),
-////			slurry trench parameters
-//			'slurry': JSON.stringify(slurry.checked),
-//			'slurryK': JSON.stringify(slurryK.value),
-//			'slurryT': JSON.stringify(slurryT.value),
-//			'pXCoords': JSON.stringify(pXCoords),
-//			'pYCoords': JSON.stringify(pYCoords),
+            "model":JSON.stringify(model_),
+            "constant":JSON.stringify(constant_),
+            "uflow":JSON.stringify(uflow_),
+            "wells":JSON.stringify(wells_),
+            "line_sink":JSON.stringify(linesink_),
+            "head_line_sink":JSON.stringify(headlinesink_),
+            "res_line_sink":JSON.stringify(reslinesink_),
+            "line_sink_ditch":JSON.stringify(linesinkditch_),
+            "line_doublet_imp":JSON.stringify(linedoubletimp_),
+            "polygon_inhom":JSON.stringify(polygoninhom_),
+            "make_inhom_side":JSON.stringify(makeinhompolyside_),
 			},
 			success: function (data){
 					console.log(data)
@@ -130,7 +185,8 @@ timml_solution = function(){
 
 //					addWaterTable(raster_elev_mapView,"Water Table");
 //					addContours(contourLines,levels,"Elevation Contours");
-//                    document.removeEventListener("click",handler,true);
+                    document.removeEventListener("click",handler,true);
+                    $('#loading').addClass("hidden");
 					}
 			});
 };
@@ -623,8 +679,8 @@ initialize_timml_layers = function(){
     var featureCollection;
 
     //  Initialize the headers for each layer
-    model_constant_layer = ["Label","constant head","constant layer","k","zb","zt","c",
-        "n","nll"];
+    model_constant_layer = ["Label","constant head","constant layer","uflow grad","uflow angle",
+        "k","zb","zt","c","n","nll"];
     wells_layer = ["Label","Qw","rw","layers"];
     line_sink_layer = ["Label","sigma","layers"];
     head_line_sink_layer = ["Label","head","layers"];
@@ -797,6 +853,8 @@ $(document).ready(function(){
     initialize_timml_layers();
     //  Bind listeners to map drawing tools
     drawing_listener();
+    //  Hide the loading gif
+    $('#loading').addClass("hidden");
 });
 
 /*****************************************************************************
