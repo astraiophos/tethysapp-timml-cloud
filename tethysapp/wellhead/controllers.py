@@ -77,21 +77,17 @@ def timml(request):
     uflow_info = json.loads(get_data['uflow'])
     wells_info = json.loads(get_data['wells'])
 
-    print "Model information:"
-    print model_info
-    print ""
+    print "Build model"
+    ml = Model(k=[model_info["k"]],zb=[model_info["zb"]],zt=[model_info["zt"]])
+    print "Build constant"
+    rf = Constant(ml,xr=constant_info["coordinates"][0],yr=constant_info["coordinates"][1],
+                  head=constant_info["head"])
+    print "Build uflow"
+    uf = Uflow(ml,grad=uflow_info["grad"],angle=uflow_info["angle"])
 
-    print "Constant information:"
-    print constant_info
-    print ""
+    ml.solve()
 
-    print "Uflow information:"
-    print uflow_info
-    print ""
-
-    print "Wells information:"
-    print wells_info
-    print ""
+    print "solved!!!"
 
 
     return JsonResponse({

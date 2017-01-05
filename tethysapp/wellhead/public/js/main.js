@@ -48,7 +48,10 @@ timml_solution = function(){
     var layer;
     var features
 
-    //  Used to store the information and pass to the controller
+    //  Need to know the size of the map to the edges
+    var map_window;
+
+    //  Used to store the model information and pass to the controller
     var model_ = {};
     var constant_ = {};
     var uflow_ = {};
@@ -61,9 +64,9 @@ timml_solution = function(){
     var polygoninhom_ = {};
     var makeinhompolyside_ = {};
 
-    //  Initialize the map object for retrieving information
+    //  Initialize the map object and get map size
     map = TETHYS_MAP_VIEW.getMap();
-    //  First gather the information into the variables to include coordinates and attributes
+    map_window = map.getView().calculateExtent(map.getSize());
 
     // ***   Model information   *** //
     layer = map.getLayers().item(9);
@@ -145,6 +148,8 @@ timml_solution = function(){
             "line_doublet_imp":JSON.stringify(linedoubletimp_),
             "polygon_inhom":JSON.stringify(polygoninhom_),
             "make_inhom_side":JSON.stringify(makeinhompolyside_),
+            //  Map Information
+            "map_corners":JSON.stringify(map_window),
 			},
 			success: function (data){
 					console.log(data)
