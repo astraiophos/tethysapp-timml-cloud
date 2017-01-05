@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 import json
 import numpy
 
@@ -58,3 +59,21 @@ def home(request):
                'table_view_edit': table_view_edit}
 
     return render(request, 'wellhead/home.html', context)
+
+def timml(request):
+    try:
+        from timml import *
+        print "Successfully loaded TimML"
+    except Exception,e:
+        print str(e)
+        return JsonResponse({"error":str(e)})
+
+    get_data = request.GET
+
+    #   Collect the information that was passed
+    test = get_data['test']
+    print test
+
+    return JsonResponse({
+        "sucess": "Data analysis complete!",
+    })

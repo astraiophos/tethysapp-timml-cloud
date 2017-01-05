@@ -27,6 +27,9 @@ class WellheadProtection(TethysAppBase):
         url_maps = (UrlMap(name='home',
                            url='wellhead',
                            controller='wellhead.controllers.home'),
+                    UrlMap(name='timml',
+                           url='wellhead/timml',
+                           controller='wellhead.controllers.timml')
         )
 
         return url_maps

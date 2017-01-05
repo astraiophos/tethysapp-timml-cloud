@@ -17,6 +17,7 @@ var drawing_listener;
 var build_table;
 var addRow;
 var deleteRow;
+var timml_solution;
 
 /*****************************************************************************
  *                             Variables
@@ -40,6 +41,99 @@ var $id = 0;
 //  Once the user has defined their features with the corresponding attributes, collect all features and prepare data
 //  for export to timml controller function. When the results are passed back, create two new layers to represent
 //  the groundwater elevations (using contours and a grid, respectively).
+
+timml_solution = function(){
+    var model_;
+    var constant_;
+    var uflow_;
+    var wells_;
+    var linesink_;
+    var headlinesink_;
+    var reslinesink_;
+    var linesinkditch_;
+    var linedoubletimp_;
+    var polygoninhom_;
+    var makeinhompolyside_;
+    //  First gather the information into the variables to include coordinates and attributes
+
+    //  Model information
+
+
+    //  Pass information to controller for processing, to be passed back and read in as two layers
+    //  Also prevent user from clicking and add visual cue that information is being processed
+//    document.getElementById('loading').style.display = "block";
+//
+//    document.addEventListener("click",handler,true);
+//
+//    function handler(e){
+//        e.stopPropagation();
+//        e.preventDefault();
+//    }
+    $.ajax({
+		type: 'GET',
+		url: 'timml',
+		dataType: 'json',
+		data: {
+		    'test':'Here goes!',
+//			'xIndex': JSON.stringify(mapXCoords),
+//			'yIndex': JSON.stringify(mapYCoords),
+//			'wXCoords': JSON.stringify(wXCoords),
+//			'wYCoords': JSON.stringify(wYCoords),
+//			'cellSide': JSON.stringify(cellSide),
+//			'initial': JSON.stringify(iwte.value),
+//			'bedrock': JSON.stringify(bedrock.value),
+//			'q': JSON.stringify(q.value),
+//			'k': JSON.stringify(k.value),
+////			slurry trench parameters
+//			'slurry': JSON.stringify(slurry.checked),
+//			'slurryK': JSON.stringify(slurryK.value),
+//			'slurryT': JSON.stringify(slurryT.value),
+//			'pXCoords': JSON.stringify(pXCoords),
+//			'pYCoords': JSON.stringify(pYCoords),
+			},
+			success: function (data){
+					console.log(data)
+					if (data.error){
+						console.log(data.error);
+						return
+					}
+//					waterTableRegional = (JSON.parse(data.local_Water_Table));
+////					console.log(waterTableRegional);
+//
+//					var raster_elev_mapView = {
+//						'type': 'FeatureCollection',
+//						'crs': {
+//							'type': 'name',
+//							'properties':{
+//								'name':'EPSG:4326'
+//								}
+//						},
+//						'features': waterTableRegional
+//					};
+//
+//					levels = (JSON.parse(data.heads));
+//					window.sessionStorage['levels'] = data.heads;
+//
+//					Contours = (JSON.parse(data.contours));
+////					console.log(Contours);
+//
+//					var contourLines = {
+//						'type': 'FeatureCollection',
+//						'crs': {
+//							'type': 'name',
+//							'properties': {
+//								'name':'EPSG:4326'
+//							}
+//						},
+//						'features': Contours
+//					}
+
+//					addWaterTable(raster_elev_mapView,"Water Table");
+//					addContours(contourLines,levels,"Elevation Contours");
+//                    document.removeEventListener("click",handler,true);
+					}
+			});
+};
 
 /*****************************************************************************
  *                    User Interaction and Attribute Table
