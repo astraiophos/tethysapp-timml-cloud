@@ -79,6 +79,18 @@ readInitialLayers = function (){
     addMenus_and_ListenersToInitialLayers();
 }
 
+//  Add new layer dynamically
+add_new_layer = function(mapIndex){
+    var map;
+    var layer;
+
+    map = TETHYS_MAP_VIEW.getMap();
+    layer = map.getLayers().item(mapIndex);
+
+    createLayerListItem(layer,mapIndex);
+
+};
+
 //  Add listeners to the initial table of contents as read in from the map view gizmo layers
 addMenus_and_ListenersToInitialLayers = function()
 {

@@ -88,8 +88,21 @@ def timml(request):
     k_list = [float(i) for i in ((model_info['k']).split(','))]
     zb_list = [float(i) for i in ((model_info['zb']).split(','))]
     zt_list = [float(i) for i in ((model_info['zt']).split(','))]
+    #   Optional Parameters, make empty arrays if not defined by the user
+    if model_info['n'] <> "":
+        n_list = [float(i) for i in ((model_info['n']).split(','))]
+    else:
+        n_list = []
+    if model_info['c'] <> "":
+        c_list = [float(i) for i in ((model_info['c']).split(','))]
+    else:
+        c_list = []
+    if model_info['nll'] <> "":
+        nll_list = [float(i) for i in ((model_info['nll']).split(','))]
+    else:
+        nll_list = []
 
-    ml = Model(k=k_list,zb=zb_list,zt=zt_list)
+    ml = Model(k=k_list,zb=zb_list,zt=zt_list,n=n_list,c=c_list,nll=nll_list)
 
     print "Build constant"
     rf = Constant(ml,xr=constant_info["coordinates"][0],yr=constant_info["coordinates"][1],
@@ -105,7 +118,7 @@ def timml(request):
             Well(ml,
                  xw=wells_info[str("well_" + str(index))]['coordinates'][0],
                  yw=wells_info[str("well_" + str(index))]['coordinates'][1],
-                 Qw=float(wells_info[str("well_" + str(index))]['Qw'][0]),
+                 Qw=float(wells_info[str("well_" + str(index))]['Qw']),
                  rw=float(wells_info[str("well_" + str(index))]['rw']),
                  layers=layers_list,label=wells_info[str("well_" + str(index))]['label'])
         print "Finished wells"
@@ -114,11 +127,6 @@ def timml(request):
     ml.solve(doIterations=True)
 
     print "solved!!!"
-
-    print "map_window[0]" + str(map_window[0])
-    print "map_window[2]" + str(map_window[2])
-    print "map_window[1]" + str(map_window[1])
-    print "map_window[3]" + str(map_window[3])
 
     contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/cell_side), map_window[1],
                              map_window[3], numpy.absolute((map_window[1]-map_window[3])/cell_side), levels = 10,
@@ -213,4 +221,5 @@ def timml(request):
         "contours": json.dumps(Contours),
         "heads": json.dumps(intervals),
         "capture": "Capture Zone goes here",
+        "wells": json.dumps(wells_info),
     })
