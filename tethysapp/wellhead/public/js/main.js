@@ -145,7 +145,7 @@ timml_solution = function(){
             //  If coordinates of any feature is longer than 2, cancel solve request and notify user
             if (linesink_['line_sink_' + i]['coordinates'].length>2){
                 error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
-                "Please break up your linesink to have only 2 vertices");
+                "Please break up your feature to have only 2 vertices");
                 return;
             }
         };
@@ -170,6 +170,13 @@ timml_solution = function(){
             });
 
             headlinesink_[String("head_line_sink_" + i)] = attributes[i];
+
+            //  If coordinates of any feature is longer than 2, cancel solve request and notify user
+            if (headlinesink_['head_line_sink_' + i]['coordinates'].length>2){
+                error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
+                "Please break up your feature to have only 2 vertices");
+                return;
+            }
         };
     }
 

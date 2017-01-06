@@ -77,6 +77,7 @@ def timml(request):
     uflow_info = json.loads(get_data['uflow'])
     wells_info = json.loads(get_data['wells'])
     linesinks_info = json.loads(get_data['line_sink'])
+    headlinesinks_info = json.loads(get_data['head_line_sink'])
 
     #   Get map size and calculate cell size
     map_window = json.loads(get_data['map_corners'])
@@ -144,13 +145,45 @@ def timml(request):
                  label=linesinks_info[str("line_sink_" + str(index))]['label'])
         print "Finished linesinks"
 
+    if 'head_line_sink_0' in headlinesinks_info:
+        for index in range(0,len(headlinesinks_info)):
+            if headlinesinks_info['head_line_sink_0']['layers']<>"":
+                layers_list = [int(i) for i in (headlinesinks_info[str("head_line_sink_" + str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
+            HeadLineSink(ml,
+                 x1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][0],
+                 y1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][1],
+                 x2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][0],
+                 y2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][1],
+                 head=float(headlinesinks_info[str("head_line_sink_" + str(index))]['head']),
+                 layers=layers_list,
+                 label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
+        print "Finished linesinks"
+
+    if 'head_line_sink_0' in headlinesinks_info:
+        for index in range(0,len(headlinesinks_info)):
+            if headlinesinks_info['head_line_sink_0']['layers']<>"":
+                layers_list = [int(i) for i in (headlinesinks_info[str("head_line_sink_" + str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
+            HeadLineSink(ml,
+                 x1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][0],
+                 y1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][1],
+                 x2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][0],
+                 y2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][1],
+                 head=float(headlinesinks_info[str("head_line_sink_" + str(index))]['head']),
+                 layers=layers_list,
+                 label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
+        print "Finished linesinks"
+
     #   Do iterations in the event that elements are used that require it (used as a 'catch-all')
     ml.solve(doIterations=True)
 
     print "solved!!!"
 
-    contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/cell_side), map_window[1],
-                             map_window[3], numpy.absolute((map_window[1]-map_window[3])/cell_side), levels = 10,
+    contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/9), map_window[1],
+                             map_window[3], numpy.absolute((map_window[1]-map_window[3])/9), levels = 10,
                              newfig = True, returncontours = True)
 
     # Return the contour paths and store them as a list
