@@ -78,10 +78,15 @@ def timml(request):
     wells_info = json.loads(get_data['wells'])
     linesinks_info = json.loads(get_data['line_sink'])
     headlinesinks_info = json.loads(get_data['head_line_sink'])
+    reslinesinks_info = json.loads(get_data['res_line_sink'])
 
     #   Get map size and calculate cell size
     map_window = json.loads(get_data['map_corners'])
     cell_side = (map_window[2]-map_window[0])/20
+
+    #   Set the solver to default to regular solves (not iterative solutions)
+    #   If elements are used that require iterative solutions then solvetype will be modified before ml.solve()
+    solvetype = False
 
     #   Massage data inumpyut to be in the right format
     print "Building model"
@@ -119,7 +124,7 @@ def timml(request):
             if wells_info['well_0']['layers']<>"":
                 layers_list = [int(i) for i in (wells_info[str("well_" + str(index))]['layers'].split(','))]
             else:
-                layers_list = []
+                layers_list = [0]
             Well(ml,
                  xw=wells_info[str("well_" + str(index))]['coordinates'][0],
                  yw=wells_info[str("well_" + str(index))]['coordinates'][1],
@@ -175,10 +180,28 @@ def timml(request):
                  head=float(headlinesinks_info[str("head_line_sink_" + str(index))]['head']),
                  layers=layers_list,
                  label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
-        print "Finished linesinks"
+        print "Finished head_linesinks"
+
+    if 'res_line_sink_0' in reslinesinks_info:
+        for index in range(0,len(reslinesinks_info)):
+            if reslinesinks_info['res_line_sink_0']['layers']<>"":
+                layers_list = [int(i) for i in (reslinesinks_info[str("res_line_sink_" + str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
+            ResLineSink(ml,
+                 x1=reslinesinks_info[str("res_line_sink_" + str(index))]['coordinates'][0][0],
+                 y1=reslinesinks_info[str("res_line_sink_" + str(index))]['coordinates'][0][1],
+                 x2=reslinesinks_info[str("res_line_sink_" + str(index))]['coordinates'][1][0],
+                 y2=reslinesinks_info[str("res_line_sink_" + str(index))]['coordinates'][1][1],
+                 head=float(reslinesinks_info[str("res_line_sink_" + str(index))]['head']),
+                 res=float(reslinesinks_info[str("res_line_sink_" + str(index))]['res']),
+                 width=float(reslinesinks_info[str("res_line_sink_" + str(index))]['width']),
+                 layers=layers_list,
+                 label=reslinesinks_info[str("res_line_sink_" + str(index))]['label'])
+        print "Finished res_linesinks"
 
     #   Do iterations in the event that elements are used that require it (used as a 'catch-all')
-    ml.solve(doIterations=True)
+    ml.solve(doIterations=solvetype)
 
     print "solved!!!"
 
@@ -219,31 +242,31 @@ def timml(request):
     # This section constructs the featurecollection polygons defining the water table elevations
     # Cells are defined at the corners, water table elevation is defined at the center of the cell
 
-    waterTable = []
-
-    for long in numpy.arange(map_window[0]-cell_side, map_window[2]+cell_side, cell_side):
-        for lat in numpy.arange(map_window[1]-cell_side, map_window[3]+cell_side, cell_side):
-            waterTable.append({
-                'type': 'Feature',
-                'geometry': {
-                    'type': 'Polygon',
-                    'coordinates': [
-                                    [   [long,lat],
-                                        [long + cell_side, lat],
-                                        [long + cell_side, lat + cell_side],
-                                        [long, lat + cell_side],
-                                        [long,lat]
-                                    ]
-                                   ]
-                    },
-                    'properties': {
-                        'elevation' : ml.head(0,(long+cell_side/2),(lat+cell_side/2)),
-                    }
-            })
+    # waterTable = []
+    #
+    # for long in numpy.arange(map_window[0]-cell_side, map_window[2]+cell_side, cell_side):
+    #     for lat in numpy.arange(map_window[1]-cell_side, map_window[3]+cell_side, cell_side):
+    #         waterTable.append({
+    #             'type': 'Feature',
+    #             'geometry': {
+    #                 'type': 'Polygon',
+    #                 'coordinates': [
+    #                                 [   [long,lat],
+    #                                     [long + cell_side, lat],
+    #                                     [long + cell_side, lat + cell_side],
+    #                                     [long, lat + cell_side],
+    #                                     [long,lat]
+    #                                 ]
+    #                                ]
+    #                 },
+    #                 'properties': {
+    #                     'elevation' : ml.head(0,(long+cell_side/2),(lat+cell_side/2)),
+    #                 }
+    #         })
 
     # print waterTable
-    # This collects the contour lines and creates JSON objects for the response to AJAX request (to be drawn in js)
 
+    # This collects the contour lines and creates JSON objects for the response to AJAX request (to be drawn in js)
     Contours = []
     i = 0
 
@@ -271,7 +294,7 @@ def timml(request):
 
     return JsonResponse({
         "sucess": "Data analysis complete!",
-        "raster": json.dumps(waterTable),
+        # "raster": json.dumps(waterTable),
         "contours": json.dumps(Contours),
         "heads": json.dumps(intervals),
         "capture": "Capture Zone goes here",

@@ -201,6 +201,13 @@ timml_solution = function(){
             });
 
             reslinesink_[String("res_line_sink_" + i)] = attributes[i];
+
+            //  If coordinates of any feature is longer than 2, cancel solve request and notify user
+            if (reslinesink_['res_line_sink_' + i]['coordinates'].length>2){
+                error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
+                "Please break up your feature to have only 2 vertices");
+                return;
+            }
         };
     }
 
