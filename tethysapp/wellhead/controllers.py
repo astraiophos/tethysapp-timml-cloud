@@ -51,7 +51,7 @@ def home(request):
                             striped=True,
                             bordered=False,
                             condensed=False,
-                            editable_columns=(False, 'ageInput', 'jobInput'),
+                            editable_columns=(False, 'ageInumpyut', 'jobInumpyut'),
                             row_ids=[21, 25, 31],
                             attributes={'id':'attr-table'})
 
@@ -77,10 +77,14 @@ def timml(request):
     uflow_info = json.loads(get_data['uflow'])
     wells_info = json.loads(get_data['wells'])
 
-    #   Massage input to be in the right format
+    #   Get map size and calculate cell size
+    map_window = json.loads(get_data['map_corners'])
+    cell_side = (map_window[2]-map_window[0])/20
+
+    #   Massage data inumpyut to be in the right format
     print "Building model"
 
-    #   Credit to @SilentGhost on stackoverflow for the following code
+    #   Credit to @SilentGhost on stackoverflow for the following code structure
     k_list = [float(i) for i in ((model_info['k']).split(','))]
     zb_list = [float(i) for i in ((model_info['zb']).split(','))]
     zt_list = [float(i) for i in ((model_info['zt']).split(','))]
@@ -106,13 +110,107 @@ def timml(request):
                  layers=layers_list,label=wells_info[str("well_" + str(index))]['label'])
         print "Finished wells"
 
-    ml.solve()
+    #   Do iterations in the event that elements are used that require it (used as a 'catch-all')
+    ml.solve(doIterations=True)
 
     print "solved!!!"
 
+    print "map_window[0]" + str(map_window[0])
+    print "map_window[2]" + str(map_window[2])
+    print "map_window[1]" + str(map_window[1])
+    print "map_window[3]" + str(map_window[3])
+
+    contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/cell_side), map_window[1],
+                             map_window[3], numpy.absolute((map_window[1]-map_window[3])/cell_side), levels = 10,
+                             newfig = True, returncontours = True)
+
+    # Return the contour paths and store them as a list
+    contourPaths = []
+
+    # This retrieves the heads of each contour traced by TimML and stores them in intervals[]
+    intervals = []
+    i = 0
+
+    retrieveIntervals = contourList.levels
+    try:
+        while(i<10):
+            intervals.append(retrieveIntervals[i])
+            i += 1
+    except:
+        pass
+
+    # print intervals
+
+    # Retrieves the contour traces and stores them in contourPaths[]
+    i = 0
+    try:
+        while (i < 10):
+            print i
+            contourPaths.append(contourList.collections[i].get_paths())
+            i += 1
+    except:
+        pass
+
+    # print contourPaths
+
+
+    # This section constructs the featurecollection polygons defining the water table elevations
+    # Cells are defined at the corners, water table elevation is defined at the center of the cell
+
+    waterTable = []
+
+    for long in numpy.arange(map_window[0]-cell_side, map_window[2]+cell_side, cell_side):
+        for lat in numpy.arange(map_window[1]-cell_side, map_window[3]+cell_side, cell_side):
+            waterTable.append({
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Polygon',
+                    'coordinates': [
+                                    [   [long,lat],
+                                        [long + cell_side, lat],
+                                        [long + cell_side, lat + cell_side],
+                                        [long, lat + cell_side],
+                                        [long,lat]
+                                    ]
+                                   ]
+                    },
+                    'properties': {
+                        'elevation' : ml.head(0,(long+cell_side/2),(lat+cell_side/2)),
+                    }
+            })
+
+    # print waterTable
+    # This collects the contour lines and creates JSON objects for the response to AJAX request (to be drawn in js)
+
+    Contours = []
+    i = 0
+
+    for path in contourList.collections:
+        for segment in path.get_segments():
+            trace = []
+            for piece in segment:
+                trace.append(piece.tolist())
+
+            if (i<len(intervals)):
+                Contours.append({
+                    'type': 'Feature',
+                    'geometry': {
+                        'type': 'LineString',
+                        'coordinates': trace
+                    },
+                    'properties':{
+                        'elevation' : intervals[i],
+                    }
+                })
+        i += 1
+
+    # print "Showing the Contour Objects"
+    # print Contours
+
     return JsonResponse({
         "sucess": "Data analysis complete!",
-        "raster": "Raster data goes here",
-        "contours": "Contour data goes here",
-        "particle": "Particle tracking goes here",
+        "raster": json.dumps(waterTable),
+        "contours": json.dumps(Contours),
+        "heads": json.dumps(intervals),
+        "capture": "Capture Zone goes here",
     })

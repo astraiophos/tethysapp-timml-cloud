@@ -232,7 +232,7 @@ timml_solution = function(){
     }
 
     // ***   Polygon Inhom data *** //
-        layer = map.getLayers().item(2);
+    layer = map.getLayers().item(2);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
