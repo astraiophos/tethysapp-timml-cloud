@@ -76,6 +76,7 @@ def timml(request):
     constant_info = json.loads(get_data['constant'])
     uflow_info = json.loads(get_data['uflow'])
     wells_info = json.loads(get_data['wells'])
+    linesinks_info = json.loads(get_data['line_sink'])
 
     #   Get map size and calculate cell size
     map_window = json.loads(get_data['map_corners'])
@@ -114,14 +115,34 @@ def timml(request):
 
     if 'well_0' in wells_info:
         for index in range(0,len(wells_info)):
-            layers_list = [int(i) for i in (wells_info[str("well_" + str(index))]['layers'].split(','))]
+            if wells_info['well_0']['layers']<>"":
+                layers_list = [int(i) for i in (wells_info[str("well_" + str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
             Well(ml,
                  xw=wells_info[str("well_" + str(index))]['coordinates'][0],
                  yw=wells_info[str("well_" + str(index))]['coordinates'][1],
                  Qw=float(wells_info[str("well_" + str(index))]['Qw']),
                  rw=float(wells_info[str("well_" + str(index))]['rw']),
-                 layers=layers_list,label=wells_info[str("well_" + str(index))]['label'])
+                 layers=layers_list,
+                 label=wells_info[str("well_" + str(index))]['label'])
         print "Finished wells"
+
+    if 'line_sink_0' in linesinks_info:
+        for index in range(0,len(linesinks_info)):
+            if linesinks_info['line_sink_0']['layers']<>"":
+                layers_list = [int(i) for i in (linesinks_info[str("line_sink_" + str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
+            LineSink(ml,
+                 x1=linesinks_info[str("line_sink_" + str(index))]['coordinates'][0][0],
+                 y1=linesinks_info[str("line_sink_" + str(index))]['coordinates'][0][1],
+                 x2=linesinks_info[str("line_sink_" + str(index))]['coordinates'][1][0],
+                 y2=linesinks_info[str("line_sink_" + str(index))]['coordinates'][1][1],
+                 sigma=float(linesinks_info[str("line_sink_" + str(index))]['sigma']),
+                 layers=layers_list,
+                 label=linesinks_info[str("line_sink_" + str(index))]['label'])
+        print "Finished linesinks"
 
     #   Do iterations in the event that elements are used that require it (used as a 'catch-all')
     ml.solve(doIterations=True)

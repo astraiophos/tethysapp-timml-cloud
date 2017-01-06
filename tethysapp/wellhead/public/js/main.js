@@ -141,8 +141,16 @@ timml_solution = function(){
             });
 
             linesink_[String("line_sink_" + i)] = attributes[i];
+
+            //  If coordinates of any feature is longer than 2, cancel solve request and notify user
+            if (linesink_['line_sink_' + i]['coordinates'].length>2){
+                error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
+                "Please break up your linesink to have only 2 vertices");
+                return;
+            }
         };
     }
+
 
     // ***   Head Line Sink data   *** //
     layer = map.getLayers().item(6);
@@ -263,14 +271,15 @@ timml_solution = function(){
 
     //  Pass information to controller for processing, to be passed back and read in as two layers
     //  Also prevent user from clicking and add visual cue that information is being processed
-    $('#loading').removeClass("hidden");
-
-    document.addEventListener("click",handler,true);
 
     function handler(e){
         e.stopPropagation();
         e.preventDefault();
     }
+    $('#loading').removeClass("hidden");
+
+    document.addEventListener("click",handler,true);
+
     $.ajax({
 		type: 'GET',
 		url: 'timml',
@@ -295,6 +304,8 @@ timml_solution = function(){
 //					console.log(JSON.parse(data.wells));
 					if (data.error){
 						console.log(data.error);
+						document.removeEventListener("click",handler,true);
+                        $('#loading').addClass("hidden");
 						return
 					}
 //					waterTableRegional = (JSON.parse(data.local_Water_Table));
