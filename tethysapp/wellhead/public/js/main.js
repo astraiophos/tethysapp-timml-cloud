@@ -229,6 +229,12 @@ timml_solution = function(){
             });
 
             linedoubletimp_[String("line_doublet_imp_" + i)] = attributes[i];
+            //  If coordinates of any feature is longer than 2, cancel solve request and notify user
+            if (linedoubletimp_['line_doublet_imp_' + i]['coordinates'].length>2){
+                error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
+                "Please break up your feature to have only 2 vertices");
+                return;
+            }
         };
     }
 
@@ -252,6 +258,12 @@ timml_solution = function(){
             });
 
             linesinkditch_[String("line_sink_ditch_" + i)] = attributes[i];
+            //  If coordinates of any feature is longer than 2, cancel solve request and notify user
+            if (linesinkditch_['line_sink_ditch_' + i]['coordinates'].length>2){
+                error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
+                "Please break up your feature to have only 2 vertices");
+                return;
+            }
         };
     }
 
@@ -306,8 +318,8 @@ timml_solution = function(){
             "line_sink":JSON.stringify(linesink_),
             "head_line_sink":JSON.stringify(headlinesink_),
             "res_line_sink":JSON.stringify(reslinesink_),
-            "line_sink_ditch":JSON.stringify(linesinkditch_),
             "line_doublet_imp":JSON.stringify(linedoubletimp_),
+            "line_sink_ditch":JSON.stringify(linesinkditch_),
             "polygon_inhom":JSON.stringify(polygoninhom_),
             //  Map Information
             "map_corners":JSON.stringify(map_window),

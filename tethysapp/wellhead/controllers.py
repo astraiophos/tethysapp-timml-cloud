@@ -79,6 +79,8 @@ def timml(request):
     linesinks_info = json.loads(get_data['line_sink'])
     headlinesinks_info = json.loads(get_data['head_line_sink'])
     reslinesinks_info = json.loads(get_data['res_line_sink'])
+    linedoubletimp_info = json.loads(get_data['line_doublet_imp'])
+    linesinkditch_info = json.loads(get_data['line_sink_ditch'])
 
     #   Get map size and calculate cell size
     map_window = json.loads(get_data['map_corners'])
@@ -121,7 +123,7 @@ def timml(request):
 
     if 'well_0' in wells_info:
         for index in range(0,len(wells_info)):
-            if wells_info['well_0']['layers']<>"":
+            if wells_info['well_' + str(index)]['layers']<>"":
                 layers_list = [int(i) for i in (wells_info[str("well_" + str(index))]['layers'].split(','))]
             else:
                 layers_list = [0]
@@ -136,7 +138,7 @@ def timml(request):
 
     if 'line_sink_0' in linesinks_info:
         for index in range(0,len(linesinks_info)):
-            if linesinks_info['line_sink_0']['layers']<>"":
+            if linesinks_info['line_sink_' + str(index)]['layers']<>"":
                 layers_list = [int(i) for i in (linesinks_info[str("line_sink_" + str(index))]['layers'].split(','))]
             else:
                 layers_list = []
@@ -152,23 +154,7 @@ def timml(request):
 
     if 'head_line_sink_0' in headlinesinks_info:
         for index in range(0,len(headlinesinks_info)):
-            if headlinesinks_info['head_line_sink_0']['layers']<>"":
-                layers_list = [int(i) for i in (headlinesinks_info[str("head_line_sink_" + str(index))]['layers'].split(','))]
-            else:
-                layers_list = []
-            HeadLineSink(ml,
-                 x1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][0],
-                 y1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][1],
-                 x2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][0],
-                 y2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][1],
-                 head=float(headlinesinks_info[str("head_line_sink_" + str(index))]['head']),
-                 layers=layers_list,
-                 label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
-        print "Finished linesinks"
-
-    if 'head_line_sink_0' in headlinesinks_info:
-        for index in range(0,len(headlinesinks_info)):
-            if headlinesinks_info['head_line_sink_0']['layers']<>"":
+            if headlinesinks_info['head_line_sink_' + str(index)]['layers']<>"":
                 layers_list = [int(i) for i in (headlinesinks_info[str("head_line_sink_" + str(index))]['layers'].split(','))]
             else:
                 layers_list = []
@@ -182,12 +168,34 @@ def timml(request):
                  label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
         print "Finished head_linesinks"
 
+    # if 'head_line_sink_0' in headlinesinks_info:
+    #     for index in range(0,len(headlinesinks_info)):
+    #         if headlinesinks_info['head_line_sink_' + str(index)]['layers']<>"":
+    #             layers_list = [int(i) for i in (headlinesinks_info[str("head_line_sink_" + str(index))]['layers'].split(','))]
+    #         else:
+    #             layers_list = []
+    #         HeadLineSink(ml,
+    #              x1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][0],
+    #              y1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][1],
+    #              x2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][0],
+    #              y2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][1],
+    #              head=float(headlinesinks_info[str("head_line_sink_" + str(index))]['head']),
+    #              layers=layers_list,
+    #              label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
+    #     print "Finished head_linesinks"
+
     if 'res_line_sink_0' in reslinesinks_info:
         for index in range(0,len(reslinesinks_info)):
-            if reslinesinks_info['res_line_sink_0']['layers']<>"":
+            if reslinesinks_info['res_line_sink_' + str(index)]['layers']<>"":
                 layers_list = [int(i) for i in (reslinesinks_info[str("res_line_sink_" + str(index))]['layers'].split(','))]
             else:
                 layers_list = []
+            if reslinesinks_info['res_line_sink_'+str(index)]['bottomelev']<>"":
+                elev = reslinesinks_info['res_line_sink_'+str(index)]['bottomelev']
+                #   Reslinesinks require iterative solutions when bottomelev is specified, trigger iterative solution
+                solvetype=True
+            else:
+                elev = None
             ResLineSink(ml,
                  x1=reslinesinks_info[str("res_line_sink_" + str(index))]['coordinates'][0][0],
                  y1=reslinesinks_info[str("res_line_sink_" + str(index))]['coordinates'][0][1],
@@ -197,8 +205,43 @@ def timml(request):
                  res=float(reslinesinks_info[str("res_line_sink_" + str(index))]['res']),
                  width=float(reslinesinks_info[str("res_line_sink_" + str(index))]['width']),
                  layers=layers_list,
+                 bottomelev=elev,
                  label=reslinesinks_info[str("res_line_sink_" + str(index))]['label'])
         print "Finished res_linesinks"
+
+    if 'line_doublet_imp_0' in linedoubletimp_info:
+        for index in range(0,len(linedoubletimp_info)):
+            if linedoubletimp_info['line_doublet_imp_' + str(index)]['layers']<>"":
+                layers_list = [int(i) for i in (linedoubletimp_info[str("line_doublet_imp_" +
+                                                                        str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
+            LineDoubletImp(ml,
+                 x1=linedoubletimp_info[str("line_doublet_imp_" + str(index))]['coordinates'][0][0],
+                 y1=linedoubletimp_info[str("line_doublet_imp_" + str(index))]['coordinates'][0][1],
+                 x2=linedoubletimp_info[str("line_doublet_imp_" + str(index))]['coordinates'][1][0],
+                 y2=linedoubletimp_info[str("line_doublet_imp_" + str(index))]['coordinates'][1][1],
+                 order=int(linedoubletimp_info[str("line_doublet_imp_" + str(index))]['order']),
+                 layers=layers_list,
+                 label=linedoubletimp_info[str("line_doublet_imp_" + str(index))]['label'])
+        print "Finished line_doublet_imp's"
+
+    if 'line_sink_ditch_0' in linedoubletimp_info:
+        for index in range(0,len(linedoubletimp_info)):
+            if linesinkditch_info['line_sink_ditch_' + str(index)]['layers']<>"":
+                layers_list = [int(i) for i in (linedoubletimp_info[str("line_sink_ditch_" +
+                                                                        str(index))]['layers'].split(','))]
+            else:
+                layers_list = []
+            LineDoubletImp(ml,
+                 x1=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][0][0],
+                 y1=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][0][1],
+                 x2=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][1][0],
+                 y2=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][1][1],
+                 order=int(linedoubletimp_info[str("line_sink_ditch_" + str(index))]['order']),
+                 layers=layers_list,
+                 label=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['label'])
+        print "Finished line_doublet_imp's"
 
     #   Do iterations in the event that elements are used that require it (used as a 'catch-all')
     ml.solve(doIterations=solvetype)
