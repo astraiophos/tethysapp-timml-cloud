@@ -151,7 +151,6 @@ timml_solution = function(){
         };
     }
 
-
     // ***   Head Line Sink data   *** //
     layer = map.getLayers().item(6);
     features = layer.getSource().getFeatures();
@@ -258,12 +257,6 @@ timml_solution = function(){
             });
 
             linesinkditch_[String("line_sink_ditch_" + i)] = attributes[i];
-            //  If coordinates of any feature is longer than 2, cancel solve request and notify user
-            if (linesinkditch_['line_sink_ditch_' + i]['coordinates'].length>2){
-                error_message("Feature '" + features[i].getProperties()['Label']+  "' has more than 2 vertices. " +
-                "Please break up your feature to have only 2 vertices");
-                return;
-            }
         };
     }
 
@@ -279,14 +272,14 @@ timml_solution = function(){
             //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
             attributes.push({
                 'coordinates': features[i].getGeometry().getCoordinates(),
-                'Naquifers': features[i].getProperties()['Naquifers'],
+//                'Naquifers': features[i].getProperties()['Naquifers'],
                 'k': features[i].getProperties()['k'],
                 'zb': features[i].getProperties()['zb'],
                 'zt': features[i].getProperties()['zt'],
                 'c': features[i].getProperties()['c'],
                 'n': features[i].getProperties()['n'],
                 'nll': features[i].getProperties()['nll'],
-                'order': features[i].getProperties()['order'],
+                'order': features[i].getProperties()['inhom side order'],
                 'label': features[i].getProperties()['Label']
             });
 
@@ -982,7 +975,7 @@ initialize_timml_layers = function(){
     res_line_sink_layer = ["Label","head","res","width","layers","bottomelev"];
     line_doublet_imp_layer = ["Label","order","layers"];
     line_sink_ditch_layer = ["Label","Q","res","width","layers"];
-    polygon_inhom_layer = ["Label","Naquifers","k","zb","zt","c","n","nll","inhom side order"];
+    polygon_inhom_layer = ["Label","k","zb","zt","c","n","nll","inhom side order"];
 
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]

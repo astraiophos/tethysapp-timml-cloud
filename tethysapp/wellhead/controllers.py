@@ -81,6 +81,7 @@ def timml(request):
     reslinesinks_info = json.loads(get_data['res_line_sink'])
     linedoubletimp_info = json.loads(get_data['line_doublet_imp'])
     linesinkditch_info = json.loads(get_data['line_sink_ditch'])
+    polygoninhom_info = json.loads(get_data['polygon_inhom'])
 
     #   Get map size and calculate cell size
     map_window = json.loads(get_data['map_corners'])
@@ -168,22 +169,6 @@ def timml(request):
                  label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
         print "Finished head_linesinks"
 
-    # if 'head_line_sink_0' in headlinesinks_info:
-    #     for index in range(0,len(headlinesinks_info)):
-    #         if headlinesinks_info['head_line_sink_' + str(index)]['layers']<>"":
-    #             layers_list = [int(i) for i in (headlinesinks_info[str("head_line_sink_" + str(index))]['layers'].split(','))]
-    #         else:
-    #             layers_list = []
-    #         HeadLineSink(ml,
-    #              x1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][0],
-    #              y1=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][0][1],
-    #              x2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][0],
-    #              y2=headlinesinks_info[str("head_line_sink_" + str(index))]['coordinates'][1][1],
-    #              head=float(headlinesinks_info[str("head_line_sink_" + str(index))]['head']),
-    #              layers=layers_list,
-    #              label=headlinesinks_info[str("head_line_sink_" + str(index))]['label'])
-    #     print "Finished head_linesinks"
-
     if 'res_line_sink_0' in reslinesinks_info:
         for index in range(0,len(reslinesinks_info)):
             if reslinesinks_info['res_line_sink_' + str(index)]['layers']<>"":
@@ -226,22 +211,55 @@ def timml(request):
                  label=linedoubletimp_info[str("line_doublet_imp_" + str(index))]['label'])
         print "Finished line_doublet_imp's"
 
-    if 'line_sink_ditch_0' in linedoubletimp_info:
-        for index in range(0,len(linedoubletimp_info)):
+    if 'line_sink_ditch_0' in linesinkditch_info:
+        for index in range(0,len(linesinkditch_info)):
             if linesinkditch_info['line_sink_ditch_' + str(index)]['layers']<>"":
-                layers_list = [int(i) for i in (linedoubletimp_info[str("line_sink_ditch_" +
+                layers_list = [int(i) for i in (linesinkditch_info[str("line_sink_ditch_" +
                                                                         str(index))]['layers'].split(','))]
             else:
                 layers_list = []
-            LineDoubletImp(ml,
-                 x1=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][0][0],
-                 y1=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][0][1],
-                 x2=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][1][0],
-                 y2=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['coordinates'][1][1],
-                 order=int(linedoubletimp_info[str("line_sink_ditch_" + str(index))]['order']),
+            LineSinkDitch(ml,
+                 xylist=linesinkditch_info[str("line_sink_ditch_" + str(index))]['coordinates'],
+                 Q=linesinkditch_info[str("line_sink_ditch_" + str(index))]['Q'],
+                 res=linesinkditch_info[str("line_sink_ditch_" + str(index))]['res'],
+                 width=linesinkditch_info[str("line_sink_ditch_" + str(index))]['width'],
                  layers=layers_list,
-                 label=linedoubletimp_info[str("line_sink_ditch_" + str(index))]['label'])
-        print "Finished line_doublet_imp's"
+                 label=linesinkditch_info[str("line_sink_ditch_" + str(index))]['label'])
+        print "Finished linesink_ditches"
+
+    if 'polygoninhom_0' in polygoninhom_info:
+        for index in range(0,len(polygoninhom_info)):
+            #   Credit to @SilentGhost on stackoverflow for the following code structure
+            k_list = [float(i) for i in ((polygoninhom_info[str("polygoninhom_" + str(index))]['k']).split(','))]
+            zb_list = [float(i) for i in ((polygoninhom_info[str("polygoninhom_" + str(index))]['zb']).split(','))]
+            zt_list = [float(i) for i in ((polygoninhom_info[str("polygoninhom_" + str(index))]['zt']).split(','))]
+            #   Optional Parameters, make empty arrays if not defined by the user
+            if polygoninhom_info[str("polygoninhom_" + str(index))]['n'] <> "":
+                n_list = [float(i) for i in ((polygoninhom_info[str("polygoninhom_" + str(index))]['n']).split(','))]
+            else:
+                n_list = []
+            if polygoninhom_info[str("polygoninhom_" + str(index))]['c'] <> "":
+                c_list = [float(i) for i in ((polygoninhom_info[str("polygoninhom_" + str(index))]['c']).split(','))]
+            else:
+                c_list = []
+            if polygoninhom_info[str("polygoninhom_" + str(index))]['nll'] <> "":
+                nll_list = [float(i) for i in ((polygoninhom_info[str("polygoninhom_" + str(index))]['nll']).split(','))]
+            else:
+                nll_list = []
+            PolygonInhom(ml,
+                 k=k_list,
+                 zb=zb_list,
+                 zt=zt_list,
+                 c=c_list,
+                 xylist=polygoninhom_info[str("polygoninhom_" + str(index))]['coordinates'][0],
+                 n=n_list,
+                 nll=nll_list,
+                         )
+            MakeInhomPolySide(ml,
+                 xylist=polygoninhom_info[str("polygoninhom_" + str(index))]['coordinates'][0],
+                 order=int(polygoninhom_info[str("polygoninhom_" + str(index))]['order']),
+                             )
+        print "Finished polygon_inhom's"
 
     #   Do iterations in the event that elements are used that require it (used as a 'catch-all')
     ml.solve(doIterations=solvetype)
