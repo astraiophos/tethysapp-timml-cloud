@@ -709,6 +709,7 @@ drawing_listener = function(){
     });
 };
 
+//  Save table attributes to features
 save_attributes = function(layerName){
     var map;
     var layer;

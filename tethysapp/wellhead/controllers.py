@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 import json
+import matplotlib.pyplot as plt
 import numpy
 
 from tethys_sdk.gizmos import *
@@ -91,7 +92,7 @@ def timml(request):
     #   If elements are used that require iterative solutions then solvetype will be modified before ml.solve()
     solvetype = False
 
-    #   Massage data inumpyut to be in the right format
+    #   Massage data input to be in the right format
     print "Building model"
 
     #   Credit to @SilentGhost on stackoverflow for the following code structure
@@ -266,9 +267,11 @@ def timml(request):
 
     print "solved!!!"
 
-    contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/9), map_window[1],
-                             map_window[3], numpy.absolute((map_window[1]-map_window[3])/9), levels = 10,
+    contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/3), map_window[1],
+                             map_window[3], numpy.absolute((map_window[1]-map_window[3])/3), levels = 10,
                              newfig = True, returncontours = True)
+
+    #   This next part uses modified equations from TimML to retrieve capturezone tracelines
 
     # Return the contour paths and store them as a list
     contourPaths = []
@@ -361,3 +364,60 @@ def timml(request):
         "capture": "Capture Zone goes here",
         "wells": json.dumps(wells_info),
     })
+
+def j_capturezone( ml, w, N, z, tmax, xsec=False ):
+    xstart = w.xw + 1.01*w.rw * numpy.cos( numpy.arange(0.01,2*numpy.pi,2*numpy.pi/N) )
+    ystart = w.yw + 1.01*w.rw * numpy.sin( numpy.arange(0.01,2*numpy.pi,2*numpy.pi/N) )
+    zstart = z * numpy.ones(len(xstart))
+    ax = plt.gcf().axes[0]
+    x1,x2,y1,y2 = ax.axis()
+    step = (x2 - x1) / 100.0
+    test = j_timtracelines(ml,xstart,ystart,zstart,-step,tmax=tmax,xsec=xsec)
+    return test
+
+
+def j_timtracelines(ml,xlist,ylist,zlist,step,twoD=1,tmax=1e30,Nmax=200,labfrac=2.0,
+                    Hfrac=5.0,window=[-1e30,-1e30,1e30,1e30],overlay=1,color=None,
+                    width=0.5,style='-',xsec=0,layout=True, verbose = True):
+    '''Routine for plotting multiple tracelines using pylab'''
+    # Set colors
+    if type( color ) is str:
+        color = ml.aq.Naquifers * [color]
+    elif type( color ) is list:
+        Ncolor = len(color)
+        if Ncolor < ml.aq.Naquifers:
+            color = color + ml.aq.Naquifers * [ color[0] ]
+    elif color is None:
+        color = ['b','r','g','m','c']
+        if ml.aq.Naquifers > 5:
+            color = int(ceil(ml.aq.Naquifers/5.)) * color
+    # Set figure
+    if not overlay:
+        fig = plt.figure()
+        ax1 = plt.subplot(111)
+    if overlay:
+        fig = plt.gcf()
+        ax1 = fig.axes[0]
+        if xsec:
+            ax2 = fig.axes[1]
+    xmin,xmax = ax1.get_xlim()
+    ymin,ymax = ax1.get_ylim()
+    trace = []
+    for i in range(len(xlist)):
+        x = xlist[i]; y = ylist[i]; z = zlist[i]
+        [xyz,t,stop,pylayers] = traceline(ml,x,y,z,step,tmax,Nmax,labfrac=labfrac,Hfrac=Hfrac,window=window,verbose=verbose)
+        trace.append([xyz,t,stop,pylayers])
+        pylayers = numpy.array(pylayers)
+        if xsec:
+            ax2.plot(xyz[:,0],xyz[:,2],color=[.7,.7,.7])
+        for j in range(pylayers.min(),pylayers.max()+1):
+            ax1.plot( numpy.where(pylayers==j,xyz[:,0],numpy.nan), numpy.where(pylayers==j,xyz[:,1],numpy.nan), color[j])
+            if xsec:
+                ax2.plot( numpy.where(pylayers==j,xyz[:,0],numpy.nan), numpy.where(pylayers==j,xyz[:,2],numpy.nan), color[j])
+    ax1.set_xlim(xmin,xmax)
+    ax1.set_ylim(ymin,ymax)
+    if xsec:
+        ax2.set_ylim(ml.aq.zb[-1],ml.aq.zt[0])
+        ax2.set_xlim(xmin,xmax)
+    plt.draw()
+    return trace
