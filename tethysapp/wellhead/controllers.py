@@ -273,7 +273,7 @@ def timml(request):
 
     #   This next part uses modified equations from TimML to retrieve capturezone tracelines
     if 'well_0' in wells_info:
-        track_lines=[]
+        capture_zone=[]
         for index in range(0,len(wells_info)):
             if wells_info['well_' + str(index)]['Num Particles']<>"":
                 well = ml.elementDict[wells_info['well_' + str(index)]['label']]
@@ -286,14 +286,24 @@ def timml(request):
                                            xsec=False)
 
     if 'tracelines' in locals():
-        for path in range(0,len(tracelines)):
-            track_lines.append({
-                'type':'Feature',
-                'geometry':{
-                    'type':'LineString',
-                    'coordinates':tracelines[path][0]
-                }
-            })
+        print "These are the tracelines"
+        print tracelines
+        capture_info = capture_builder(tracelines)
+        print "This is the capture info"
+        print capture_info
+        for path in range(0,len(capture_info)):
+            for seg in range(1,len(capture_info['path_'+str(path)])+1):
+                capture_zone.append({
+                    'type':'Feature',
+                    'geometry':{
+                        'type':'LineString',
+                        'coordinates':capture_info['path_'+str(path)]['segment_'+str(seg)]['coordinates']
+                    },
+                    'properties':{
+                        'layer':capture_info['path_'+str(path)]['segment_'+str(seg)]['layer']
+                    }
+                })
+        print capture_zone
 
     # Return the contour paths and store them as a list
     contourPaths = []
@@ -383,7 +393,7 @@ def timml(request):
         # "raster": json.dumps(waterTable),
         "contours": json.dumps(Contours),
         "heads": json.dumps(intervals),
-        "capture": track_lines,
+        "capture": capture_zone,
         "wells": json.dumps(wells_info),
     })
 
