@@ -267,11 +267,33 @@ def timml(request):
 
     print "solved!!!"
 
-    contourList = timcontour(ml, map_window[0], map_window[2], numpy.absolute((map_window[0]-map_window[2])/3), map_window[1],
-                             map_window[3], numpy.absolute((map_window[1]-map_window[3])/3), levels = 10,
+    contourList = timcontour(ml, map_window[0], map_window[2], 100, map_window[1],
+                             map_window[3], 100, levels = 10,
                              newfig = True, returncontours = True)
 
     #   This next part uses modified equations from TimML to retrieve capturezone tracelines
+    if 'well_0' in wells_info:
+        track_lines=[]
+        for index in range(0,len(wells_info)):
+            if wells_info['well_' + str(index)]['Num Particles']<>"":
+                well = ml.elementDict[wells_info['well_' + str(index)]['label']]
+                tracelines = j_capturezone(ml,
+                                           w=well,
+                                           N=int(wells_info['well_' + str(index)]['Num Particles']),
+                                           z=float(wells_info['well_' + str(index)]['zStart']),
+                                           tmax=1e30,
+                                           window = map_window,
+                                           xsec=False)
+
+    if 'track_lines' in locals():
+        for path in range(0,len(tracelines)):
+            track_lines.append({
+                'type':'Feature',
+                'geometry':{
+                    'type':'LineString',
+                    'coordinates':tracelines[path][0]
+                }
+            })
 
     # Return the contour paths and store them as a list
     contourPaths = []
@@ -361,25 +383,26 @@ def timml(request):
         # "raster": json.dumps(waterTable),
         "contours": json.dumps(Contours),
         "heads": json.dumps(intervals),
-        "capture": "Capture Zone goes here",
+        "capture": track_lines,
         "wells": json.dumps(wells_info),
     })
 
-def j_capturezone( ml, w, N, z, tmax, xsec=False ):
+def j_capturezone( ml, w, N, z, tmax, window, xsec=False):
     xstart = w.xw + 1.01*w.rw * numpy.cos( numpy.arange(0.01,2*numpy.pi,2*numpy.pi/N) )
     ystart = w.yw + 1.01*w.rw * numpy.sin( numpy.arange(0.01,2*numpy.pi,2*numpy.pi/N) )
     zstart = z * numpy.ones(len(xstart))
     ax = plt.gcf().axes[0]
     x1,x2,y1,y2 = ax.axis()
     step = (x2 - x1) / 100.0
-    test = j_timtracelines(ml,xstart,ystart,zstart,-step,tmax=tmax,xsec=xsec)
-    return test
+    traces = j_timtracelines(ml,xstart,ystart,zstart,-step,window=window,tmax=tmax,xsec=xsec)
+    return traces
 
 
 def j_timtracelines(ml,xlist,ylist,zlist,step,twoD=1,tmax=1e30,Nmax=200,labfrac=2.0,
                     Hfrac=5.0,window=[-1e30,-1e30,1e30,1e30],overlay=1,color=None,
                     width=0.5,style='-',xsec=0,layout=True, verbose = True):
     '''Routine for plotting multiple tracelines using pylab'''
+    from timml.mltrace import *
     # Set colors
     if type( color ) is str:
         color = ml.aq.Naquifers * [color]
