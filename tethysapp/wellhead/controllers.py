@@ -285,7 +285,7 @@ def timml(request):
                                            window = map_window,
                                            xsec=False)
 
-    if 'track_lines' in locals():
+    if 'tracelines' in locals():
         for path in range(0,len(tracelines)):
             track_lines.append({
                 'type':'Feature',
@@ -444,3 +444,26 @@ def j_timtracelines(ml,xlist,ylist,zlist,step,twoD=1,tmax=1e30,Nmax=200,labfrac=
         ax2.set_xlim(xmin,xmax)
     plt.draw()
     return trace
+
+
+def capture_builder(tracelines):
+    capture_info = {}
+    for particle in range(0,len(tracelines)):
+        seg = 1
+        capture_info['path_'+str(particle)]={}
+        capture_info['path_'+str(particle)]['segment_'+str(seg)]={}
+        capture_info['path_'+str(particle)]['segment_'+str(seg)]['coordinates']=[]
+        capture_info['path_'+str(particle)]['segment_'+str(seg)]['layer'] = tracelines[particle][3][0]
+        for i in range(0,len(tracelines[particle][0])):
+            check=tracelines[particle][3][i]
+            if check <> capture_info['path_'+str(particle)]['segment_'+str(seg)]['layer']:
+                seg+=1
+                capture_info['path_'+str(particle)]['segment_'+str(seg)]={}
+                capture_info['path_'+str(particle)]['segment_'+str(seg)]['coordinates']=[]
+                capture_info['path_'+str(particle)]['segment_'+str(seg)]['layer'] = check
+
+            capture_info['path_' + str(particle)]['segment_'+str(seg)]['coordinates'].append([
+                tracelines[particle][0][i][0],
+                [tracelines[particle][0][i][1]]
+            ])
+    return capture_info
