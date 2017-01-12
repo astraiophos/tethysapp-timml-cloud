@@ -286,11 +286,7 @@ def timml(request):
                                            xsec=False)
 
     if 'tracelines' in locals():
-        print "These are the tracelines"
-        print tracelines
         capture_info = capture_builder(tracelines)
-        print "This is the capture info"
-        print capture_info
         for path in range(0,len(capture_info)):
             for seg in range(1,len(capture_info['path_'+str(path)])+1):
                 capture_zone.append({
@@ -303,6 +299,7 @@ def timml(request):
                         'layer':capture_info['path_'+str(path)]['segment_'+str(seg)]['layer']
                     }
                 })
+        print "This is the capture_zone info:"
         print capture_zone
 
     # Return the contour paths and store them as a list
