@@ -347,7 +347,7 @@ timml_solution = function(){
 					window.sessionStorage['levels'] = data.heads;
 
 					Contours = (JSON.parse(data.contours));
-//					console.log(Contours);
+					paths = JSON.parse(data.capture);
 
 					var contourLines = {
 						'type': 'FeatureCollection',
@@ -360,8 +360,20 @@ timml_solution = function(){
 						'features': Contours
 					}
 
+                    var pathLines = {
+                        'type': 'FeatureCollection',
+                        'crs': {
+                            'type':'name',
+                            'properties':{
+                                'name':'EPSG:4326'
+                            }
+                        },
+                        'features':paths
+                    }
+
 //					addWaterTable(raster_elev_mapView,"Water Table");
 					addContours(contourLines,levels,"Elevation Contours");
+					addPaths(pathLines,[0,1,2,3,4,5,6,7,8,9],"Capture Zone(s)")
                     document.removeEventListener("click",handler,true);
                     $('#loading').addClass("hidden");
 					}
@@ -428,6 +440,122 @@ function addContours(contourLines,levels,titleName){
             }
     //at this point, the style for the current level is in the cache so return it as an array
         return [styleCacheHead[elevation]];
+    }
+
+    //	Reads in the contour lines as GeoJSON objects and creates an openlayers vector object
+    var collection = contourLines;
+    var format = new ol.format.GeoJSON();
+    var vectorSource = new ol.source.Vector({
+        features: format.readFeatures(collection,
+        {featureProjection:"EPSG:4326"})
+        });
+
+	var vector = new ol.layer.Image({
+		zIndex: 4,
+		source: new ol.source.ImageVector({
+			source: vectorSource,
+			style: styleFunction,
+		}),
+	});
+
+//	console.log(vector);
+
+	//	Deletes the existing layer containing any old contourlines
+    map = TETHYS_MAP_VIEW.getMap();
+    for (i = 0; i < map.getLayers().getProperties().length ; i ++){
+        if (map.getLayers().item(i).tethys_legend_title === titleName)
+            map.removeLayer(map.getLayers().item(i));
+    }
+
+    vector.tethys_legend_title = titleName;
+    vector.tethys_editable = false;
+    map.addLayer(vector);
+
+//    TETHYS_MAP_VIEW.updateLegend();
+
+//    $('a.display-control').on("click", function(){
+//        $(function() {
+//            var map = TETHYS_MAP_VIEW.getMap();
+//            if (!!map.getLayers().item(2)){
+//                toggle_legend(map.getLayers().item(2).getProperties().visible,1);
+//            };
+//            if (!!map.getLayers().item(3)){
+//                toggle_legend(map.getLayers().item(3).getProperties().visible,2);
+//            }
+//			if (!!map.getLayers().item(4)){
+//                toggle_legend(map.getLayers().item(4).getProperties().visible,3);
+//            }
+//        })
+//    });
+
+//	toggle_legend(true,3,levels);
+//	document.getElementById('loading').style.display = "none";
+
+};
+
+function addPaths(pathLines,layers,titleName){
+    var getStyleColor;
+    var map;
+    var i;
+
+    getStyleColor = function(value) {
+        if (value == layers[0])
+            return [0,0,0,1];			//	Black
+        else if (value == layers[1])
+            return [170,1,20, 1];		//	Red
+        else if (value == layers[2])
+            return [196,100,0,1];		//	Orange
+        else if (value == layers[3])
+            return [255,165,0,1];		//	Light Orange, Hex:ffa500
+        else if (value == layers[4])
+            return [255,255,0,1];		//	Yellow, Hex:FFFF00
+        else if (value == layers[5])
+            return [0,255,0,1];			//	Green
+        else if (value == layers[6])
+            return [0,218,157,1];		//	Turqoise(ish), Hex:00DA9D
+        else if (value == layers[7])
+            return [0,158,223,1];		//	Lighter Blue, Hex:009EDF
+        else if (value == layers[8])
+            return [1,107,231,1];		//	Light Blue, Hex:016BE7
+		else
+			return [0,32,229,1];		//	Blue, Hex:0020E5
+    };
+
+	//	Default style
+	var defaultStyle = new ol.style.Style({
+		stroke: new ol.style.Stroke({
+			color: [0,0,0,1],
+			width: 2
+			})
+	});
+
+    //This will be used to cache the style
+    var styleCacheHead = {};
+
+    function styleFunction(feature, resolution){
+        //get the element ID, label, end_element, end_state, and layer from the feature properties
+        var elem_id = feature.get('elem_ID');
+        var elem_label = feature.get('elem_label');
+        var elem_end = feature.get('end_element');
+        var elem_state = feature.get('end_state');
+        var elem_layer = feature.get('layer');
+        //if there is no elevation value or it's one we don't recognize,
+        //return the default style
+        if(!elem_layer) {
+            return [defaultStyle];
+            }
+        //check the cache and create a new style for the elevation if it's not been created before.
+        if(!styleCacheHead[elem_layer]){
+            var style_color = getStyleColor(elem_layer);
+            styleCacheHead[elem_layer] = new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                	color:style_color,
+                	width:2
+                	}),
+                });
+            }
+    //at this point, the style for the current level is in the cache so return it as an array
+        return [styleCacheHead[elem_layer]];
     }
 
     //	Reads in the contour lines as GeoJSON objects and creates an openlayers vector object

@@ -301,14 +301,12 @@ def timml(request):
                         'properties':{
                             'layer':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['layer'],
                             'elem_ID':str("well_"+str(well)),
-                            'elem_Label':wells_info['well_'+str(well)]['label'],
+                            'elem_label':wells_info['well_'+str(well)]['label'],
                             'total_time':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['total_time'],
                             'end_state':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_state'],
                             'end_element':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_element']
                         }
                     })
-        print "This is the capture_zone info:"
-        print capture_zone
 
     # Return the contour paths and store them as a list
     contourPaths = []
