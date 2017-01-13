@@ -274,31 +274,39 @@ def timml(request):
     #   This next part uses modified equations from TimML to retrieve capturezone tracelines
     if 'well_0' in wells_info:
         capture_zone=[]
+        tracelines = []
         for index in range(0,len(wells_info)):
             if wells_info['well_' + str(index)]['Num Particles']<>"":
                 well = ml.elementDict[wells_info['well_' + str(index)]['label']]
-                tracelines = j_capturezone(ml,
+                tracelines.append(j_capturezone(ml,
                                            w=well,
                                            N=int(wells_info['well_' + str(index)]['Num Particles']),
                                            z=float(wells_info['well_' + str(index)]['zStart']),
                                            tmax=1e30,
                                            window = map_window,
                                            xsec=False)
+                                  )
 
     if 'tracelines' in locals():
         capture_info = capture_builder(tracelines)
-        for path in range(0,len(capture_info)):
-            for seg in range(1,len(capture_info['path_'+str(path)])+1):
-                capture_zone.append({
-                    'type':'Feature',
-                    'geometry':{
-                        'type':'LineString',
-                        'coordinates':capture_info['path_'+str(path)]['segment_'+str(seg)]['coordinates']
-                    },
-                    'properties':{
-                        'layer':capture_info['path_'+str(path)]['segment_'+str(seg)]['layer']
-                    }
-                })
+        for well in range(0,len(capture_info)):
+            for path in range(0,len(capture_info['well_'+str(well)])):
+                for seg in range(1,len(capture_info['well_'+str(well)]['path_'+str(path)])+1):
+                    capture_zone.append({
+                        'type':'Feature',
+                        'geometry':{
+                            'type':'LineString',
+                            'coordinates':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['coordinates']
+                        },
+                        'properties':{
+                            'layer':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['layer'],
+                            'elem_ID':str("well_"+str(well)),
+                            'elem_Label':wells_info['well_'+str(well)]['label'],
+                            'total_time':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['total_time'],
+                            'end_state':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_state'],
+                            'end_element':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_element']
+                        }
+                    })
         print "This is the capture_zone info:"
         print capture_zone
 
@@ -455,22 +463,27 @@ def j_timtracelines(ml,xlist,ylist,zlist,step,twoD=1,tmax=1e30,Nmax=200,labfrac=
 
 def capture_builder(tracelines):
     capture_info = {}
-    for particle in range(0,len(tracelines)):
-        seg = 1
-        capture_info['path_'+str(particle)]={}
-        capture_info['path_'+str(particle)]['segment_'+str(seg)]={}
-        capture_info['path_'+str(particle)]['segment_'+str(seg)]['coordinates']=[]
-        capture_info['path_'+str(particle)]['segment_'+str(seg)]['layer'] = tracelines[particle][3][0]
-        for i in range(0,len(tracelines[particle][0])):
-            check=tracelines[particle][3][i]
-            if check <> capture_info['path_'+str(particle)]['segment_'+str(seg)]['layer']:
-                seg+=1
-                capture_info['path_'+str(particle)]['segment_'+str(seg)]={}
-                capture_info['path_'+str(particle)]['segment_'+str(seg)]['coordinates']=[]
-                capture_info['path_'+str(particle)]['segment_'+str(seg)]['layer'] = check
+    for index in range(0,len(tracelines)):
+        capture_info['well_' + str(index)] = {}
+        for particle in range(0,len(tracelines[index])):
+            seg = 1
+            capture_info['well_' + str(index)]['path_'+str(particle)]={}
+            capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]={}
+            capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['coordinates']=[]
+            capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['layer'] = tracelines[index][particle][3][0]
+            capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['end_state'] = tracelines[index][particle][2][0]
+            capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['end_element'] = tracelines[index][particle][2][1]
+            capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['total_time'] = tracelines[index][particle][1][-1]
+            for i in range(0,len(tracelines[index][particle][0])):
+                check=tracelines[index][particle][3][i]
+                if check <> capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['layer']:
+                    seg+=1
+                    capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]={}
+                    capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['coordinates']=[]
+                    capture_info['well_' + str(index)]['path_'+str(particle)]['segment_'+str(seg)]['layer'] = check
 
-            capture_info['path_' + str(particle)]['segment_'+str(seg)]['coordinates'].append([
-                tracelines[particle][0][i][0],
-                [tracelines[particle][0][i][1]]
-            ])
+                capture_info['well_' + str(index)]['path_' + str(particle)]['segment_'+str(seg)]['coordinates'].append([
+                    tracelines[index][particle][0][i][0],   # X-Coordinate
+                    tracelines[index][particle][0][i][1]    # Y-Coordinate
+                ])
     return capture_info

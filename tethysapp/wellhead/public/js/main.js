@@ -320,7 +320,7 @@ timml_solution = function(){
             "map_corners":JSON.stringify(map_window),
 			},
 			success: function (data){
-//					console.log(data);
+					console.log(data);
 //					console.log("Here's what's passed back: ");
 //					console.log(JSON.parse(data.wells));
 					if (data.error){
