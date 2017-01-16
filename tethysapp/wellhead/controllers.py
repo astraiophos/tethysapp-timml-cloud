@@ -70,22 +70,22 @@ def timml(request):
         return JsonResponse({"error":str(e),
                              "message":"Check with administrator, timml library is not loading properly"})
 
-    get_data = request.GET
+    post_data = request.POST
 
     #   Collect the model information
-    model_info = json.loads(get_data['model'])
-    constant_info = json.loads(get_data['constant'])
-    uflow_info = json.loads(get_data['uflow'])
-    wells_info = json.loads(get_data['wells'])
-    linesinks_info = json.loads(get_data['line_sink'])
-    headlinesinks_info = json.loads(get_data['head_line_sink'])
-    reslinesinks_info = json.loads(get_data['res_line_sink'])
-    linedoubletimp_info = json.loads(get_data['line_doublet_imp'])
-    linesinkditch_info = json.loads(get_data['line_sink_ditch'])
-    polygoninhom_info = json.loads(get_data['polygon_inhom'])
+    model_info = json.loads(post_data['model'])
+    constant_info = json.loads(post_data['constant'])
+    uflow_info = json.loads(post_data['uflow'])
+    wells_info = json.loads(post_data['wells'])
+    linesinks_info = json.loads(post_data['line_sink'])
+    headlinesinks_info = json.loads(post_data['head_line_sink'])
+    reslinesinks_info = json.loads(post_data['res_line_sink'])
+    linedoubletimp_info = json.loads(post_data['line_doublet_imp'])
+    linesinkditch_info = json.loads(post_data['line_sink_ditch'])
+    polygoninhom_info = json.loads(post_data['polygon_inhom'])
 
     #   Get map size and calculate cell size
-    map_window = json.loads(get_data['map_corners'])
+    map_window = json.loads(post_data['map_corners'])
     cell_side = (map_window[2]-map_window[0])/20
 
     #   Set the solver to default to regular solves (not iterative solutions)
@@ -292,21 +292,24 @@ def timml(request):
         for well in range(0,len(capture_info)):
             for path in range(0,len(capture_info['well_'+str(well)])):
                 for seg in range(1,len(capture_info['well_'+str(well)]['path_'+str(path)])+1):
-                    capture_zone.append({
-                        'type':'Feature',
-                        'geometry':{
-                            'type':'LineString',
-                            'coordinates':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['coordinates']
-                        },
-                        'properties':{
-                            'layer':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['layer'],
-                            'elem_ID':str("well_"+str(well)),
-                            'elem_label':wells_info['well_'+str(well)]['label'],
-                            'total_time':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['total_time'],
-                            'end_state':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_state'],
-                            'end_element':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_element']
-                        }
-                    })
+                    try:
+                        capture_zone.append({
+                            'type':'Feature',
+                            'geometry':{
+                                'type':'LineString',
+                                'coordinates':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['coordinates']
+                            },
+                            'properties':{
+                                'layer':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['layer'],
+                                'elem_ID':str("well_"+str(well)),
+                                'elem_label':wells_info['well_'+str(well)]['label'],
+                                'total_time':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['total_time'],
+                                'end_state':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_state'],
+                                'end_element':capture_info['well_'+str(well)]['path_'+str(path)]['segment_'+str(seg)]['end_element']
+                            }
+                        })
+                    except Exception,e:
+                        print str(e)
 
     # Return the contour paths and store them as a list
     contourPaths = []

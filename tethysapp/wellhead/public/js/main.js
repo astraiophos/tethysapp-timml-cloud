@@ -18,6 +18,8 @@ var build_table;
 var addRow;
 var deleteRow;
 var timml_solution;
+var checkCsrfSafe;
+var getCookie;
 
 /*****************************************************************************
  *                             Variables
@@ -299,25 +301,36 @@ timml_solution = function(){
     }
     $('#loading').removeClass("hidden");
 
-    document.addEventListener("click",handler,true);
+    //  Preload variables as JSON strings to prevent ajax call sending prematurely without finishing data compilation
+    var model = JSON.stringify(model_);
+    var constant=JSON.stringify(constant_);
+    var uflow=JSON.stringify(uflow_);
+    var wells=JSON.stringify(wells_);
+    var line_sink=JSON.stringify(linesink_);
+    var head_line_sink=(JSON.stringify(headlinesink_));
+    var res_line_sink=JSON.stringify(reslinesink_);
+    var line_doublet_imp=JSON.stringify(linedoubletimp_);
+    var line_sink_ditch=JSON.stringify(linesinkditch_);
+    var polygon_inhom=JSON.stringify(polygoninhom_);
+    var map_corners=JSON.stringify(map_window);
 
     $.ajax({
-		type: 'GET',
-		url: 'timml',
+		type: 'POST',
+		url: '/apps/wellhead/timml/',
 		dataType: 'json',
 		data: {
-            "model":JSON.stringify(model_),
-            "constant":JSON.stringify(constant_),
-            "uflow":JSON.stringify(uflow_),
-            "wells":JSON.stringify(wells_),
-            "line_sink":JSON.stringify(linesink_),
-            "head_line_sink":JSON.stringify(headlinesink_),
-            "res_line_sink":JSON.stringify(reslinesink_),
-            "line_doublet_imp":JSON.stringify(linedoubletimp_),
-            "line_sink_ditch":JSON.stringify(linesinkditch_),
-            "polygon_inhom":JSON.stringify(polygoninhom_),
+            "model":model,
+            "constant":constant,
+            "uflow":uflow,
+            "wells":wells,
+            "line_sink":line_sink,
+            "head_line_sink":head_line_sink,
+            "res_line_sink":res_line_sink,
+            "line_doublet_imp":line_doublet_imp,
+            "line_sink_ditch":line_sink_ditch,
+            "polygon_inhom":polygon_inhom,
             //  Map Information
-            "map_corners":JSON.stringify(map_window),
+            "map_corners":map_corners,
 			},
 			success: function (data){
 					console.log(data);
@@ -347,7 +360,7 @@ timml_solution = function(){
 					window.sessionStorage['levels'] = data.heads;
 
 					Contours = (JSON.parse(data.contours));
-					paths = JSON.parse(data.capture);
+					paths = data.capture;
 
 					var contourLines = {
 						'type': 'FeatureCollection',
@@ -559,7 +572,7 @@ function addPaths(pathLines,layers,titleName){
     }
 
     //	Reads in the contour lines as GeoJSON objects and creates an openlayers vector object
-    var collection = contourLines;
+    var collection = pathLines;
     var format = new ol.format.GeoJSON();
     var vectorSource = new ol.source.Vector({
         features: format.readFeatures(collection,
@@ -664,7 +677,7 @@ drawing_listener = function(){
                 return;
             }
 
-            //  Use if/else statments to specify which attributes to add to the feature
+            //  Use if/else statements to specify which attributes to add to the feature
             if (layerName === 'Constant and Model'){
                 for (i=0;i<model_constant_layer.length;i++){
                     feature.set(model_constant_layer[i],"");
@@ -1211,6 +1224,48 @@ initialize_timml_layers = function(){
 
 
 };
+/*****************************************************************************
+ *                       Ajax Utility Functions
+ *****************************************************************************/
+
+//  Thanks to @shawncrawley for this code which I copied from his hydroshare_gis app
+//  <https://github.com/hydroshare/tethysapp-hydroshare_gis>
+
+// Find if method is CSRF safe
+checkCsrfSafe = function (method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+};
+
+getCookie = function (name) {
+    var cookie;
+    var cookies;
+    var cookieValue = null;
+    var i;
+
+    if (document.cookie && document.cookie !== '') {
+        cookies = document.cookie.split(';');
+        for (i = 0; i < cookies.length; i += 1) {
+            cookie = $.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+};
+
+// Add CSRF token to appropriate ajax requests
+$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+        if (!checkCsrfSafe(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+        }
+    }
+});
+
 /*****************************************************************************
  *                       Add Select Interactions to Map
  *****************************************************************************/
