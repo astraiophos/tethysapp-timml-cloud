@@ -19,6 +19,7 @@ var createLayerListItem;
 var addListenersToListItem;
 var editLayerDisplayName;
 var closeLyrEdtInpt;
+var add_new_layer;
 
 var initializeLayersContextMenus;
 var initializeJqueryVariables;
@@ -1126,5 +1127,6 @@ TETHYS_TOC =    {   projectInfo: projectInfo,
                     exit_edit_mode: exit_edit_mode,
                     onClickEditLayer: onClickEditLayer,
                     onClickSaveEdits: onClickSaveEdits,
-                    onClickShowAttrTable: onClickShowAttrTable
+                    onClickShowAttrTable: onClickShowAttrTable,
+                    add_new_layer:add_new_layer
                 }
