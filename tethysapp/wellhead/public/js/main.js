@@ -70,6 +70,12 @@ timml_solution = function(){
     map = TETHYS_MAP_VIEW.getMap();
     map_window = map.getView().calculateExtent(map.getSize());
 
+    //  Make sure that the user is not in edit mode before trying to solve the model, return if true
+    if (projectInfo['editMode'] === true){
+        error_message("You are in edit mode, save/discard your changes before trying to solve the model");
+        return;
+    }
+
     // ***   Model information   *** //
     layer = map.getLayers().item(9);
     features = layer.getSource().getFeatures();

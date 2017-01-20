@@ -112,7 +112,7 @@ addMenus_and_ListenersToInitialLayers = function()
 };
 
 projectInfo = {
-    'resId': null,
+    'editMode': false,
     'map': {
         'baseMap': 'None',
         'layers': {},
@@ -495,7 +495,7 @@ onClickEditLayer = function(e){
     layer = map.getLayers().item(mapIndex);
 
     //  Make sure that the layer being edited is actually editable
-    if (layer.tethys_editable === false){
+    if (projectInfo['editMode'] === true){
         error_message("This layer is locked and cannot be edited," +
             " make sure that you aren't already editing another layer." +
             " Otherwise, contact the administrator.");
@@ -644,7 +644,7 @@ onClickSaveEdits = function(){
     };
 
     //  Make sure that edit mode is turned on
-    if (layer.tethys_editable === false){
+    if (projectInfo['editMode'] === false){
         error_message("You are not in edit mode.");
         return;
     }
@@ -806,7 +806,7 @@ onClickCancelEdits = function(){
     };
 
     //  Make sure that edit mode is turned on
-    if (layer.tethys_editable === false){
+    if (projectInfo['editMode'] === false){
         error_message("You are not in edit mode.");
         return;
     }
@@ -978,6 +978,8 @@ onClickShowAttrTable = function(e){
  *****************************************************************************/
 
 enter_edit_mode = function(layerType,attrTableId){
+    //  Change projectInfo to reflect that the edit mode is active
+    projectInfo['editMode'] = true;
     //  Show the Draw/Edit tools in the Map View Gizmo
     //  If the layer in question is a point layer, only turn on pertinent tools
     if (layerType === "point"){
@@ -1050,6 +1052,8 @@ enter_edit_mode = function(layerType,attrTableId){
 };
 
 exit_edit_mode = function(attrTableId){
+    //  Change projectInfo to reflect that the edit mode is inactive
+    projectInfo['editMode'] = false;
     //  Hide all of the Draw/Edit tools in the Map View Gizmo
     try{
         $('#tethys_modify').addClass('hidden')}
