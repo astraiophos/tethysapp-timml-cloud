@@ -1,0 +1,42 @@
+{% extends "wellhead/base.html" %}
+
+{% load tethys_gizmos %}
+
+{% load staticfiles %}
+
+{% block app_navigation_items %}
+  {% csrf_token %}
+  <b>Table of Contents</b>
+  <div id="toc-layers">
+    <ul id="toc-layers-list" class="ui-sortable"></ul>
+  </div>
+  <a id="solve" class="btn btn-success" onclick="timml_solution();">Solve</a>
+
+  <div id="loading" class="load">
+      <img id="loading-image" class=""
+      src="{% static 'wellhead/images/ajax-loader-transparent.gif' %}"
+      alt="Loading..."/>
+  </div>
+
+<!--<button type="button" class="btn btn-primary" onclick="onClickSaveEdits();">Edit Selected Layer</button>-->
+{% endblock %}
+
+{% block app_content %}
+
+  {{ block.super }}
+
+  {% gizmo map_view map_view_options %}
+
+  <!--Add Attribute Table here, to be appended to golden layout window after html render-->
+  <table class="table table-hover table-striped" id="attr-table">
+    <tbody><tr><td class="hidden" align="center">No Features on Selected Layer</td></tr></tbody>
+  </table>
+  <!--{% gizmo table_view table_view_edit %}-->
+
+{% endblock %}
+
+{% block app_actions %}
+  <a id="editCancel" class="btn btn-default hidden" onclick="onClickCancelEdits();">Cancel</a>
+  <a id="editSave" class="btn btn-default hidden" onclick="onClickSaveEdits();">Save</a>
+
+{% endblock %}

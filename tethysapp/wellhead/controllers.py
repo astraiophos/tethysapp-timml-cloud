@@ -9,6 +9,9 @@ from tethys_sdk.gizmos import *
 
 @login_required()
 def home(request):
+    context = {}
+    return render(request, 'wellhead/map.html',context)
+def map(request):
     """
     Controller for the app home page.
     """
