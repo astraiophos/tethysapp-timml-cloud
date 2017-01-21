@@ -88,7 +88,14 @@ add_new_layer = function(mapIndex){
     map = TETHYS_MAP_VIEW.getMap();
     layer = map.getLayers().item(mapIndex);
 
-    createLayerListItem(layer,mapIndex);
+    createLayerListItem(layer,mapIndex,'prepend');
+
+    initializeJqueryVariables();
+    var $list = $tocLayersList;
+    var $listItem;
+    $listItem = $tocLayersList.find('li:first-child');
+    addListenersToListItem($listItem);
+    addContextMenuToListItem($listItem,'GeographicFeatureResource');
 
 };
 

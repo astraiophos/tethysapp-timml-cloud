@@ -477,8 +477,6 @@ function addContours(contourLines,levels,titleName){
 		}),
 	});
 
-//	console.log(vector);
-
 	//	Deletes the existing layer containing any old contourlines
     map = TETHYS_MAP_VIEW.getMap();
     for (i = 0; i < map.getLayers().getProperties().length ; i ++){
@@ -490,25 +488,13 @@ function addContours(contourLines,levels,titleName){
     vector.tethys_editable = false;
     map.addLayer(vector);
 
-//    TETHYS_MAP_VIEW.updateLegend();
-
-//    $('a.display-control').on("click", function(){
-//        $(function() {
-//            var map = TETHYS_MAP_VIEW.getMap();
-//            if (!!map.getLayers().item(2)){
-//                toggle_legend(map.getLayers().item(2).getProperties().visible,1);
-//            };
-//            if (!!map.getLayers().item(3)){
-//                toggle_legend(map.getLayers().item(3).getProperties().visible,2);
-//            }
-//			if (!!map.getLayers().item(4)){
-//                toggle_legend(map.getLayers().item(4).getProperties().visible,3);
-//            }
-//        })
-//    });
-
-//	toggle_legend(true,3,levels);
-//	document.getElementById('loading').style.display = "none";
+    //  Find the mapIndex of the layer just added, to be passed to TOC_gizmo for making a new list item
+    for (i=0;i<map.getLayers().getArray().length;i++){
+        if (map.getLayers().item(i).tethys_legend_title === titleName){
+            add_new_layer(i);
+        }
+        else{}
+    };
 
 };
 
@@ -606,25 +592,13 @@ function addPaths(pathLines,layers,titleName){
     vector.tethys_editable = false;
     map.addLayer(vector);
 
-//    TETHYS_MAP_VIEW.updateLegend();
-
-//    $('a.display-control').on("click", function(){
-//        $(function() {
-//            var map = TETHYS_MAP_VIEW.getMap();
-//            if (!!map.getLayers().item(2)){
-//                toggle_legend(map.getLayers().item(2).getProperties().visible,1);
-//            };
-//            if (!!map.getLayers().item(3)){
-//                toggle_legend(map.getLayers().item(3).getProperties().visible,2);
-//            }
-//			if (!!map.getLayers().item(4)){
-//                toggle_legend(map.getLayers().item(4).getProperties().visible,3);
-//            }
-//        })
-//    });
-
-//	toggle_legend(true,3,levels);
-//	document.getElementById('loading').style.display = "none";
+    //  Find the mapIndex of the layer just added, to be passed to TOC_gizmo for making a new list item
+    for (i=0;i<map.getLayers().getArray().length;i++){
+        if (map.getLayers().item(i).tethys_legend_title === titleName){
+            add_new_layer(i);
+        }
+        else{}
+    };
 
 };
 
