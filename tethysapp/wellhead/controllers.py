@@ -10,7 +10,7 @@ from tethys_sdk.gizmos import *
 @login_required()
 def home(request):
     context = {}
-    return render(request, 'wellhead/map.html',context)
+    return render(request, 'wellhead/home.html',context)
 def map(request):
     """
     Controller for the app home page.
@@ -29,7 +29,7 @@ def map(request):
         controls=['Delete', 'Move', 'Point', 'Box','Polygon','LineString', 'Modify'],
         initial='Point',
         output_format='WKT',
-        line_color='#663399'
+        # line_color='#663399'
     )
 
     # Define map view options
@@ -62,7 +62,7 @@ def map(request):
     context = {'map_view_options': map_view_options,
                'table_view_edit': table_view_edit}
 
-    return render(request, 'wellhead/home.html', context)
+    return render(request, 'wellhead/map.html', context)
 
 def timml(request):
     #   Make sure that the module loads properly

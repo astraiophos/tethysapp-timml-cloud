@@ -6,6 +6,13 @@
 
 {% block app_navigation_items %}
   {% csrf_token %}
+  <div align="center" width="100%" class="btn-group">
+      <button id="modelOpen" class="btn btn-primary" type="button" name="manage_models" onclick="open_model();">Open</button>
+      <button id="modelSave" class="btn btn-primary" type="button" name="manage_models" onclick="save_model();">Save</button>
+  </div>
+
+  <p><br /><br /></p>
+
   <b>Table of Contents</b>
   <div id="toc-layers">
     <ul id="toc-layers-list" class="ui-sortable"></ul>
