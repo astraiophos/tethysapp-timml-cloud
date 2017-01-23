@@ -403,7 +403,6 @@ def timml(request):
         "contours": json.dumps(Contours),
         "heads": json.dumps(intervals),
         "capture": capture_zone,
-        "wells": json.dumps(wells_info),
     })
 
 def j_capturezone( ml, w, N, z, tmax, window, xsec=False):
