@@ -392,7 +392,7 @@ timml_solution = function(){
 
 //					addWaterTable(raster_elev_mapView,"Water Table");
 					addContours(contourLines,levels,"Elevation Contours");
-					addPaths(pathLines,[0,1,2,3,4,5,6,7,8,9],"Capture Zone(s)")
+					addPaths(pathLines,[0,1,2,3,4,5,6,7,8,9],"Path Line(s)")
                     document.removeEventListener("click",handler,true);
                     $('#loading').addClass("hidden");
 					}
@@ -469,20 +469,20 @@ function addContours(contourLines,levels,titleName){
         {featureProjection:"EPSG:4326"})
         });
 
-	var vector = new ol.layer.Image({
+	var vector = new ol.layer.Vector({
 		zIndex: 4,
-		source: new ol.source.ImageVector({
-			source: vectorSource,
-			style: styleFunction,
-		}),
+		source: vectorSource,
+		style: styleFunction,
 	});
 
 	//	Deletes the existing layer containing any old contourlines
     map = TETHYS_MAP_VIEW.getMap();
     for (i = 0; i < map.getLayers().getProperties().length ; i ++){
-        if (map.getLayers().item(i).tethys_legend_title === titleName)
+        if (map.getLayers().item(i).tethys_legend_title === titleName){
+            delete_layer(i);
             map.removeLayer(map.getLayers().item(i));
-    }
+        }
+    };
 
     vector.tethys_legend_title = titleName;
     vector.tethys_editable = false;
@@ -491,7 +491,7 @@ function addContours(contourLines,levels,titleName){
     //  Find the mapIndex of the layer just added, to be passed to TOC_gizmo for making a new list item
     for (i=0;i<map.getLayers().getArray().length;i++){
         if (map.getLayers().item(i).tethys_legend_title === titleName){
-            add_new_layer(i);
+            add_layer(i);
         }
         else{}
     };
@@ -563,7 +563,7 @@ function addPaths(pathLines,layers,titleName){
         return [styleCacheHead[elem_layer]];
     }
 
-    //	Reads in the contour lines as GeoJSON objects and creates an openlayers vector object
+    //	Reads in the path lines as GeoJSON objects and creates an openlayers vector object
     var collection = pathLines;
     var format = new ol.format.GeoJSON();
     var vectorSource = new ol.source.Vector({
@@ -571,12 +571,10 @@ function addPaths(pathLines,layers,titleName){
         {featureProjection:"EPSG:4326"})
         });
 
-	var vector = new ol.layer.Image({
+	var vector = new ol.layer.Vector({
 		zIndex: 4,
-		source: new ol.source.ImageVector({
-			source: vectorSource,
-			style: styleFunction,
-		}),
+		source: vectorSource,
+		style: styleFunction,
 	});
 
 //	console.log(vector);
@@ -584,9 +582,11 @@ function addPaths(pathLines,layers,titleName){
 	//	Deletes the existing layer containing any old contourlines
     map = TETHYS_MAP_VIEW.getMap();
     for (i = 0; i < map.getLayers().getProperties().length ; i ++){
-        if (map.getLayers().item(i).tethys_legend_title === titleName)
+        if (map.getLayers().item(i).tethys_legend_title === titleName){
+            delete_layer(i);
             map.removeLayer(map.getLayers().item(i));
-    }
+        }
+    };
 
     vector.tethys_legend_title = titleName;
     vector.tethys_editable = false;
@@ -595,7 +595,7 @@ function addPaths(pathLines,layers,titleName){
     //  Find the mapIndex of the layer just added, to be passed to TOC_gizmo for making a new list item
     for (i=0;i<map.getLayers().getArray().length;i++){
         if (map.getLayers().item(i).tethys_legend_title === titleName){
-            add_new_layer(i);
+            add_layer(i);
         }
         else{}
     };
@@ -913,6 +913,8 @@ build_table = function(layerName,features,editable){
     var feature;
     var id;
     var featureCount;
+
+    console.log("test");
 
     //  Save the attributes before anything else if the table has been edited and needs to be saved
     if ($('#attr-table.edit')[0] != undefined){

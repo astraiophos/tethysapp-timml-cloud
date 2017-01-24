@@ -19,7 +19,8 @@ var createLayerListItem;
 var addListenersToListItem;
 var editLayerDisplayName;
 var closeLyrEdtInpt;
-var add_new_layer;
+var add_layer;
+var delete_layer;
 
 var initializeLayersContextMenus;
 var initializeJqueryVariables;
@@ -81,7 +82,7 @@ readInitialLayers = function (){
 }
 
 //  Add new layer dynamically
-add_new_layer = function(mapIndex){
+add_layer = function(mapIndex){
     var map;
     var layer;
 
@@ -96,7 +97,31 @@ add_new_layer = function(mapIndex){
     $listItem = $tocLayersList.find('li:first-child');
     addListenersToListItem($listItem);
     addContextMenuToListItem($listItem,'GeographicFeatureResource');
+    $('.layer-name').parent().off('click');
+    initialize_listeners();
+};
 
+delete_layer = function(mapIndex){
+    var map;
+    var layer;
+    var layerName;
+    initializeJqueryVariables();
+    var $list = $tocLayersList;
+
+    map = TETHYS_MAP_VIEW.getMap();
+    layer = map.getLayers().item(mapIndex);
+
+    //  Get the layerName to delete the correct list item in the TOC
+    layerName = layerName.tethys_legend_title;
+
+    try{
+        $list.find('li').each(function(index){
+            if ($(this).find('.layer-name').text()===layerName){
+                this.remove();
+            }
+        });
+    }
+    catch(err){console.log(err);}
 };
 
 //  Add listeners to the initial table of contents as read in from the map view gizmo layers
@@ -1139,5 +1164,6 @@ TETHYS_TOC =    {   projectInfo: projectInfo,
                     onClickEditLayer: onClickEditLayer,
                     onClickSaveEdits: onClickSaveEdits,
                     onClickShowAttrTable: onClickShowAttrTable,
-                    add_new_layer:add_new_layer
+                    add_layer:add_layer,
+                    delete_layer:delete_layer,
                 }

@@ -87,6 +87,9 @@ def timml(request):
     linesinkditch_info = json.loads(post_data['line_sink_ditch'])
     polygoninhom_info = json.loads(post_data['polygon_inhom'])
 
+    #   Initialize capture_zone variable
+    capture_zone=[]
+
     #   Get map size and calculate cell size
     map_window = json.loads(post_data['map_corners'])
     cell_side = (map_window[2]-map_window[0])/20
@@ -276,7 +279,6 @@ def timml(request):
 
     #   This next part uses modified equations from TimML to retrieve capturezone tracelines
     if 'well_0' in wells_info:
-        capture_zone=[]
         tracelines = []
         for index in range(0,len(wells_info)):
             if wells_info['well_' + str(index)]['Num Particles']<>"":
@@ -329,8 +331,6 @@ def timml(request):
     except:
         pass
 
-    # print intervals
-
     # Retrieves the contour traces and stores them in contourPaths[]
     i = 0
     try:
@@ -340,36 +340,6 @@ def timml(request):
             i += 1
     except:
         pass
-
-    # print contourPaths
-
-
-    # This section constructs the featurecollection polygons defining the water table elevations
-    # Cells are defined at the corners, water table elevation is defined at the center of the cell
-
-    # waterTable = []
-    #
-    # for long in numpy.arange(map_window[0]-cell_side, map_window[2]+cell_side, cell_side):
-    #     for lat in numpy.arange(map_window[1]-cell_side, map_window[3]+cell_side, cell_side):
-    #         waterTable.append({
-    #             'type': 'Feature',
-    #             'geometry': {
-    #                 'type': 'Polygon',
-    #                 'coordinates': [
-    #                                 [   [long,lat],
-    #                                     [long + cell_side, lat],
-    #                                     [long + cell_side, lat + cell_side],
-    #                                     [long, lat + cell_side],
-    #                                     [long,lat]
-    #                                 ]
-    #                                ]
-    #                 },
-    #                 'properties': {
-    #                     'elevation' : ml.head(0,(long+cell_side/2),(lat+cell_side/2)),
-    #                 }
-    #         })
-
-    # print waterTable
 
     # This collects the contour lines and creates JSON objects for the response to AJAX request (to be drawn in js)
     Contours = []
@@ -399,11 +369,13 @@ def timml(request):
 
     return JsonResponse({
         "sucess": "Data analysis complete!",
-        # "raster": json.dumps(waterTable),
         "contours": json.dumps(Contours),
         "heads": json.dumps(intervals),
         "capture": capture_zone,
     })
+
+#   Custom Utility Functions
+#   Credits to Mark Bakker (code borrowed from TimML repository for returning the plotting coordinates)
 
 def j_capturezone( ml, w, N, z, tmax, window, xsec=False):
     xstart = w.xw + 1.01*w.rw * numpy.cos( numpy.arange(0.01,2*numpy.pi,2*numpy.pi/N) )
