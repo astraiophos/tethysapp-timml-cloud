@@ -112,7 +112,7 @@ delete_layer = function(mapIndex){
     layer = map.getLayers().item(mapIndex);
 
     //  Get the layerName to delete the correct list item in the TOC
-    layerName = layerName.tethys_legend_title;
+    layerName = layer.tethys_legend_title;
 
     try{
         $list.find('li').each(function(index){

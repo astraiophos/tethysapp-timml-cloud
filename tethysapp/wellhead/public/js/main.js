@@ -577,9 +577,7 @@ function addPaths(pathLines,layers,titleName){
 		style: styleFunction,
 	});
 
-//	console.log(vector);
-
-	//	Deletes the existing layer containing any old contourlines
+	//	Deletes the existing layer containing any old pathlines
     map = TETHYS_MAP_VIEW.getMap();
     for (i = 0; i < map.getLayers().getProperties().length ; i ++){
         if (map.getLayers().item(i).tethys_legend_title === titleName){
