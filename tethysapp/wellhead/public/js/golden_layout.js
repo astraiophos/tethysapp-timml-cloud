@@ -33,56 +33,58 @@ var $tableLayoutDiv;
  *****************************************************************************/
 
 $(document).ready(function(){
-//    initializeJqueryVars;
-    $innerApp = $('#inner-app-content');
-    $mapContainer = $('#map_view_outer_container');
-    $tableContainer = $('#attr-table');
-    $mapWrapper = $('#map_wrapper');
+    if (typeof TETHYS_MAP_VIEW !== 'undefined') {
+    //    initializeJqueryVars;
+        $innerApp = $('#inner-app-content');
+        $mapContainer = $('#map_view_outer_container');
+        $tableContainer = $('#attr-table');
+        $mapWrapper = $('#map_wrapper');
 
-    config = {
-        settings:{hasHeaders:false},
-        content: [{
-            type: 'column',
-            content:[{
-                type: 'component',
-                componentName: 'Map',
-                componentState: { myId: 'map_view_layout' },
-            id: 'map'
-            },
+        config = {
+            settings:{hasHeaders:false},
+            content: [{
+                type: 'column',
+                content:[{
+                    type: 'component',
+                    componentName: 'Map',
+                    componentState: { myId: 'map_view_layout' },
+                id: 'map'
+                },
 
-            {
-            type: 'column',
-            content:[{
-                type: 'component',
-                componentName: 'Table',
-                componentState: { myId: 'attribute_table_layout' }
-                }],
-            id: 'table',
-            height:10
+                {
+                type: 'column',
+                content:[{
+                    type: 'component',
+                    componentName: 'Table',
+                    componentState: { myId: 'attribute_table_layout' }
+                    }],
+                id: 'table',
+                height:10
+                }]
             }]
-        }]
-    };
+        };
 
-    //  To resize the layout to fit
-    window_height = $(window).height();
-    $innerApp.height(window_height-220);
+        //  To resize the layout to fit
+        window_height = $(window).height();
+        $innerApp.height(window_height-220);
 
-    myLayout = new GoldenLayout( config,$innerApp );
-    myLayout.registerComponent( 'Map', function( container, componentState ){
-        container.getElement().addClass('id');
-        container.getElement().attr('id',componentState.myId);
-    });
-        myLayout.registerComponent( 'Table', function( container, componentState ){
-        container.getElement().addClass('id');
-        container.getElement().attr('id',componentState.myId);
-    });
-    myLayout.init();
+        myLayout = new GoldenLayout( config,$innerApp );
+        myLayout.registerComponent( 'Map', function( container, componentState ){
+            container.getElement().addClass('id');
+            container.getElement().attr('id',componentState.myId);
+        });
+            myLayout.registerComponent( 'Table', function( container, componentState ){
+            container.getElement().addClass('id');
+            container.getElement().attr('id',componentState.myId);
+        });
+        myLayout.init();
 
-    $mapLayoutDiv = $('#map_view_layout');
-    $tableLayoutDiv = $('#attribute_table_layout');
+        $mapLayoutDiv = $('#map_view_layout');
+        $tableLayoutDiv = $('#attribute_table_layout');
 
-    $mapContainer.appendTo($mapLayoutDiv);
-    $tableContainer.appendTo($tableLayoutDiv);
-    //  Resize map div to be 100% so that map always fills the space inside layout container
-    $mapWrapper.height('100%');
+        $mapContainer.appendTo($mapLayoutDiv);
+        $tableContainer.appendTo($tableLayoutDiv);
+        //  Resize map div to be 100% so that map always fills the space inside layout container
+        $mapWrapper.height('100%');
+    }
 })

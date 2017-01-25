@@ -20,6 +20,8 @@ var deleteRow;
 var timml_solution;
 var checkCsrfSafe;
 var getCookie;
+var save_model_as;
+var save_model;
 
 /*****************************************************************************
  *                             Variables
@@ -912,8 +914,6 @@ build_table = function(layerName,features,editable){
     var id;
     var featureCount;
 
-    console.log("test");
-
     //  Save the attributes before anything else if the table has been edited and needs to be saved
     if ($('#attr-table.edit')[0] != undefined){
         features = save_attributes(layerName);
@@ -1299,16 +1299,18 @@ $.ajaxSetup({
  *****************************************************************************/
 
 $(document).ready(function(){
-    var map = TETHYS_MAP_VIEW.getMap();
-    //  This will hide the drawing layer from the table of contents and add the basemap to the table of contents
-    map.getLayers().item(0).tethys_data={'tethys_toc':true};
-    map.getLayers().item(1).tethys_data={'tethys_toc':false};
-    //  Initialize the TimML layers to be used
-    initialize_timml_layers();
-    //  Bind listeners to map drawing tools
-    drawing_listener();
-    //  Hide the loading gif
-    $('#loading').addClass("hidden");
+    if (typeof TETHYS_MAP_VIEW !== 'undefined') {
+        var map = TETHYS_MAP_VIEW.getMap();
+        //  This will hide the drawing layer from the table of contents and add the basemap to the table of contents
+        map.getLayers().item(0).tethys_data={'tethys_toc':true};
+        map.getLayers().item(1).tethys_data={'tethys_toc':false};
+        //  Initialize the TimML layers to be used
+        initialize_timml_layers();
+        //  Bind listeners to map drawing tools
+        drawing_listener();
+        //  Hide the loading gif
+        $('#loading').addClass("hidden");
+    }
 });
 
 /*****************************************************************************

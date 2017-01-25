@@ -1128,18 +1128,19 @@ initialize_listeners = function(){
  *****************************************************************************/
 
 $(document).ready(function(){
-    initializeJqueryVariables();
-    initializeLayersContextMenus();
-    readInitialLayers();
-    addInitialEventListeners();
-    initialize_listeners();
-    exit_edit_mode('#attr-table input');
+    if (typeof TETHYS_MAP_VIEW !== 'undefined') {
+        initializeJqueryVariables();
+        initializeLayersContextMenus();
+        readInitialLayers();
+        addInitialEventListeners();
+        initialize_listeners();
+        exit_edit_mode('#attr-table input');
 
-    $tocLayersList.sortable({
-    placeholder: "ui-state-highlight",
-    stop: drawLayersInListOrder
-    });
-
+        $tocLayersList.sortable({
+        placeholder: "ui-state-highlight",
+        stop: drawLayersInListOrder
+        });
+    }
 });
 
 /*****************************************************************************
