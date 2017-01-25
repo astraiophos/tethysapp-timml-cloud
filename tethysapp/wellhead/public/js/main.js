@@ -1204,6 +1204,32 @@ initialize_timml_layers = function(){
 
 
 };
+
+/*****************************************************************************
+ *                       Save Utility Functions
+ *****************************************************************************/
+save_model_as = function(){
+    $('#GenericModal').on('show.bs.modal', function (event) {
+    	$('#ModalTitle').text('Please enter the model name:');
+        $('#ModalBody').text('');
+        $('#ModalBody').append('<form id="save-form" action="save_model();">' +
+            '<div id="save-input"><input type="text" name="fileName"/>' +
+            '</form>');
+        $('#ModalFooter').hide();
+        $('.modal-footer').prepend('<button id="save-button" type="submit" class="btn btn-default"' +
+            'form="save-form" value="Submit" data-dismiss="modal">Save</button>');
+    })
+    $('form').on("submit",function(event){
+        event.preventDefault();
+        save_model($(this).serialize());
+    });
+    $('#GenericModal').modal('show')
+};
+
+save_model = function(name){
+    console.log(name);
+};
+
 /*****************************************************************************
  *                       Ajax Utility Functions
  *****************************************************************************/
