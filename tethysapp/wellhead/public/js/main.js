@@ -1209,25 +1209,44 @@ initialize_timml_layers = function(){
  *                       Save Utility Functions
  *****************************************************************************/
 save_model_as = function(){
-    $('#GenericModal').on('show.bs.modal', function (event) {
-    	$('#ModalTitle').text('Please enter the model name:');
-        $('#ModalBody').text('');
-        $('#ModalBody').append('<form id="save-form" action="save_model();">' +
-            '<div id="save-input"><input type="text" name="fileName"/>' +
-            '</form>');
-        $('#ModalFooter').hide();
-        $('.modal-footer').prepend('<button id="save-button" type="submit" class="btn btn-default"' +
-            'form="save-form" value="Submit" data-dismiss="modal">Save</button>');
-    })
-    $('form').on("submit",function(event){
-        event.preventDefault();
-        save_model($(this).serialize());
-    });
+    //  Add user interactive input and save button, to be deleted on close
+    $('#ModalTitle').text('Please enter the model name:');
+    $('#ModalBody').text('');
+    $('#ModalBody').append('<div id="save-input"><input type="text" name="fileName"/></div>');
+    $('#ModalFooter').hide();
+    $('.modal-footer').prepend('<button id="save-button" type="button" class="btn btn-default"' +
+        'data-dismiss="modal" onclick="save_model();">Save</button>');
+
     $('#GenericModal').modal('show')
 };
 
-save_model = function(name){
-    console.log(name);
+//  This makes certain that the extra input field and save button get removed from the modal
+$('#GenericModal').on('hidden.bs.modal', function (e) {
+    $('#save-input').remove();
+    $('#save-button').remove();
+});
+
+save_model = function(){
+    var name;
+
+    name = $('#save-input').find('input').val();
+
+    $.ajax({
+		type: 'POST',
+		url: '/apps/wellhead/save/',
+		dataType: 'json',
+		data: {
+		    'file_name':name,
+		    'session':JSON.stringify(sessionStorage),
+			},
+			success: function (data){
+					if (data.error){
+						console.log(data.error);
+						return
+					}
+					}
+			});
+
 };
 
 /*****************************************************************************

@@ -462,3 +462,19 @@ def capture_builder(tracelines):
                     tracelines[index][particle][0][i][1]    # Y-Coordinate
                 ])
     return capture_info
+
+def save(request):
+    post_data = request.POST
+
+    file_name = post_data['file_name']
+    session = json.loads(post_data['session'])
+    session['Constant and Model_Features'] = json.loads(session['Constant and Model_Features'])
+
+    print "This is the name of the model"
+    print file_name
+    print "This is the session storage"
+    print session['Constant and Model_Features']
+
+    return JsonResponse({
+        "success":"Save Successfull!",
+    })
