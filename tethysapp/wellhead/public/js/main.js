@@ -22,6 +22,7 @@ var checkCsrfSafe;
 var getCookie;
 var save_model_as;
 var save_model;
+var open_model;
 
 /*****************************************************************************
  *                             Variables
@@ -1209,21 +1210,31 @@ initialize_timml_layers = function(){
  *                       Save Utility Functions
  *****************************************************************************/
 save_model_as = function(){
-    //  Add user interactive input and save button, to be deleted on close
-    $('#ModalTitle').text('Please enter the model name:');
-    $('#ModalBody').text('');
-    $('#ModalBody').append('<div id="save-input"><input type="text" name="fileName"/></div>');
-    $('#ModalFooter').hide();
-    $('.modal-footer').prepend('<button id="save-button" type="button" class="btn btn-default"' +
-        'data-dismiss="modal" onclick="save_model();">Save</button>');
 
-    $('#GenericModal').modal('show')
+    if (projectInfo['editMode'] !== true){
+        //  Add user interactive input and save button, to be deleted on close
+        $('#ModalTitle').addClass('hidden');
+        $('.modal-header').append('<div id="save-header"><h4>Provide a name for saving your model</h4></div>');
+        $('#ModalBody').addClass('hidden');
+        $('.modal-body').append('<div id="save-input"><input type="text" name="fileName"/></div>');
+        $('#ModalFooter').hide();
+        $('.modal-footer').prepend('<button id="save-button" type="button" class="btn btn-default"' +
+            'data-dismiss="modal" onclick="save_model();">Save</button>');
+
+        $('#GenericModal').modal('show')
+    }
+    else{
+        error_message("You cannot save your file while in edit mode. Please save/cancel your edits.");
+    }
 };
 
 //  This makes certain that the extra input field and save button get removed from the modal
 $('#GenericModal').on('hidden.bs.modal', function (e) {
     $('#save-input').remove();
     $('#save-button').remove();
+    $('#save-header').remove();
+    $('#ModalBody').removeClass('hidden');
+    $('#ModalTitle').removeClass('hidden');
 });
 
 save_model = function(){
@@ -1231,24 +1242,63 @@ save_model = function(){
 
     name = $('#save-input').find('input').val();
 
-    $.ajax({
-		type: 'POST',
-		url: '/apps/wellhead/save/',
-		dataType: 'json',
-		data: {
-		    'file_name':name,
-		    'session':JSON.stringify(sessionStorage),
-			},
-			success: function (data){
-					if (data.error){
-						console.log(data.error);
-						return
-					}
-					}
-			});
+    if (projectInfo['editMode'] !== true){
+        if (name !== undefined){
+            $.ajax({
+                type: 'POST',
+                url: '/apps/wellhead/saveAs/',
+                dataType: 'json',
+                data: {
+                    'file_name':name,
+                    'session':JSON.stringify(sessionStorage),
+                    },
+                    success: function (data){
+                                if (data.error){
+                                    console.log(data.error);
+                                    return
+                                }
+                                projectInfo['model_name'] = data.file_name;
+                            }
+                    });
+        }
+        else if (name === ""){
+            error_message("You need to assign a name to your model, the name cannot be blank");
+        }
 
+        else if (name === undefined){
+            if (projectInfo.hasOwnProperty('model_name')){
+                name = projectInfo['model_name'];
+
+                $.ajax({
+                type: 'POST',
+                url: '/apps/wellhead/save/',
+                dataType: 'json',
+                data: {
+                    'file_name':name,
+                    'session':JSON.stringify(sessionStorage),
+                    },
+                    success: function (data){
+                            if (data.error){
+                                console.log(data.error);
+                                return
+                            }
+                    }
+                });
+            }
+            else{
+            //  Fires only if the file name has not been defined previous to the save call
+                save_model_as();
+            }
+        }
+    }
+    else{
+        error_message("You cannot save your file while in edit mode. Please save/cancel your edits.");
+    }
 };
 
+open_model = function(){
+
+};
 /*****************************************************************************
  *                       Ajax Utility Functions
  *****************************************************************************/

@@ -33,6 +33,9 @@ class WellheadProtection(TethysAppBase):
                     UrlMap(name='timml',
                            url='wellhead/timml',
                            controller='wellhead.controllers.timml'),
+                    UrlMap(name='saveAs',
+                           url='wellhead/saveAs',
+                           controller='wellhead.controllers.saveAs'),
                     UrlMap(name='save',
                            url='wellhead/save',
                            controller='wellhead.controllers.save')

@@ -4,6 +4,9 @@ from django.http import JsonResponse
 import json
 import matplotlib.pyplot as plt
 import numpy
+from .app import WellheadProtection as wellhead
+import os
+import uuid
 
 from tethys_sdk.gizmos import *
 
@@ -463,17 +466,42 @@ def capture_builder(tracelines):
                 ])
     return capture_info
 
+def saveAs(request):
+    from .app import WellheadProtection as wellhead
+    import os
+    import uuid
+
+    #   Generates a unique id for the file
+    unique_id = uuid.uuid4().hex[:6]
+
+    post_data = request.POST
+
+    file_name = post_data['file_name']
+    new_file_name = unique_id + '_' + file_name + '.txt'
+    session = json.loads(post_data['session'])
+
+    user_workspace = wellhead.get_user_workspace(request.user)
+    new_file_path = os.path.join(user_workspace.path,new_file_name)
+
+    with open(new_file_path, 'w') as a_file:
+        a_file.write(session)
+
+    return JsonResponse({
+        "success":"Save Successfull!",
+        'file_name':new_file_name,
+    })
+
 def save(request):
     post_data = request.POST
 
     file_name = post_data['file_name']
     session = json.loads(post_data['session'])
-    session['Constant and Model_Features'] = json.loads(session['Constant and Model_Features'])
 
-    print "This is the name of the model"
-    print file_name
-    print "This is the session storage"
-    print session['Constant and Model_Features']
+    user_workspace = wellhead.get_user_workspace(request.user)
+    new_file_path = os.path.join(user_workspace.path,file_name)
+
+    with open(new_file_path, 'w') as a_file:
+        a_file.write(str(session))
 
     return JsonResponse({
         "success":"Save Successfull!",
