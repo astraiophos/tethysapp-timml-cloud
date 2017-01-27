@@ -481,7 +481,7 @@ def saveAs(request):
     session = json.loads(post_data['session'])
 
     user_workspace = wellhead.get_user_workspace(request.user)
-    new_file_path = os.path.join(user_workspace.path,new_file_name)
+    new_file_path = os.path.join(user_workspace.path,unique_id + '_' + file_name + '.txt')
 
     with open(new_file_path, 'w') as a_file:
         a_file.write(session)
@@ -505,4 +505,20 @@ def save(request):
 
     return JsonResponse({
         "success":"Save Successfull!",
+    })
+
+def open(request):
+    post_data = request.POST
+
+    file_name = post_data['file_name']
+
+    user_workspace = wellhead.get_user_workspace(request.user)
+    new_file_path = os.path.join(user_workspace.path,file_name)
+
+    with open(new_file_path, 'r') as a_file:
+        session = a_file.read()
+
+    return JsonResponse({
+        'success':'Save Successfull!',
+        'session':json.dumps(session),
     })

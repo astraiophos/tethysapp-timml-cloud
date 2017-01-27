@@ -1296,7 +1296,23 @@ save_model = function(){
     }
 };
 
-open_model = function(){
+open_model = function(file_name){
+
+    $.ajax({
+    type: 'POST',
+    url: '/apps/wellhead/open/',
+    dataType: 'json',
+    data: {
+        'file_name':file_name,
+        },
+        success: function (data){
+                if (data.error){
+                    console.log(data.error);
+                    return
+                }
+                sessionStorage = JSON.parse(data.session);
+        }
+    });
 
 };
 /*****************************************************************************

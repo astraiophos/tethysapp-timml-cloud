@@ -38,7 +38,10 @@ class WellheadProtection(TethysAppBase):
                            controller='wellhead.controllers.saveAs'),
                     UrlMap(name='save',
                            url='wellhead/save',
-                           controller='wellhead.controllers.save')
+                           controller='wellhead.controllers.save'),
+                    UrlMap(name='open',
+                           url='wellhead/open',
+                           controller='wellhead.controllers.open')
         )
 
         return url_maps
