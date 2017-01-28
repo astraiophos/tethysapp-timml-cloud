@@ -12,7 +12,13 @@ from tethys_sdk.gizmos import *
 
 @login_required()
 def home(request):
-    context = {}
+    select_input2 = SelectInput(display_text='Select2',
+                            name='select1',
+                            multiple=False,
+                            options=[('One', '1'), ('Two', '2'), ('Three', '3')],
+                            initial=['Three'],
+                            original=True)
+    context = {'select_input2':select_input2}
     return render(request, 'wellhead/home.html',context)
 def map(request):
     """

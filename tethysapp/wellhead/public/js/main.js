@@ -1257,7 +1257,7 @@ save_model = function(){
                                     console.log(data.error);
                                     return
                                 }
-                                projectInfo['model_name'] = data.file_name;
+                                sessionStorage['model_name'] = data.file_name;
                             }
                     });
         }
@@ -1266,8 +1266,8 @@ save_model = function(){
         }
 
         else if (name === undefined){
-            if (projectInfo.hasOwnProperty('model_name')){
-                name = projectInfo['model_name'];
+            if (sessionStorage.hasOwnProperty('model_name')){
+                name = sessionStorage['model_name'];
 
                 $.ajax({
                 type: 'POST',
@@ -1317,6 +1317,7 @@ open_model = function(file_name){
                     sessionStorage.setItem(key, open_session[key]);
                   }
                 };
+                sessionStorage['model_name'] = file_name;
         }
     });
     location.reload();
