@@ -1300,7 +1300,7 @@ open_model = function(file_name){
 
     $.ajax({
     type: 'POST',
-    url: '/apps/wellhead/open/',
+    url: '/apps/wellhead/openModel/',
     dataType: 'json',
     data: {
         'file_name':file_name,
@@ -1310,10 +1310,16 @@ open_model = function(file_name){
                     console.log(data.error);
                     return
                 }
-                sessionStorage = JSON.parse(data.session);
+                open_session = JSON.parse(data.session);
+                sessionStorage.clear();
+                for (var key in open_session) {
+                  if (open_session.hasOwnProperty(key)) {
+                    sessionStorage.setItem(key, open_session[key]);
+                  }
+                };
         }
     });
-
+    location.reload();
 };
 /*****************************************************************************
  *                       Ajax Utility Functions

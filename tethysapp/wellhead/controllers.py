@@ -467,10 +467,6 @@ def capture_builder(tracelines):
     return capture_info
 
 def saveAs(request):
-    from .app import WellheadProtection as wellhead
-    import os
-    import uuid
-
     #   Generates a unique id for the file
     unique_id = uuid.uuid4().hex[:6]
 
@@ -478,7 +474,7 @@ def saveAs(request):
 
     file_name = post_data['file_name']
     new_file_name = unique_id + '_' + file_name + '.txt'
-    session = json.loads(post_data['session'])
+    session = post_data['session']
 
     user_workspace = wellhead.get_user_workspace(request.user)
     new_file_path = os.path.join(user_workspace.path,unique_id + '_' + file_name + '.txt')
@@ -495,7 +491,7 @@ def save(request):
     post_data = request.POST
 
     file_name = post_data['file_name']
-    session = json.loads(post_data['session'])
+    session = post_data['session']
 
     user_workspace = wellhead.get_user_workspace(request.user)
     new_file_path = os.path.join(user_workspace.path,file_name)
@@ -507,7 +503,7 @@ def save(request):
         "success":"Save Successfull!",
     })
 
-def open(request):
+def openModel(request):
     post_data = request.POST
 
     file_name = post_data['file_name']
@@ -520,5 +516,5 @@ def open(request):
 
     return JsonResponse({
         'success':'Save Successfull!',
-        'session':json.dumps(session),
+        'session':session,
     })
