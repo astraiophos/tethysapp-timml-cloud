@@ -13,14 +13,27 @@
 
   {{ block.super }}
 
-  <form id="model-list">
-    <select id="mySelect" size="10">
-      <option>Apple</option>
-      <option>Orange</option>
-      <option>Pineapple</option>
-      <option>Banana</option>
-    </select>
-  </form>
+  <table id="user-models">
+    <tr>
+      <th>Model Name</th>
+      <th>Date Saved</th>
+    </tr>
+    <tr class="model">
+      <td>Test</td>
+      <td>January 30, 2017</td>
+    </tr>
+  </table>
+
+  <table id="example-models">
+    <tr>
+      <th>Model Name</th>
+      <th>Date Saved</th>
+    </tr>
+    <tr class="model">
+      <td>Test</td>
+      <td>January 30, 2017</td>
+    </tr>
+  </table>
 
 
 {% endblock %}

@@ -1,8 +1,8 @@
 /*****************************************************************************
- * FILE:    main.js
+ * FILE:    map_model.js
  * DATE:    12/16/2016
  * AUTHOR:  Jacob Fullerton
- * COPYRIGHT: (c) 2016 Brigham Young University
+ * COPYRIGHT: (c) 2017 Brigham Young University
  * LICENSE: BSD 2-Clause
  * CONTRIBUTIONS:   http://openlayers.org/
  *
