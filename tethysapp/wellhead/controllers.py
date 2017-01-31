@@ -548,3 +548,5 @@ def workspace_manager(request):
             print str(e)
             return JsonResponse({"error":str(e),
                              "message":"Check with administrator, the file cannot be deleted"})
+    else:
+        return JsonResponse({"error":"Bad Request"})
