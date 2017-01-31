@@ -28,6 +28,24 @@ var $userModels;
  *****************************************************************************/
 //  Populates the tables with the user and app workspace saved models
 build_model_tables = function(){
+    var examples;
+    var user_models;
+
+    $.ajax({
+		type: 'POST',
+		url: '/apps/wellhead/workspaceManager/',
+		dataType: 'json',
+		data: {
+            'task':'Read',
+			},
+			success: function (data){
+                console.log(data);
+                examples = data.example_files;
+                user_models = data.user_files;
+			}
+    });
+
+    //  Build table with Jquery, then format using DataTable();
 
 };
 
@@ -88,7 +106,7 @@ build_layout = function(){
 /*****************************************************************************
  *                             UI Functions
  *****************************************************************************/
-initialize_listeners = function(){
+initialize_selector = function(){
     //  Make model highlight when clicked on
     $('.model').on('click',function(){
         $('.model').removeClass('ui-selected');
@@ -108,5 +126,6 @@ $(document).ready(function(){
         build_model_tables();
         build_layout();
         initialize_listeners();
+        sessionStorage.clear();
     }
 });

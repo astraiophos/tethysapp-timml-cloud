@@ -6,7 +6,7 @@ class WellheadProtection(TethysAppBase):
     Tethys app class for Wellhead Protection.
     """
 
-    name = 'Wellhead Protection'
+    name = 'TimML-Cloud'
     index = 'wellhead:home'
     icon = 'wellhead/images/icon.gif'
     package = 'wellhead'

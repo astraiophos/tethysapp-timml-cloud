@@ -7,6 +7,7 @@ import numpy
 from .app import WellheadProtection as wellhead
 import os
 import uuid
+import datetime
 
 from tethys_sdk.gizmos import *
 
@@ -533,11 +534,22 @@ def workspace_manager(request):
     app_workspace = wellhead.get_app_workspace()
 
     if task == 'Read':
-        user_files = os.listdir(user_workspace)
-        example_files = os.listdir(app_workspace)
+        user_files = {}
+        example_files = {}
+
+        files = os.listdir(user_workspace.path)
+        for file in files:
+            mypath = os.path.join(user_workspace.path,file)
+            user_files[file] = {'date':os.path.getmtime(mypath),'description':'To be filled later'}
+
+        files = os.listdir(app_workspace.path)
+        for file in files:
+            mypath = os.path.join(user_workspace.path,file)
+            example_files[file] = {'date':os.path.getmtime(mypath),'description':'To be filled later'}
+
         return JsonResponse({
-            'user-files':user_files,
-            'example-files':example_files
+            'user_files':user_files,
+            'example_files':example_files
         })
     elif task == 'Delete':
         file_name = post_data['file']
