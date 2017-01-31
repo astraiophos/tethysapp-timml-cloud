@@ -12,8 +12,7 @@
  *                              Functions
  *****************************************************************************/
 
-var build_user_table;
-var build_example_table;
+var build_model_tables;
 var build_layout;
 
 /*****************************************************************************
@@ -28,11 +27,7 @@ var $userModels;
  *                             Main Script
  *****************************************************************************/
 //  Populates the tables with the user and app workspace saved models
-build_user_table = function(){
-
-};
-
-build_example_table = function(){
+build_model_tables = function(){
 
 };
 
@@ -70,7 +65,7 @@ build_layout = function(){
 
     //  To resize the layout to fit
     window_height = $(window).height();
-    $innerApp.height(window_height-220);
+    $innerApp.height(window_height-400);
 
     myLayout = new GoldenLayout( config,$innerApp );
     myLayout.registerComponent( 'User Models', function( container, componentState ){
@@ -110,8 +105,7 @@ $(document).ready(function(){
     //  change this if statement accordingly so it only fires with the landing page.
     if (typeof TETHYS_MAP_VIEW === 'undefined') {
         //  Build model lists as tables
-        build_user_table();
-        build_example_table();
+        build_model_tables();
         build_layout();
         initialize_listeners();
     }

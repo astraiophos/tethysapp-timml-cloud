@@ -524,3 +524,27 @@ def openModel(request):
         'success':'Save Successfull!',
         'session':session,
     })
+
+def workspace_manager(request):
+    post_data = request.POST
+
+    task = post_data['task']
+    user_workspace = wellhead.get_user_workspace(request.user)
+    app_workspace = wellhead.get_app_workspace()
+
+    if task == 'Read':
+        user_files = os.listdir(user_workspace)
+        example_files = os.listdir(app_workspace)
+        return JsonResponse({
+            'user-files':user_files,
+            'example-files':example_files
+        })
+    elif task == 'Delete':
+        file_name = post_data['file']
+        delete_file_path = os.path.join(user_workspace.path,file_name)
+        try:
+            os.remove(delete_file_path)
+        except Exception,e:
+            print str(e)
+            return JsonResponse({"error":str(e),
+                             "message":"Check with administrator, the file cannot be deleted"})

@@ -41,7 +41,10 @@ class WellheadProtection(TethysAppBase):
                            controller='wellhead.controllers.save'),
                     UrlMap(name='openModel',
                            url='wellhead/openModel',
-                           controller='wellhead.controllers.openModel')
+                           controller='wellhead.controllers.openModel'),
+                    UrlMap(name='workspaceManager',
+                           url='wellhead/workspaceManager',
+                           controller='wellhead.controllers.workspace_manager')
         )
 
         return url_maps
