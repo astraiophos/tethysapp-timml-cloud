@@ -12,8 +12,8 @@ class WellheadProtection(TethysAppBase):
     package = 'wellhead'
     root_url = 'wellhead'
     color = '#34495e'
-    description = "Generic groundwater modeling implementing Mark Bakker's TimML software package. Users can delineate wellhead protection zones using this software to identify potential risks to municipal wells."
-    tags = '"Hydrology","Environmental","Groundwater"'
+    description = "Cloud-based groundwater modeling implementing Mark Bakker's TimML software package. Users can delineate wellhead protection zones using this software to identify potential risks to municipal wells."
+    tags = '"Hydrogeology","Environmental","Groundwater"'
     enable_feedback = False
     feedback_emails = []
 

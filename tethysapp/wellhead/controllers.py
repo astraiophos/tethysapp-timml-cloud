@@ -8,6 +8,8 @@ from .app import WellheadProtection as wellhead
 import os
 import uuid
 import datetime
+from shutil import copyfile
+
 
 from tethys_sdk.gizmos import *
 
@@ -556,7 +558,7 @@ def workspace_manager(request):
             'example_files':example_files
         })
     elif task == 'Delete':
-        file_name = post_data['file']
+        file_name = post_data['file_name']
         delete_file_path = os.path.join(user_workspace.path,file_name)
         try:
             os.remove(delete_file_path)
@@ -564,5 +566,23 @@ def workspace_manager(request):
             print str(e)
             return JsonResponse({"error":str(e),
                              "message":"Check with administrator, the file cannot be deleted"})
+        return JsonResponse({"success":"Deletion Successful!"})
+    elif task == 'Copy':
+        file_name = post_data['file_name']
+        src_file_path = os.path.join(user_workspace.path,file_name)
+
+        unique_id = uuid.uuid4().hex[:6]
+        model = post_data['model']
+        dst_file_name = unique_id + '_' + model
+        dst_file_path = os.path.join(user_workspace.path,dst_file_name)
+
+        try:
+            copyfile(src_file_path,dst_file_path)
+        except Exception,e:
+            print str(e)
+            return JsonResponse({"error":str(e),
+                                 "message":"Check with administrator, the file cannot be copied"})
+        return JsonResponse({"success":"Copy Successful!"})
+
     else:
         return JsonResponse({"error":"Bad Request"})

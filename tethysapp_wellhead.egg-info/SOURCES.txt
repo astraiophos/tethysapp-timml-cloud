@@ -11,4 +11,5 @@ tethysapp_wellhead.egg-info/SOURCES.txt
 tethysapp_wellhead.egg-info/dependency_links.txt
 tethysapp_wellhead.egg-info/namespace_packages.txt
 tethysapp_wellhead.egg-info/not-zip-safe
+tethysapp_wellhead.egg-info/requires.txt
 tethysapp_wellhead.egg-info/top_level.txt

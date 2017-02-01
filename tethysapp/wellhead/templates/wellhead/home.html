@@ -30,7 +30,9 @@
 {% endblock %}
 
 {% block app_actions %}
-  <a class="btn btn-primary" href="{% url 'wellhead:map' %}" onclick="return open_selected_model();">Open</a>
-  <a id="editSave" class="btn btn-default hidden" onclick="onClickSaveEdits();">Save</a>
+  <a class="btn btn-danger" onclick="return delete_selected_model();">Delete</a>
+  <a class="btn btn-default" onclick="duplicate_selected_model();">Copy</a>
+  <a class="btn btn-default" href="{% url 'wellhead:map' %}" onclick="return open_selected_model();">Open</a>
+  <a class="btn btn-default" href="{% url 'wellhead:map' %}" onclick="sessionStorage.clear();">New</a>
 
 {% endblock %}

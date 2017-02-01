@@ -16,7 +16,7 @@ setup(
     name=release_package,
     version='0.0',
     tags='"Hydrology","Environmental","Groundwater"',
-    description="neric groundwater modeling implementing Mark Bakker's TimML software package. Users can delineate wellhead protection zones using this software to identify potential risks to municipal wells.",
+    description="Cloud-based groundwater modeling implementing Mark Bakker's TimML software package. Users can delineate wellhead protection zones using this software to identify potential risks to municipal wells.",
     long_description='',
     keywords='',
     author='Jacob Fullerton',

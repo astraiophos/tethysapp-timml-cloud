@@ -1237,10 +1237,22 @@ $('#GenericModal').on('hidden.bs.modal', function (e) {
     $('#ModalTitle').removeClass('hidden');
 });
 
-save_model = function(){
+save_model = function(model){
     var name;
+    var extents;
 
-    name = $('#save-input').find('input').val();
+    if (model === undefined){
+        name = $('#save-input').find('input').val();
+    }
+    else if (model !== undefined){
+        name = model;
+    }
+
+    //  Get the map extents to save to the session storage
+    map = TETHYS_MAP_VIEW.getMap();
+    extents = map.getView().calculateExtent(map.getSize());
+
+    sessionStorage['extents'] = extents;
 
     if (projectInfo['editMode'] !== true){
         if (name !== undefined){
@@ -1297,6 +1309,7 @@ save_model = function(){
 };
 
 open_model = function(file_name){
+    var extents;
 
     $.ajax({
     type: 'POST',
@@ -1428,6 +1441,14 @@ $(document).ready(function(){
         drawing_listener();
         //  Hide the loading gif
         $('#loading').addClass("hidden");
+
+        //  Check if the sessionStorage has an extent of the map, then change the map location to match
+        if (sessionStorage.hasOwnProperty('extents')){
+            extents = sessionStorage['extents'];
+            extents = extents.split(",").map(Number)
+
+            map.getView().fit(extents, map.getSize());
+        }
     }
 });
 

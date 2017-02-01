@@ -39,7 +39,6 @@ build_model_tables = function(){
             'task':'Read',
 			},
 			success: function (data){
-                console.log(data);
                 examples = data.example_files;
                 user_models = data.user_files;
                 table_builder(user_models,examples);
@@ -70,16 +69,71 @@ open_selected_model = function(){
     var model;
 
     //  Check that the user has selected a model to open, if not, return an error
-    if ($('.ui-selected').attr('data-file') === undefined){
+    if ($('.info').attr('data-file') === undefined){
         error_message("Please click on the model you wish to open from the table above.");
         return false;
     }
     else{
-        model = $('.ui-selected').attr('data-file');
+        model = $('.info').attr('data-file');
         open_model(model);
     }
 };
 
+delete_selected_model = function(){
+    var model;
+
+    //  Check that the user has selected a model to delete, if not, return an error
+    if($('.info').attr('data-file') === undefined){
+        error_message("Please click on the model you wish to delete from the table above.");
+        return false;
+    }
+    else{
+        model = $('.info').attr('data-file');
+        $.ajax({
+            type: 'POST',
+            url: '/apps/wellhead/workspaceManager/',
+            dataType: 'json',
+            data: {
+                'task':'Delete',
+                'file_name':model,
+                },
+                success: function (data){
+                    $('#user-models tbody').empty();
+                    $('#example-models tbody').empty();
+                    build_model_tables();
+                }
+        });
+    }
+};
+
+duplicate_selected_model = function(){
+    var file_name;
+    var model;
+        //  Check that the user has selected a model to delete, if not, return an error
+    if($('.info').attr('data-file') === undefined){
+        error_message("Please click on the model you wish to duplicate from the table above.");
+        return false;
+    }
+    else{
+        file_name = $('.info').attr('data-file');
+        model = file_name.split("_").pop();
+        $.ajax({
+            type: 'POST',
+            url: '/apps/wellhead/workspaceManager/',
+            dataType: 'json',
+            data: {
+                'task':'Copy',
+                'file_name':file_name,
+                'model':model,
+            },
+            success: function(data){
+                $('#user-models tbody').empty();
+                $('#example-models tbody').empty();
+                build_model_tables();
+            }
+        });
+    }
+};
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
@@ -140,8 +194,8 @@ build_layout = function(){
 initialize_selector = function(){
     //  Make model highlight when clicked on
     $('.model').on('click',function(){
-        $('.model').removeClass('ui-selected');
-        $(this).addClass('ui-selected').trigger('select_change');
+        $('.model').removeClass('info');
+        $(this).addClass('info').trigger('select_change');
     });
 };
 
