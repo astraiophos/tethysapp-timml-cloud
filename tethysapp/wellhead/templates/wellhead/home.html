@@ -30,7 +30,7 @@
 {% endblock %}
 
 {% block app_actions %}
-  <a id="editCancel" class="btn btn-default hidden" onclick="onClickCancelEdits();">Cancel</a>
+  <a class="btn btn-primary" href="{% url 'wellhead:map' %}" onclick="return open_selected_model();">Open</a>
   <a id="editSave" class="btn btn-default hidden" onclick="onClickSaveEdits();">Save</a>
 
 {% endblock %}

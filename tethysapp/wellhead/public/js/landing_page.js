@@ -66,6 +66,20 @@ build_model_tables = function(){
     };
 };
 
+open_selected_model = function(){
+    var model;
+
+    //  Check that the user has selected a model to open, if not, return an error
+    if ($('.ui-selected').attr('data-file') === undefined){
+        error_message("Please click on the model you wish to open from the table above.");
+        return false;
+    }
+    else{
+        model = $('.ui-selected').attr('data-file');
+        open_model(model);
+    }
+};
+
 /*****************************************************************************
  *                            Main Script
  *****************************************************************************/
