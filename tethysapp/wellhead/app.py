@@ -3,7 +3,7 @@ from tethys_sdk.base import TethysAppBase, url_map_maker
 
 class WellheadProtection(TethysAppBase):
     """
-    Tethys app class for Wellhead Protection.
+    Tethys app class for TimML-Cloud.
     """
 
     name = 'TimML-Cloud'
