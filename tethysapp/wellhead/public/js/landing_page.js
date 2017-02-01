@@ -42,11 +42,28 @@ build_model_tables = function(){
                 console.log(data);
                 examples = data.example_files;
                 user_models = data.user_files;
+                table_builder(user_models,examples);
 			}
     });
 
-    //  Build table with Jquery, then format using DataTable();
-
+    var table_builder = function(user_models,examples){
+        //  Build table with Jquery, then format using DataTable();
+        for (key in user_models){
+            if (user_models.hasOwnProperty(key)){
+                file = String(key).split("_").pop();
+                $('#user-models').append('<tr data-file="'+ key + '" class="model"><td>' +
+                    file + '</td>' + '<td>' + user_models[key]['date'] + '</td>');
+            }
+        };
+        for (key in examples){
+            if (examples.hasOwnProperty(key)){
+                file = String(key).split("_").pop();
+                $('#example-models').append('<tr data-file="'+ key + '" class="model"><td>' +
+                    file + '</td>' + '<td>' + user_models[key]['date'] + '</td>');
+            }
+        };
+        initialize_selector();
+    };
 };
 
 /*****************************************************************************
@@ -125,7 +142,6 @@ $(document).ready(function(){
         //  Build model lists as tables
         build_model_tables();
         build_layout();
-        initialize_listeners();
         sessionStorage.clear();
     }
 });
