@@ -398,8 +398,8 @@ timml_solution = function(){
 					addPaths(pathLines,[0,1,2,3,4,5,6,7,8,9],"Path Line(s)")
 
 					//  Add the layers to the table of contents
-                    addLayerTOC("Elevation Contours");
-                    addLayerTOC("Path Line(s)");
+                    addLayerTOC("Elevation Contours",'View');
+                    addLayerTOC("Path Line(s)",'View');
 
                     document.removeEventListener("click",handler,true);
                     $('#loading').addClass("hidden");
@@ -592,13 +592,13 @@ function addPaths(pathLines,layers,titleName){
 
 };
 
-function addLayerTOC(layer_name){
+function addLayerTOC(layer_name,type){
     var map;
 
     map = TETHYS_MAP_VIEW.getMap();
     for (i=0;i<map.getLayers().getArray().length;i++){
         if (map.getLayers().item(i).tethys_legend_title === layer_name){
-            add_layer(i);
+            add_layer(i,type);
         }
         else{}
     };
