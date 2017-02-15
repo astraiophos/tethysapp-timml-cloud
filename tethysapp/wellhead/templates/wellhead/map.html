@@ -7,9 +7,9 @@
 {% block app_navigation_items %}
   {% csrf_token %}
   <div class="btn-group">
-    <a class="btn btn-primary" href="{% url 'wellhead:home' %}">Home Page</a>
-    <button id="modelSaveAs" class="btn btn-primary" type="button" name="manage_models" onclick="save_model_as();">Save As</button>
-    <button id="modelSave" class="btn btn-primary" type="button" name="manage_models" onclick="save_model();">Save</button>
+    <a class="btn btn-primary" href="{% url 'wellhead:home' %}">Home</a>
+    <button id="modelSaveAs" class="btn btn-primary" type="button" onclick="save_model_as();">Save As</button>
+    <button id="modelSave" class="btn btn-primary" type="button" onclick="save_model();">Save</button>
   </div>
 
   <p><br /></p>
@@ -26,7 +26,6 @@
       alt="Loading..."/>
   </div>
 
-<!--<button type="button" class="btn btn-primary" onclick="onClickSaveEdits();">Edit Selected Layer</button>-->
 {% endblock %}
 
 {% block app_content %}
@@ -37,9 +36,8 @@
 
   <!--Add Attribute Table here, to be appended to golden layout window after html render-->
   <table class="table table-hover table-striped" id="attr-table">
-    <tbody><tr><td class="hidden" align="center">No Features on Selected Layer</td></tr></tbody>
+    <tbody><tr><td align="center">Please select a layer to view its attribute table</td></tr></tbody>
   </table>
-  <!--{% gizmo table_view table_view_edit %}-->
 
 {% endblock %}
 

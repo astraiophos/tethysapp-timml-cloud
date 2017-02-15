@@ -135,7 +135,7 @@ duplicate_selected_model = function(){
     }
 };
 /*****************************************************************************
- *                            Main Script
+ *                            Golden Layout
  *****************************************************************************/
 
 build_layout = function(){
@@ -196,6 +196,18 @@ initialize_selector = function(){
     $('.model').on('click',function(){
         $('.model').removeClass('info');
         $(this).addClass('info').trigger('select_change');
+    });
+    $('.lm_tab').each(function(){
+        if ($(this).text() === "Example Models"){
+            $(this).on('click',function(){
+                $("#delete").addClass('hidden');
+            })
+        }
+        else if ($(this).text() === "User Models"){
+            $(this).on('click',function(){
+                $("#delete").removeClass('hidden');
+            });
+        }
     });
 };
 
