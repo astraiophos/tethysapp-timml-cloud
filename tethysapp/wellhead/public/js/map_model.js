@@ -396,6 +396,11 @@ timml_solution = function(){
 //					addWaterTable(raster_elev_mapView,"Water Table");
 					addContours(contourLines,levels,"Elevation Contours");
 					addPaths(pathLines,[0,1,2,3,4,5,6,7,8,9],"Path Line(s)")
+
+					//  Add the layers to the table of contents
+                    addLayerTOC("Elevation Contours",'View');
+                    addLayerTOC("Path Line(s)",'View');
+
                     document.removeEventListener("click",handler,true);
                     $('#loading').addClass("hidden");
 					}
@@ -491,14 +496,6 @@ function addContours(contourLines,levels,titleName){
     vector.tethys_editable = false;
     map.addLayer(vector);
 
-    //  Find the mapIndex of the layer just added, to be passed to TOC_gizmo for making a new list item
-    for (i=0;i<map.getLayers().getArray().length;i++){
-        if (map.getLayers().item(i).tethys_legend_title === titleName){
-            add_layer(i);
-        }
-        else{}
-    };
-
 };
 
 function addPaths(pathLines,layers,titleName){
@@ -593,15 +590,19 @@ function addPaths(pathLines,layers,titleName){
     vector.tethys_editable = false;
     map.addLayer(vector);
 
-    //  Find the mapIndex of the layer just added, to be passed to TOC_gizmo for making a new list item
+};
+
+function addLayerTOC(layer_name,type){
+    var map;
+
+    map = TETHYS_MAP_VIEW.getMap();
     for (i=0;i<map.getLayers().getArray().length;i++){
-        if (map.getLayers().item(i).tethys_legend_title === titleName){
-            add_layer(i);
+        if (map.getLayers().item(i).tethys_legend_title === layer_name){
+            add_layer(i,type);
         }
         else{}
     };
-
-};
+}
 
 /*****************************************************************************
  *                    User Interaction and Attribute Table

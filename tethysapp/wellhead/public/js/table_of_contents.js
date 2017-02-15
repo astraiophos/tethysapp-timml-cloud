@@ -82,9 +82,13 @@ readInitialLayers = function (){
 }
 
 //  Add new layer dynamically
-add_layer = function(mapIndex){
+add_layer = function(mapIndex,type){
     var map;
     var layer;
+
+    if (!type === undefined){
+        type = 'GeographicFeatureResource';
+    }
 
     map = TETHYS_MAP_VIEW.getMap();
     layer = map.getLayers().item(mapIndex);
@@ -96,7 +100,7 @@ add_layer = function(mapIndex){
     var $listItem;
     $listItem = $tocLayersList.find('li:first-child');
     addListenersToListItem($listItem);
-    addContextMenuToListItem($listItem,'GeographicFeatureResource');
+    addContextMenuToListItem($listItem,type);
     $('.layer-name').parent().off('click');
     initialize_listeners();
 };
@@ -135,7 +139,7 @@ addMenus_and_ListenersToInitialLayers = function()
         $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
         addListenersToListItem($listItem);
         if ($listItem.find('.layer-name').text().trim() === "Basemap"){
-            addContextMenuToListItem($listItem,'Basemap');
+            addContextMenuToListItem($listItem,'View');
         }
         else{
             addContextMenuToListItem($listItem,'GeographicFeatureResource');
@@ -289,13 +293,13 @@ editLayerDisplayName = function (e, $layerNameInput, $layerNameSpan) {
 
 initializeLayersContextMenus = function () {
     layersContextMenuBase = [
-//        {
-//            name: 'Isolate',
-//            title: 'Isolate',
-//            fun: function (e) {
-//                onClickisolateLayer(e);
-//            }
-//        },
+        {
+            name: 'Isolate',
+            title: 'Isolate',
+            fun: function (e) {
+                onClickisolateLayer(e);
+            }
+        },
         {
             name: 'Rename',
             title: 'Rename',
@@ -376,7 +380,7 @@ initializeLayersContextMenus = function () {
     contextMenuDict = {
 //        'GenericResource': layersContextMenuViewFile,
         'GeographicFeatureResource': layersContextMenuVector,
-        'Basemap':layersContextMenuBase
+        'View':layersContextMenuBase
 //        'TimeSeriesResource': layersContextMenuTimeSeries,
 //        'RefTimeSeriesResource': layersContextMenuTimeSeries,
 //        'RasterResource': layersContextMenuRaster
