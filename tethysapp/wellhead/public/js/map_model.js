@@ -882,6 +882,7 @@ save_attributes = function(layerName){
     var map;
     var layer;
     var features;
+    var features
     var feature;
     var selector;
     var copyFeatures = [];
@@ -919,21 +920,21 @@ save_attributes = function(layerName){
     };
 
     //  Update features to have the right attributes
-    for (feature in layer.getSource().getFeatures()){
+    for (feature in features){
         copyFeatures.push({
             'type': 'Feature',
             'geometry':{
-                'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
-                'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+                'type': features[feature].getGeometry().getType(),
+                'coordinates': features[feature].getGeometry().getCoordinates(),
             }
         });
         //  Gather the properties for each element
         featureProps[feature] = [];
-        for (property in layer.getSource().getFeatures()[feature].getProperties()){
+        for (property in features[feature].getProperties()){
             if (String(property) === 'geometry'){}
             else if (String(property) === 'type'){}
             else{
-                featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
+                featureProps[feature].push([String(property),features[feature].getProperties()[property]])
             }
         };
     };
