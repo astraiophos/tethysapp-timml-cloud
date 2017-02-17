@@ -206,6 +206,7 @@ initialize_selector = function(){
         else if ($(this).text() === "User Models"){
             $(this).on('click',function(){
                 $("#delete").removeClass('hidden');
+                $("#delete").removeClass('hidden');
             });
         }
     });

@@ -97,6 +97,7 @@ def timml(request):
     reslinesinks_info = json.loads(post_data['res_line_sink'])
     linedoubletimp_info = json.loads(post_data['line_doublet_imp'])
     linesinkditch_info = json.loads(post_data['line_sink_ditch'])
+    circareasink_info = json.loads(post_data['circ_area_sink'])
     polygoninhom_info = json.loads(post_data['polygon_inhom'])
 
     #   Initialize capture_zone variable
@@ -245,6 +246,18 @@ def timml(request):
                  layers=layers_list,
                  label=linesinkditch_info[str("line_sink_ditch_" + str(index))]['label'])
         print "Finished linesink_ditches"
+
+    if 'circ_area_sink_0' in circareasink_info:
+        for index in range(0,len(circareasink_info)):
+            CircAreaSink(ml,
+                        xp=circareasink_info[str("circ_area_sink_" + str(index))]['coordinates'][0],
+                        yp=circareasink_info[str("circ_area_sink_" + str(index))]['coordinates'][1],
+                        Rp=circareasink_info[str("circ_area_sink_" + str(index))]['Rp'],
+                        infil=circareasink_info[str("circ_area_sink_" + str(index))]['infil'],
+                        layer=circareasink_info[str("circ_area_sink_" + str(index))]['layer'],
+                        label=circareasink_info[str("circ_area_sink_" + str(index))]['label']
+                        )
+        print "Finished CircAreaSink's"
 
     if 'polygoninhom_0' in polygoninhom_info:
         for index in range(0,len(polygoninhom_info)):

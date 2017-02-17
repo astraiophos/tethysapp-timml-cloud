@@ -35,6 +35,7 @@ var head_line_sink_layer;
 var res_line_sink_layer;
 var line_doublet_imp_layer;
 var line_sink_ditch_layer;
+var circ_area_sink_layer;
 var polygon_inhom_layer;
 var wells_layer;
 var $id = 0;
@@ -67,6 +68,7 @@ timml_solution = function(){
     var reslinesink_ = {};
     var linesinkditch_ = {};
     var linedoubletimp_ = {};
+    var circareasink_ ={};
     var polygoninhom_ = {};
 
     //  Initialize the map object and get map size
@@ -80,7 +82,7 @@ timml_solution = function(){
     }
 
     // ***   Model information   *** //
-    layer = map.getLayers().item(9);
+    layer = map.getLayers().item(10);
     features = layer.getSource().getFeatures();
 
     //  Check that the model only has at least one constant, return if false
@@ -111,7 +113,7 @@ timml_solution = function(){
     }
 
     // ***   Well(s) data   *** //
-    layer = map.getLayers().item(8);
+    layer = map.getLayers().item(9);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -137,7 +139,7 @@ timml_solution = function(){
 //    console.log(wells_);
 
     // ***   Line Sink data   *** //
-    layer = map.getLayers().item(7);
+    layer = map.getLayers().item(8);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -165,7 +167,7 @@ timml_solution = function(){
     }
 
     // ***   Head Line Sink data   *** //
-    layer = map.getLayers().item(6);
+    layer = map.getLayers().item(7);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -193,7 +195,7 @@ timml_solution = function(){
     }
 
     // ***   Res Line Sink data   *** //
-    layer = map.getLayers().item(5);
+    layer = map.getLayers().item(6);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -224,7 +226,7 @@ timml_solution = function(){
     }
 
     // ***   Line Doublet Imp data   *** //
-    layer = map.getLayers().item(4);
+    layer = map.getLayers().item(5);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -251,7 +253,7 @@ timml_solution = function(){
     }
 
     // ***   Line Sink Ditch data   *** //
-    layer = map.getLayers().item(3);
+    layer = map.getLayers().item(4);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -270,6 +272,28 @@ timml_solution = function(){
             });
 
             linesinkditch_[String("line_sink_ditch_" + i)] = attributes[i];
+        };
+    }
+
+    // ***   Polygon Inhom data *** //
+    layer = map.getLayers().item(3);
+    features = layer.getSource().getFeatures();
+
+    //  Skip if there aren't any features to process
+    if (features.length === 0){}
+    else{
+        attributes = [];
+        for (i=0;i<features.length;i++){
+            //  Credit to @Darin Dimitrov on stackoverflow.com for this nested JSON structure
+            attributes.push({
+                'coordinates': features[i].getGeometry().getCoordinates(),
+                'Rp': features[i].getProperties()['Rp'],
+                'infil': features[i].getProperties()['infil'],
+                'layer': features[i].getProperties()['layer'],
+                'label': features[i].getProperties()['Label']
+            });
+
+            circareasink_[String("circ_area_sink_" + i)] = attributes[i];
         };
     }
 
@@ -320,6 +344,7 @@ timml_solution = function(){
     var res_line_sink=JSON.stringify(reslinesink_);
     var line_doublet_imp=JSON.stringify(linedoubletimp_);
     var line_sink_ditch=JSON.stringify(linesinkditch_);
+    var circ_area_sink=JSON.stringify(circareasink_);
     var polygon_inhom=JSON.stringify(polygoninhom_);
     var map_corners=JSON.stringify(map_window);
 
@@ -337,6 +362,7 @@ timml_solution = function(){
             "res_line_sink":res_line_sink,
             "line_doublet_imp":line_doublet_imp,
             "line_sink_ditch":line_sink_ditch,
+            "circ_area_sink":circ_area_sink,
             "polygon_inhom":polygon_inhom,
             //  Map Information
             "map_corners":map_corners,
@@ -667,6 +693,7 @@ drawing_listener = function(){
                 var label = "Constant_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Wells'){
                 for (i=0;i<wells_layer.length;i++){
@@ -675,6 +702,7 @@ drawing_listener = function(){
                 var label = "Well_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Line Sinks'){
                 for (i=0;i<line_sink_layer.length;i++){
@@ -683,6 +711,7 @@ drawing_listener = function(){
                 var label = "LineSink_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Head Line Sinks'){
                 for (i=0;i<head_line_sink_layer.length;i++){
@@ -691,6 +720,7 @@ drawing_listener = function(){
                 var label = "HeadLineSink_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Res Line Sinks'){
                 for (i=0;i<res_line_sink_layer.length;i++){
@@ -699,6 +729,7 @@ drawing_listener = function(){
                 var label = "ResLineSink_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Line Doublet Imp'){
                 for (i=0;i<line_doublet_imp_layer.length;i++){
@@ -707,6 +738,7 @@ drawing_listener = function(){
                 var label = "LineDoubletImp_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Line Sink Ditch'){
                 for (i=0;i<line_sink_ditch_layer.length;i++){
@@ -715,6 +747,16 @@ drawing_listener = function(){
                 var label = "LineSinkDitch_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
+            }
+            else if (layerName === 'Circ Area Sink'){
+                for (i=0;i<circ_area_sink_layer.length;i++){
+                    feature.set(circ_area_sink_layer[i],"");
+                };
+                var label = "CircAreaSink_" + id;
+                feature.set("Label",label);
+                feature.set("ID",id);
+                feature.setId(id);
             }
             else if (layerName === 'Polygon Inhom'){
                 for (i=0;i<polygon_inhom_layer.length;i++){
@@ -723,6 +765,7 @@ drawing_listener = function(){
                 var label = "PolygonInhom_" + id;
                 feature.set("Label",label);
                 feature.set("ID",id);
+                feature.setId(id);
             }
 //            console.log(feature);
 
@@ -1101,11 +1144,13 @@ initialize_timml_layers = function(){
     res_line_sink_layer = ["Label","head","res","width","layers","bottomelev"];
     line_doublet_imp_layer = ["Label","order","layers"];
     line_sink_ditch_layer = ["Label","Q","res","width","layers"];
+    circ_area_sink_layer = ["Label","Rp","infil","layer"];
     polygon_inhom_layer = ["Label","k","zb","zt","c","n","nll","inhom side order"];
 
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
     layers.push(['Polygon Inhom','rgba(10,10,10,0.5)']);
+    layers.push(['Circ Area Sink','rgba(244,164,96,1.0']);
     layers.push(['Line Sink Ditch','#8B4513']);
     layers.push(['Line Doublet Imp','#000000']);
     layers.push(['Res Line Sinks','#008000']);
@@ -1196,13 +1241,14 @@ initialize_timml_layers = function(){
 
     //  Assign Geometry type to layers, used to initialize the right state of edit mode later on
     map.getLayers().item(2).setProperties({'geometry_attribute': 'polygon'});
-    map.getLayers().item(3).setProperties({'geometry_attribute': 'line'});
+    map.getLayers().item(3).setProperties({'geometry_attribute': 'point'});
     map.getLayers().item(4).setProperties({'geometry_attribute': 'line'});
     map.getLayers().item(5).setProperties({'geometry_attribute': 'line'});
     map.getLayers().item(6).setProperties({'geometry_attribute': 'line'});
     map.getLayers().item(7).setProperties({'geometry_attribute': 'line'});
-    map.getLayers().item(8).setProperties({'geometry_attribute': 'point'});
+    map.getLayers().item(8).setProperties({'geometry_attribute': 'line'});
     map.getLayers().item(9).setProperties({'geometry_attribute': 'point'});
+    map.getLayers().item(10).setProperties({'geometry_attribute': 'point'});
 
 
 };
