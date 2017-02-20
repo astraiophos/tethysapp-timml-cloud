@@ -512,6 +512,7 @@ onClickEditLayer = function(e){
     var map;
     var mapIndex;
     var layer;
+    var features;
     var clone;
     var copyFeatures=[];
     var featureProps=[];
@@ -553,30 +554,35 @@ onClickEditLayer = function(e){
     }
 
     try{
-        for (feature in layer.getSource().getFeatures()){
+        features = layer.getSource().getFeatures();
+        features.sort(function(a,b){
+            return a.getProperties()['ID']-b.getProperties()['ID'];
+        });
+        for (feature in features){
             copyFeatures.push({
                 'type': 'Feature',
                 'geometry':{
-                    'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
-                    'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+                    'type': features[feature].getGeometry().getType(),
+                    'coordinates': features[feature].getGeometry().getCoordinates(),
                 }
             });
             //  Gather the properties for each element
             featureProps[feature] = [];
-            for (property in layer.getSource().getFeatures()[feature].getProperties()){
+            for (property in features[feature].getProperties()){
                 if (String(property) === 'geometry'){}
                 else{
-                    featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
-//                    console.log(property);
+                    featureProps[feature].push([String(property),features[feature].getProperties()[property]])
                 }
             };
             //  This copies the features to the drawinglayer
-            map.getLayers().item(1).getSource().addFeature(layer.getSource().getFeatures()[feature].clone())
+            map.getLayers().item(1).getSource().addFeature(features[feature].clone())
         };
+
         //  Add Properties to feature list
         for (feature in copyFeatures){
+            copyFeatures[feature]['properties']={};
             for (prop in featureProps[feature]){
-                copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
+                copyFeatures[feature]['properties'][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
             }
         };
         copied = {
@@ -657,6 +663,8 @@ onClickSaveEdits = function(){
     var map;
     var mapIndex;
     var layer;
+    var features;
+    var newFeatures;
     var clone;
     var copyFeatures=[];
     var featureProps=[];
@@ -702,30 +710,36 @@ onClickSaveEdits = function(){
     };
 
     try{
-        for (feature in layer.getSource().getFeatures()){
+        features = layer.getSource().getFeatures();
+        features.sort(function(a,b){
+            return a.getProperties()['ID']-b.getProperties()['ID'];
+        });
+        for (feature in features){
             copyFeatures.push({
                 'type': 'Feature',
                 'geometry':{
-                    'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
-                    'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
-                }
+                    'type': features[feature].getGeometry().getType(),
+                    'coordinates': features[feature].getGeometry().getCoordinates(),
+                },
+
             });
-            //  Gather the properties for each element
-            featureProps[feature] = [];
-            for (property in layer.getSource().getFeatures()[feature].getProperties()){
-                if (String(property) === 'geometry'){}
-                else{
-                    featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
+        //  Gather the properties for each element
+        featureProps[feature] = [];
+        for (property in features[feature].getProperties()){
+            if (String(property) === 'geometry'){}
+            else{
+                featureProps[feature].push([String(property),features[feature].getProperties()[property]])
 //                    console.log(property);
 //                    console.log(layer.getSource().getFeatures()[feature].getProperties()[property]);
-                }
-            };
+            }
+        };
         };
         //  Add Properties to feature list
         for (feature in copyFeatures){
+            copyFeatures[feature]['properties']={};
             for (prop in featureProps[feature]){
-                copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
-            }
+                copyFeatures[feature]['properties'][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
+            };
         };
 //        console.log(copyFeatures);
         copied = {
@@ -748,12 +762,12 @@ onClickSaveEdits = function(){
             {featureProjection:"EPSG:4326"})
         });
 
-        //  Add Properties to feature list because openlayers doesn't preserve custom property tags
-        for (feature in newSource.getFeatures()){
-            for (prop in featureProps[feature]){
-                newSource.getFeatures()[feature].set(String(featureProps[feature][prop][0]),featureProps[feature][prop][1])
-            };
-        };
+//        //  Add Properties to feature list because openlayers doesn't preserve custom property tags
+//        for (feature in newSource.getFeatures()){
+//            for (prop in featureProps[feature]){
+//                newSource.getFeatures()[feature].set(String(featureProps[feature][prop][0]),featureProps[feature][prop][1])
+//            };
+//        };
 
         //  Find the layer color
         color = map.getLayers().item(mapIndex).getStyle().fill_.color_;
@@ -963,6 +977,7 @@ onClickShowAttrTable = function(e){
     var map;
     var mapIndex;
     var layer;
+    var features;
     var copyFeatures=[];
     var featureProps=[];
 
@@ -972,29 +987,34 @@ onClickShowAttrTable = function(e){
     layer = map.getLayers().item(mapIndex);
 
     try{
-        for (feature in layer.getSource().getFeatures()){
+        features = layer.getSource().getFeatures();
+        features.sort(function(a,b){
+            return a.getProperties()['ID']-b.getProperties()['ID'];
+        });
+        for (feature in features){
             copyFeatures.push({
                 'type': 'Feature',
                 'geometry':{
-                    'type': layer.getSource().getFeatures()[feature].getGeometry().getType(),
-                    'coordinates': layer.getSource().getFeatures()[feature].getGeometry().getCoordinates(),
+                    'type': features[feature].getGeometry().getType(),
+                    'coordinates': features[feature].getGeometry().getCoordinates(),
                 }
             });
             //  Gather the properties for each element
             featureProps[feature] = [];
-            for (property in layer.getSource().getFeatures()[feature].getProperties()){
+            for (property in features[feature].getProperties()){
                 if (String(property) === 'geometry'){}
                 else{
-                    featureProps[feature].push([String(property),layer.getSource().getFeatures()[feature].getProperties()[property]])
+                    featureProps[feature].push([String(property),features[feature].getProperties()[property]])
 //                    console.log(property);
                 }
             };
         };
         //  Add Properties to feature list
         for (feature in copyFeatures){
+            copyFeatures[feature]['properties']={};
             for (prop in featureProps[feature]){
-                copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
-            }
+                copyFeatures[feature]['properties'][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
+            };
         };
     }
     catch(err){

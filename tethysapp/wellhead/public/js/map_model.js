@@ -940,8 +940,9 @@ save_attributes = function(layerName){
     };
     //  Add Properties to feature list
     for (feature in copyFeatures){
+        copyFeatures[feature]['properties']={};
         for (prop in featureProps[feature]){
-            copyFeatures[feature][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
+            copyFeatures[feature]['properties'][featureProps[feature][prop][0]] = featureProps[feature][prop][1];
         };
     };
     //  Read features and color to string for sessionStorage and then store features and style
@@ -976,7 +977,7 @@ build_table = function(layerName,features,editable){
     //  Build Table from features and properties
     table = document.getElementById('attr-table');
     row = table.insertRow(-1)
-    for (property in features[0]){
+    for (property in features[0]['properties']){
         if (String(property) === 'geometry'){}
         else if (String(property) === 'type'){}
         else if (String(property) === 'ID'){}
@@ -992,8 +993,8 @@ build_table = function(layerName,features,editable){
         for (i=0;i<features.length;i++){
             feature = features[i];
             row = table.insertRow(-1);
-            id = feature["ID"];
-            for (property in feature){
+            id = feature['properties']["ID"];
+            for (property in feature['properties']){
                 if (String(property) === 'geometry'){}
                 else if (String(property) === 'type'){}
                 else if (String(property) === 'ID'){}
@@ -1003,7 +1004,7 @@ build_table = function(layerName,features,editable){
                     cell.innerHTML = "<input id=" + property.replace(/\s+/g,'_') + "_" + id +" type='text'" +
                         "class='form-control input-sm' value=' '" +
                         "style=width:auto;margin-bottom:0;" + ">";
-                    $(cell).find("input")["0"].value = String(feature[property]);
+                    $(cell).find("input")["0"].value = String(feature['properties'][property]);
                 }
             };
         };
@@ -1013,14 +1014,14 @@ build_table = function(layerName,features,editable){
         for (i=0;i<features.length;i++){
             feature = features[i];
             row = table.insertRow(-1);
-            for (property in feature){
+            for (property in feature['properties']){
                 if (String(property) === 'geometry'){}
                 else if (String(property) === 'type'){}
                 else if (String(property) === 'ID'){}
                 else{
                     cell = row.insertCell();
                     cell.style = "width:auto";
-                    cell.innerHTML = feature[property];
+                    cell.innerHTML = feature['properties'][property];
                 }
             };
         };

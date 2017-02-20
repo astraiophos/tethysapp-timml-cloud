@@ -250,11 +250,11 @@ def timml(request):
     if 'circ_area_sink_0' in circareasink_info:
         for index in range(0,len(circareasink_info)):
             CircAreaSink(ml,
-                        xp=circareasink_info[str("circ_area_sink_" + str(index))]['coordinates'][0],
-                        yp=circareasink_info[str("circ_area_sink_" + str(index))]['coordinates'][1],
-                        Rp=circareasink_info[str("circ_area_sink_" + str(index))]['Rp'],
-                        infil=circareasink_info[str("circ_area_sink_" + str(index))]['infil'],
-                        layer=circareasink_info[str("circ_area_sink_" + str(index))]['layer'],
+                        xp=float(circareasink_info[str("circ_area_sink_" + str(index))]['coordinates'][0]),
+                        yp=float(circareasink_info[str("circ_area_sink_" + str(index))]['coordinates'][1]),
+                        Rp=float(circareasink_info[str("circ_area_sink_" + str(index))]['Rp']),
+                        infil=float(circareasink_info[str("circ_area_sink_" + str(index))]['infil']),
+                        layer=int(circareasink_info[str("circ_area_sink_" + str(index))]['layer']),
                         label=circareasink_info[str("circ_area_sink_" + str(index))]['label']
                         )
         print "Finished CircAreaSink's"
