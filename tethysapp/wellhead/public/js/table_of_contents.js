@@ -917,18 +917,6 @@ onClickCancelEdits = function(){
             {featureProjection:"EPSG:4326"})
         });
 
-        //  Because Openlayers 3 doesn't preserve custom property tags we need to reset
-        //  the properties as they were stored.
-        for (feature in oldSource.getFeatures()){
-            for (prop in oldFeatures[feature]){
-                if (prop === "geometry"){}
-                else{
-                    oldSource.getFeatures()[feature].set(String(prop),
-                    oldFeatures[feature][prop])
-                }
-            };
-        };
-
         //  Set drawing layer style to match the layer to be edited
 //        map.getLayers().item(mapIndex).setStyle(oldStyle);
 
