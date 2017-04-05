@@ -74,8 +74,14 @@ open_selected_model = function(){
         return false;
     }
     else{
-        model = $('.info').attr('data-file');
-        open_model(model);
+        if($('.info').parent().parent().attr('id') !== 'example-models'){
+            model = $('.info').attr('data-file');
+            open_model(model);
+        }
+        else{
+            model = $('.info').attr('data-file');
+            open_example_model(model);
+        }
     }
 };
 

@@ -1490,6 +1490,33 @@ open_model = function(file_name){
     });
     location.reload();
 };
+open_example_model = function(file_name){
+    var extents;
+
+    $.ajax({
+    type: 'POST',
+    url: '/apps/wellhead/open_example_model/',
+    dataType: 'json',
+    data: {
+        'file_name':file_name,
+        },
+        success: function (data){
+                if (data.error){
+                    console.log(data.error);
+                    return
+                }
+                open_session = JSON.parse(data.session);
+                sessionStorage.clear();
+                for (var key in open_session) {
+                  if (open_session.hasOwnProperty(key)) {
+                    sessionStorage.setItem(key, open_session[key]);
+                  }
+                };
+                sessionStorage['model_name'] = file_name;
+        }
+    });
+    location.reload();
+};
 /*****************************************************************************
  *                       Ajax Utility Functions
  *****************************************************************************/

@@ -537,7 +537,23 @@ def openModel(request):
         session = a_file.read()
 
     return JsonResponse({
-        'success':'Save Successfull!',
+        'success':'Load Successfull!',
+        'session':session,
+    })
+
+def open_example_model(request):
+    post_data = request.POST
+
+    file_name = post_data['file_name']
+
+    app_workspace = wellhead.get_app_workspace()
+    new_file_path = os.path.join(app_workspace.path,file_name)
+
+    with open(new_file_path, 'r') as a_file:
+        session = a_file.read()
+
+    return JsonResponse({
+        'success':'Load Successfull!',
         'session':session,
     })
 
