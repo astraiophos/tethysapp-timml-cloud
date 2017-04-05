@@ -300,7 +300,7 @@ def timml(request):
 
     contourList = timcontour(ml, map_window[0], map_window[2], 100, map_window[1],
                              map_window[3], 100, levels = 10,
-                             newfig = True, returncontours = True)
+                             newfig = False, returncontours = True)
 
     #   This next part uses modified equations from TimML to retrieve capturezone tracelines
     if 'well_0' in wells_info:

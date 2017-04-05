@@ -138,12 +138,18 @@ addMenus_and_ListenersToInitialLayers = function()
     for (i=0; i < $list.children().length; i++){
         $listItem = $tocLayersList.find('li:nth-child(' + (i+1) + ')');
         addListenersToListItem($listItem);
-        if ($listItem.find('.layer-name').text().trim() === "Basemap"){
+        if(projectInfo['map']['layers'][$listItem.find('.layer-name').text().trim()]['resType']===undefined){
             addContextMenuToListItem($listItem,'View');
         }
         else{
-            addContextMenuToListItem($listItem,'GeographicFeatureResource');
-        };
+            addContextMenuToListItem($listItem,String(projectInfo['map']['layers'][$listItem.find('.layer-name').text().trim()]['resType']));
+        }
+        // if ($listItem.find('.layer-name').text().trim() === "Basemap"){
+        //     addContextMenuToListItem($listItem,'View');
+        // }
+        // else{
+        //     addContextMenuToListItem($listItem,'GeographicFeatureResource');
+        // };
     };
 };
 
@@ -199,7 +205,8 @@ createLayerListItem = function (layer,mapIndex,position) {
             extents: layer.tethys_legend_extent,
             editable: layer.tethys_editable,
             geomType: layer.getProperties().geometry_attribute,
-            color: layer.color
+            color: layer.color,
+            resType: layer.resType
         };
 };
 
@@ -328,14 +335,14 @@ initializeLayersContextMenus = function () {
     });
 
     layersContextMenuRaster = layersContextMenuGeospatialBase.slice();
-    layersContextMenuRaster.unshift({
-        name: 'Modify symbology',
-        title: 'Modify symbology',
-        fun: function (e) {
-//            onClickModifySymbology(e);
-            console.log("Modifying the symbology!...oh wait...")
-        }
-    }),
+//     layersContextMenuRaster.unshift({
+//         name: 'Modify symbology',
+//         title: 'Modify symbology',
+//         fun: function (e) {
+// //            onClickModifySymbology(e);
+//             console.log("Modifying the symbology!...oh wait...")
+//         }
+//     }),
 //    {
 //        name: 'View legend',
 //        title: 'View legend',
@@ -380,7 +387,8 @@ initializeLayersContextMenus = function () {
     contextMenuDict = {
 //        'GenericResource': layersContextMenuViewFile,
         'GeographicFeatureResource': layersContextMenuVector,
-        'View':layersContextMenuBase
+        'Base':layersContextMenuBase,
+        'View':layersContextMenuGeospatialBase
 //        'TimeSeriesResource': layersContextMenuTimeSeries,
 //        'RefTimeSeriesResource': layersContextMenuTimeSeries,
 //        'RasterResource': layersContextMenuRaster

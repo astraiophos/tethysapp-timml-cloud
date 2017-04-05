@@ -82,7 +82,8 @@ timml_solution = function(){
     }
 
     // ***   Model information   *** //
-    layer = map.getLayers().item(10);
+    // layer = map.getLayers().item(10);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Constant and Model']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Check that the model only has at least one constant, return if false
@@ -113,7 +114,8 @@ timml_solution = function(){
     }
 
     // ***   Well(s) data   *** //
-    layer = map.getLayers().item(9);
+    // layer = map.getLayers().item(9);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Wells']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -139,7 +141,8 @@ timml_solution = function(){
 //    console.log(wells_);
 
     // ***   Line Sink data   *** //
-    layer = map.getLayers().item(8);
+    // layer = map.getLayers().item(8);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Line Sinks']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -167,7 +170,8 @@ timml_solution = function(){
     }
 
     // ***   Head Line Sink data   *** //
-    layer = map.getLayers().item(7);
+    // layer = map.getLayers().item(7);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Head Line Sinks']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -195,7 +199,8 @@ timml_solution = function(){
     }
 
     // ***   Res Line Sink data   *** //
-    layer = map.getLayers().item(6);
+    // layer = map.getLayers().item(6);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Res Line Sinks']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -226,7 +231,8 @@ timml_solution = function(){
     }
 
     // ***   Line Doublet Imp data   *** //
-    layer = map.getLayers().item(5);
+    // layer = map.getLayers().item(5);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Line Doublet Imp']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -253,7 +259,8 @@ timml_solution = function(){
     }
 
     // ***   Line Sink Ditch data   *** //
-    layer = map.getLayers().item(4);
+    // layer = map.getLayers().item(4);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Line Sink Ditch']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -276,7 +283,8 @@ timml_solution = function(){
     }
 
     // ***   Polygon Inhom data *** //
-    layer = map.getLayers().item(3);
+    // layer = map.getLayers().item(3);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Circ Area Sink']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -298,7 +306,8 @@ timml_solution = function(){
     }
 
     // ***   Polygon Inhom data *** //
-    layer = map.getLayers().item(2);
+    // layer = map.getLayers().item(2);
+    layer = map.getLayers().item(projectInfo['map']['layers']['Polygon Inhom']['TethysMapIndex']);
     features = layer.getSource().getFeatures();
 
     //  Skip if there aren't any features to process
@@ -1151,15 +1160,15 @@ initialize_timml_layers = function(){
 
 
     //  Assign layers[] with the list of TimML layer variables with [layer,color]
-    layers.push(['Polygon Inhom','rgba(10,10,10,0.5)']);
-    layers.push(['Circ Area Sink','rgba(244,164,96,1.0']);
-    layers.push(['Line Sink Ditch','#8B4513']);
-    layers.push(['Line Doublet Imp','#000000']);
-    layers.push(['Res Line Sinks','#008000']);
-    layers.push(['Head Line Sinks','#ADD8E6']);
-    layers.push(['Line Sinks','#0000ff']);
-    layers.push(['Wells','#fff000']);
-    layers.push(['Constant and Model','#ff0000']);
+    layers.push(['Polygon Inhom','rgba(10,10,10,0.5)','polygon']);
+    layers.push(['Circ Area Sink','rgba(244,164,96,1.0','point']);
+    layers.push(['Line Sink Ditch','#8B4513','line']);
+    layers.push(['Line Doublet Imp','#000000','line']);
+    layers.push(['Res Line Sinks','#008000','line']);
+    layers.push(['Head Line Sinks','#ADD8E6','line']);
+    layers.push(['Line Sinks','#0000ff','line']);
+    layers.push(['Wells','#fff000','point']);
+    layers.push(['Constant and Model','#ff0000','point']);
 
     for (i=0;i<layers.length;i++){
         layer = layers[i];
@@ -1189,17 +1198,17 @@ initialize_timml_layers = function(){
                 features: format.readFeatures(featureCollection,
                 {featureProjection:"EPSG:4326"})
             });
-            //  Because Openlayers 3 doesn't preserve custom property tags we need to reset
-            //  the properties as they were stored.
-            for (feature in layer_source.getFeatures()){
-                for (prop in oldFeatures[feature]){
-                    if (prop === "geometry"){}
-                    else{
-                        layer_source.getFeatures()[feature].set(String(prop),
-                        oldFeatures[feature][prop])
-                    }
-                };
-            };
+            
+
+            // for (feature in layer_source.getFeatures()){
+            //     for (prop in oldFeatures[feature]){
+            //         if (prop === "geometry"){}
+            //         else{
+            //             layer_source.getFeatures()[feature].set(String(prop),
+            //             oldFeatures[feature][prop])
+            //         }
+            //     };
+            // };
         }
         else{
             layer_source = new ol.source.Vector({wrapX: false});
@@ -1209,7 +1218,7 @@ initialize_timml_layers = function(){
             color = JSON.parse(sessionStorage[String(layer[0]+"_Style")]);
         }
         else{
-        color = layer[1];
+            color = layer[1];
         }
 
         timml_layer = new ol.layer.Vector({
@@ -1236,24 +1245,121 @@ initialize_timml_layers = function(){
         timml_layer.tethys_editable = true;
         timml_layer.tethys_data = {'tethys_toc':true};
         timml_layer.color = color;
+        timml_layer.resType = 'GeographicFeatureResource';
+        timml_layer.setProperties({'geometry_attribute':layer[2]});
 
         // Add drawing layer to the map
         map.addLayer(timml_layer);
+
+
     }
 
     //  Assign Geometry type to layers, used to initialize the right state of edit mode later on
-    map.getLayers().item(2).setProperties({'geometry_attribute': 'polygon'});
-    map.getLayers().item(3).setProperties({'geometry_attribute': 'point'});
-    map.getLayers().item(4).setProperties({'geometry_attribute': 'line'});
-    map.getLayers().item(5).setProperties({'geometry_attribute': 'line'});
-    map.getLayers().item(6).setProperties({'geometry_attribute': 'line'});
-    map.getLayers().item(7).setProperties({'geometry_attribute': 'line'});
-    map.getLayers().item(8).setProperties({'geometry_attribute': 'line'});
-    map.getLayers().item(9).setProperties({'geometry_attribute': 'point'});
-    map.getLayers().item(10).setProperties({'geometry_attribute': 'point'});
+    // map.getLayers().item(2).setProperties({'geometry_attribute': 'polygon'});
+    // map.getLayers().item(3).setProperties({'geometry_attribute': 'point'});
+    // map.getLayers().item(4).setProperties({'geometry_attribute': 'line'});
+    // map.getLayers().item(5).setProperties({'geometry_attribute': 'line'});
+    // map.getLayers().item(6).setProperties({'geometry_attribute': 'line'});
+    // map.getLayers().item(7).setProperties({'geometry_attribute': 'line'});
+    // map.getLayers().item(8).setProperties({'geometry_attribute': 'line'});
+    // map.getLayers().item(9).setProperties({'geometry_attribute': 'point'});
+    // map.getLayers().item(10).setProperties({'geometry_attribute': 'point'});
 
 
 };
+
+/*****************************************************************************
+ *                       Initialize Optional Layers
+ *****************************************************************************/
+// This section of code will add layers that are strictly for viewing. No editing
+// capabilities will be given to this layer
+
+initialize_ref_layer = function(){
+    var map = TETHYS_MAP_VIEW.getMap();
+    var jsonFeatures;
+    var oldFeatures;
+    var featureCollection;
+    var format;
+    var layer_source;
+    var color;
+    var ref_layer;
+
+    if(sessionStorage["refLayer_Features"] === undefined){
+        return
+    }
+    else{
+        jsonFeatures = sessionStorage["refLayer_Features"];
+        oldFeatures = JSON.parse(jsonFeatures);
+
+        //  Read features into a feature collection object
+        featureCollection = {
+            'type': 'FeatureCollection',
+            'crs': {
+                'type': 'name',
+                'properties': {
+                    'name':'EPSG:4326'
+                }
+            },
+            'features': oldFeatures
+        };
+
+        //  Establish the format as GeoJSON
+        format = new ol.format.GeoJSON();
+
+        layer_source = new ol.source.Vector({
+            features: format.readFeatures(featureCollection,
+            {featureProjection:"EPSG:4326"})
+        });
+        for (feature in layer_source.getFeatures()){
+            for (prop in oldFeatures[feature]){
+                if (prop === "geometry"){}
+                else{
+                    layer_source.getFeatures()[feature].set(String(prop),
+                    oldFeatures[feature][prop])
+                }
+            };
+        };
+
+        if (sessionStorage["refLayer_Style"] != undefined){
+            color = JSON.parse(sessionStorage["refLayer_Style"]);
+        }
+        else{
+            color = 'rgba(34,139,34,0.7)';
+        }
+
+        ref_layer = new ol.layer.Vector({
+            source: layer_source,
+            style: new ol.style.Style({
+                    fill: new ol.style.Fill({
+                    color: color
+                    }),
+                    stroke: new ol.style.Stroke({
+                    color: color,
+                    width: 2
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 4,
+                        fill: new ol.style.Fill({
+                          color: color
+                        })
+                    }),
+                })
+        });
+
+        // Add layer properties
+        ref_layer.tethys_legend_title = sessionStorage["refLayer_name"];
+        ref_layer.tethys_editable = false;
+        ref_layer.tethys_data = {'tethys_toc':true};
+        ref_layer.color = color;
+        ref_layer.resType = 'View';
+
+        // Add layer to the map
+        map.addLayer(ref_layer);
+
+    }
+
+};
+
 
 /*****************************************************************************
  *                       Save Utility Functions
@@ -1484,7 +1590,8 @@ $(document).ready(function(){
         //  This will hide the drawing layer from the table of contents and add the basemap to the table of contents
         map.getLayers().item(0).tethys_data={'tethys_toc':true};
         map.getLayers().item(1).tethys_data={'tethys_toc':false};
-        //  Initialize the TimML layers to be used
+        //  Initialize the layers
+        initialize_ref_layer();
         initialize_timml_layers();
         //  Bind listeners to map drawing tools
         drawing_listener();
