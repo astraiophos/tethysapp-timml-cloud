@@ -561,7 +561,7 @@ def workspace_manager(request):
 
         files = os.listdir(app_workspace.path)
         for file in files:
-            mypath = os.path.join(user_workspace.path,file)
+            mypath = os.path.join(app_workspace.path,file)
             file_time = os.path.getmtime(mypath)
             file_time = datetime.datetime.fromtimestamp(file_time)
             example_files[file] = {'date':file_time.strftime("%B %d, %Y"),'description':'To be filled later'}
