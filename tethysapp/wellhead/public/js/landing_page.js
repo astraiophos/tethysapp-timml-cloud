@@ -58,7 +58,7 @@ build_model_tables = function(){
             if (examples.hasOwnProperty(key)){
                 file = String(key).split("_").pop();
                 $('#example-models').append('<tr data-file="'+ key + '" class="model"><td>' +
-                    file + '</td>' + '<td>' + user_models[key]['date'] + '</td>');
+                    file + '</td>' + '<td>' + examples[key]['date'] + '</td>');
             }
         };
         initialize_selector();
