@@ -207,12 +207,13 @@ initialize_selector = function(){
         if ($(this).text() === "Example Models"){
             $(this).on('click',function(){
                 $("#delete").addClass('hidden');
+                $("#duplicate").addClass('hidden');
             })
         }
         else if ($(this).text() === "User Models"){
             $(this).on('click',function(){
                 $("#delete").removeClass('hidden');
-                $("#delete").removeClass('hidden');
+                $("#duplicate").removeClass('hidden');
             });
         }
     });

@@ -312,7 +312,7 @@ def timml(request):
                                            w=well,
                                            N=int(wells_info['well_' + str(index)]['Num Particles']),
                                            z=float(wells_info['well_' + str(index)]['zStart']),
-                                           tmax=1e30,
+                                           tmax=float(wells_info['well_' + str(index)]['Time']),
                                            window = map_window,
                                            xsec=False)
                                   )

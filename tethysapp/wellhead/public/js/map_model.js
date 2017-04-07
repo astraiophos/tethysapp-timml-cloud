@@ -131,7 +131,8 @@ timml_solution = function(){
                 'layers': features[i].getProperties()['layers'],
                 'label': features[i].getProperties()['Label'],
                 'Num Particles': features[i].getProperties()['Num Particles'],
-                'zStart': features[i].getProperties()['zStart']
+                'zStart': features[i].getProperties()['zStart'],
+                'Time': features[i].getProperties()['Time']
             });
 
             wells_[String("well_" + i)] = attributes[i];
@@ -1149,7 +1150,7 @@ initialize_timml_layers = function(){
     //  Initialize the headers for each layer
     model_constant_layer = ["Label","constant head","constant layer","uflow grad","uflow angle",
         "k","zb","zt","c","n","nll"];
-    wells_layer = ["Label","Qw","rw","layers","Num Particles","zStart"];
+    wells_layer = ["Label","Qw","rw","layers","Num Particles","zStart","Time"];
     line_sink_layer = ["Label","sigma","layers"];
     head_line_sink_layer = ["Label","head","layers"];
     res_line_sink_layer = ["Label","head","res","width","layers","bottomelev"];
