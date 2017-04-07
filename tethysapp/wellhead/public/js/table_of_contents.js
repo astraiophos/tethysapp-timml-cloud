@@ -834,7 +834,7 @@ onClickSaveEdits = function(){
     $('#editSave').addClass("hidden");
     $('#editCancel').addClass("hidden");
 
-    build_table(layerName,copyFeatures);
+    onClickShowAttrTable();
     //  Re-enable the layer select functionality in addition to the display of an attribute table
     initialize_listeners();
 };
@@ -1019,6 +1019,7 @@ onClickShowAttrTable = function(e){
     if (copyFeatures.length === 0){
         $('#attr-table tbody').empty()
         $('#attr-table tbody').append("<tr><td align='center'>No Features on Selected Layer</td></tr>")
+        $($lyrListItem).find('.feature-count').html('(0)')
         return
     }
 
