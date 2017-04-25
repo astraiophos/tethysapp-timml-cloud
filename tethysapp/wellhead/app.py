@@ -1,5 +1,5 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
-
+from controllers import Map_Layout
 
 class WellheadProtection(TethysAppBase):
     """
@@ -27,9 +27,12 @@ class WellheadProtection(TethysAppBase):
         url_maps = (UrlMap(name='home',
                            url='wellhead',
                            controller='wellhead.controllers.home'),
+                    # UrlMap(name='map',
+                    #        url='wellhead/map',
+                    #        controller='wellhead.controllers.map'),
                     UrlMap(name='map',
                            url='wellhead/map',
-                           controller='wellhead.controllers.map'),
+                           controller=Map_Layout.as_view()),
                     UrlMap(name='timml',
                            url='wellhead/timml',
                            controller='wellhead.controllers.timml'),

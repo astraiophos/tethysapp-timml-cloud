@@ -4,7 +4,9 @@ from django.http import JsonResponse
 import json
 import matplotlib.pyplot as plt
 import numpy
-from .app import WellheadProtection as wellhead
+# from .app import WellheadProtection as wellhead
+import app
+from tethys_sdk.layouts import MapViewLayoutController
 import os
 import uuid
 import datetime
@@ -15,13 +17,7 @@ from tethys_sdk.gizmos import *
 
 @login_required()
 def home(request):
-    select_input2 = SelectInput(display_text='Select2',
-                            name='select1',
-                            multiple=False,
-                            options=[('One', '1'), ('Two', '2'), ('Three', '3')],
-                            initial=['Three'],
-                            original=True)
-    context = {'select_input2':select_input2}
+    context = {}
     return render(request, 'wellhead/home.html',context)
 def map(request):
     """
@@ -55,26 +51,41 @@ def map(request):
             view=view_options,
             basemap={'Bing': {'key': 'AnOW7YhvlSoT5teH6u7HmKhs2BJWeh5QNzp5CBU-4su1K1XI98TGIONClI22jpbk',
                               'imagerySet': 'AerialWithLabels'}},
-            draw=drawing_options
+            draw=drawing_options,
     )
-
-    #   Initialize the Bootstraps table
-    table_view_edit = TableView(column_names=('Name', 'Age', 'Job'),
-                            rows=[('Bill', 30, 'contractor'),
-                                  ('Fred', 18, 'programmer'),
-                                  ('Bob', 26, 'boss')],
-                            hover=True,
-                            striped=True,
-                            bordered=False,
-                            condensed=False,
-                            editable_columns=(False, 'ageInumpyut', 'jobInumpyut'),
-                            row_ids=[21, 25, 31],
-                            attributes={'id':'attr-table'})
 
     context = {'map_view_options': map_view_options,
                'table_view_edit': table_view_edit}
 
     return render(request, 'wellhead/map.html', context)
+
+class Map_Layout(MapViewLayoutController):
+    # This class redefines the MapViewLayoutController functions to customize a setup just for this app
+    def build_mvview(self, request, args, kwargs):
+        view_options = MVView(
+            projection='EPSG:4326',
+            center=[-111.64925, 40.24721],
+            zoom=16.5,
+            maxZoom=22,
+            minZoom=2
+        )
+        return view_options
+
+    def build_map_view(self, request, *args, **kwargs):
+        basemap={'Bing': {'key': 'AnOW7YhvlSoT5teH6u7HmKhs2BJWeh5QNzp5CBU-4su1K1XI98TGIONClI22jpbk',
+                              'imagerySet': 'AerialWithLabels'}}
+
+        map_view_gizmo = MapView(
+            height='400px',
+            width='100%',
+            controls=self.build_controls(request, args, kwargs),
+            layers=self.build_layers(request, args, kwargs),
+            view=self.build_mvview(request, args, kwargs),
+            basemap=basemap,
+            draw=self.build_mvdraw(request, args, kwargs),
+            # legend=self.False
+        )
+        return map_view_gizmo
 
 def timml(request):
     #   Make sure that the module loads properly
@@ -498,7 +509,8 @@ def saveAs(request):
     new_file_name = unique_id + '_' + file_name + '.txt'
     session = post_data['session']
 
-    user_workspace = wellhead.get_user_workspace(request.user)
+    # user_workspace = wellhead.get_user_workspace(request.user)
+    user_workspace = app.WellheadProtection.get_user_workspace(request.user)
     new_file_path = os.path.join(user_workspace.path,unique_id + '_' + file_name + '.txt')
 
     with open(new_file_path, 'w') as a_file:
@@ -515,7 +527,8 @@ def save(request):
     file_name = post_data['file_name']
     session = post_data['session']
 
-    user_workspace = wellhead.get_user_workspace(request.user)
+    # user_workspace = wellhead.get_user_workspace(request.user)
+    user_workspace = app.WellheadProtection.get_user_workspace(request.user)
     new_file_path = os.path.join(user_workspace.path,file_name)
 
     with open(new_file_path, 'w') as a_file:
@@ -530,7 +543,8 @@ def openModel(request):
 
     file_name = post_data['file_name']
 
-    user_workspace = wellhead.get_user_workspace(request.user)
+    # user_workspace = wellhead.get_user_workspace(request.user)
+    user_workspace = app.WellheadProtection.get_user_workspace(request.user)
     new_file_path = os.path.join(user_workspace.path,file_name)
 
     with open(new_file_path, 'r') as a_file:
@@ -546,7 +560,8 @@ def open_example_model(request):
 
     file_name = post_data['file_name']
 
-    app_workspace = wellhead.get_app_workspace()
+    # app_workspace = wellhead.get_app_workspace()
+    app_workspace = app.WellheadProtection.get_app_workspace()
     new_file_path = os.path.join(app_workspace.path,file_name)
 
     with open(new_file_path, 'r') as a_file:
@@ -561,8 +576,10 @@ def workspace_manager(request):
     post_data = request.POST
 
     task = post_data['task']
-    user_workspace = wellhead.get_user_workspace(request.user)
-    app_workspace = wellhead.get_app_workspace()
+    # user_workspace = wellhead.get_user_workspace(request.user)
+    # app_workspace = wellhead.get_app_workspace()
+    user_workspace = app.WellheadProtection.get_user_workspace(request.user)
+    app_workspace = app.WellheadProtection.get_app_workspace()
 
     if task == 'Read':
         user_files = {}
