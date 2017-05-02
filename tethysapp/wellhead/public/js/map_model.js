@@ -1251,6 +1251,7 @@ initialize_timml_layers = function(){
 
         // Add drawing layer to the map
         map.addLayer(timml_layer);
+        // TETHYS_MAP_VIEW_LAYOUT.add_layer(timml_layer);
 
 
     }
@@ -1356,6 +1357,7 @@ initialize_ref_layer = function(){
 
         // Add layer to the map
         map.addLayer(ref_layer);
+        // TETHYS_MAP_VIEW_LAYOUT.add_layer(ref_layer);
 
     }
 
