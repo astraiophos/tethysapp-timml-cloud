@@ -70,6 +70,7 @@ timml_solution = function(){
     var linedoubletimp_ = {};
     var circareasink_ ={};
     var polygoninhom_ = {};
+    var projectInfo = TETHYS_MAP_VIEW_LAYOUT.projectInfo;
 
     //  Initialize the map object and get map size
     map = TETHYS_MAP_VIEW.getMap();
@@ -634,7 +635,7 @@ function addLayerTOC(layer_name,type){
     map = TETHYS_MAP_VIEW.getMap();
     for (i=0;i<map.getLayers().getArray().length;i++){
         if (map.getLayers().item(i).tethys_legend_title === layer_name){
-            add_layer(i,type);
+            TETHYS_MAP_VIEW_LAYOUT.add_layer(i,type);
         }
         else{}
     };
@@ -960,180 +961,6 @@ save_attributes = function(layerName){
     sessionStorage.setItem(String(layerName + "_Features"),jsonFeatures);
 
     return copyFeatures
-};
-
-//  Build the attribute table (called by table_of_contents.js)
-build_table = function(layerName,features,editable){
-    var table;
-    var row;
-    var cell;
-    var feature;
-    var id;
-    var featureCount;
-
-    //  Save the attributes before anything else if the table has been edited and needs to be saved
-    if ($('#attr-table.edit')[0] != undefined){
-        features = save_attributes(layerName);
-        $('#attr-table').removeClass('edit')
-    }
-    //  Empty out the attribute table before rebuilding
-    $('#attr-table tbody').empty();
-
-    //  Features will be reorganized by their ID attribute to preserve the original drawing order
-    features.sort(function(a,b){
-	    return a["ID"] - b["ID"];
-    });
-
-    //  Build Table from features and properties
-    table = document.getElementById('attr-table');
-    row = table.insertRow(-1)
-    for (property in features[0]['properties']){
-        if (String(property) === 'geometry'){}
-        else if (String(property) === 'type'){}
-        else if (String(property) === 'ID'){}
-        else{
-            cell = row.insertCell();
-            cell.style = "width:auto";
-            cell.innerHTML = String(property);
-        }
-    };
-
-    if (editable){
-        $('#attr-table').addClass('edit')
-        for (i=0;i<features.length;i++){
-            feature = features[i];
-            row = table.insertRow(-1);
-            id = feature['properties']["ID"];
-            for (property in feature['properties']){
-                if (String(property) === 'geometry'){}
-                else if (String(property) === 'type'){}
-                else if (String(property) === 'ID'){}
-                else{
-                    cell = row.insertCell();
-                    cell.style = "width:auto";
-                    cell.innerHTML = "<input id=" + property.replace(/\s+/g,'_') + "_" + id +" type='text'" +
-                        "class='form-control input-sm' value=' '" +
-                        "style=width:auto;margin-bottom:0;" + ">";
-                    $(cell).find("input")["0"].value = String(feature['properties'][property]);
-                }
-            };
-        };
-    }
-
-    else{
-        for (i=0;i<features.length;i++){
-            feature = features[i];
-            row = table.insertRow(-1);
-            for (property in feature['properties']){
-                if (String(property) === 'geometry'){}
-                else if (String(property) === 'type'){}
-                else if (String(property) === 'ID'){}
-                else{
-                    cell = row.insertCell();
-                    cell.style = "width:auto";
-                    cell.innerHTML = feature['properties'][property];
-                }
-            };
-        };
-    }
-
-    //  Update the feature count for each layer
-    featureCount = features.length;
-    $('.layer-name').each(function(index){
-        if($(this).text().trim()===layerName){
-            $(this).parent().find('.feature-count').html("(" + featureCount + ")");}
-    })
-};
-
-addRow = function(layerName,feature,id){
-    var table;
-    var row;
-    var cell;
-
-    //  Designates that the table is open for editing and that changes should be saved
-    $('#attr-table').addClass('edit')
-
-    if ($('#attr-table tbody').text() === "No Features on Selected Layer"){
-        //  Clear out the table and initialize table and row variables
-        $('#attr-table tbody').empty();
-        table = document.getElementById('attr-table');
-        row = table.insertRow(0)
-            for (property in feature.getProperties()){
-                if (String(property) === 'geometry'){}
-                else if (String(property) === 'ID'){}
-                else if (String(property) === 'type'){}
-                else{
-                    cell = row.insertCell();
-                    cell.style = "width:auto";
-                    cell.innerHTML = String(property);
-                }
-            };
-    }
-    table = document.getElementById('attr-table');
-    row = table.insertRow(-1);
-        for (property in feature.getProperties()){
-            if (String(property) === 'geometry'){}
-            else if (String(property) === 'ID'){}
-            else if (String(property) === 'type'){}
-            else{
-                cell = row.insertCell();
-                cell.style = "width:auto";
-                //  Credits to @Deviljho and @SimeVidas on stackoverflow.com for this little trick with removing spaces
-                cell.innerHTML = "<input id=" + property.replace(/\s+/g,'_') + "_" + id +" type='text'" +
-                    "class='form-control input-sm' value=' '" +
-                    "style=width:auto;margin-bottom:0;" + ">";
-                $(cell).find("input")["0"].value = String(feature.getProperties()[property]);
-            }
-        };
-};
-
-deleteRow = function(id,features){
-    var counter;
-    var oldID;
-    var selector;
-    var new_input_id;
-
-    //  Delete the appropriate row in the table
-    if ($('#attr-table tbody').find('tr')[id] != undefined){
-        $('#attr-table tbody').find('tr')[id].remove();
-    }
-    else{
-        return;
-    }
-
-
-    //  Renumber the id's of the features
-    for (i=0;i<features.length;i++){
-        if (features[i].getProperties()["ID"] < id){}
-        else if ((features[i].getProperties()["ID"] - id)===1){
-            oldID = features[i].getProperties()["ID"];
-            features[i].set("ID",Number(id));
-            counter = 1;
-            //  Reassign the table input id's per input to match the new feature id
-            for (property in features[i].getProperties()){
-                if (property === 'geometry'){}
-                else if (property === 'type'){}
-                else{
-                    selector = property.replace(/\s+/g,'_') + "_" + oldID;
-                    new_input_id = property.replace(/\s+/g,'_')+ "_" + id;
-                    $('#'+selector).prop('id',new_input_id);
-                }
-            };
-        }
-        else{
-            oldID = features[i].getProperties()["ID"];
-            features[i].set("ID",Number(id+counter));
-            //  Reassign the table input id's per input to match the new feature id
-            for (property in features[i].getProperties()){
-                if (property === 'geometry'){}
-                else if (property === 'type'){}
-                selector = property.replace(/\s+/g,'_') + "_" + oldID;
-                new_input_id = property.replace(/\s+/g,'_')+ "_" + Number(id+counter);
-                $('#'+selector).prop('id',new_input_id);
-            };
-            counter += 1;
-        }
-    };
 };
 
 /*****************************************************************************

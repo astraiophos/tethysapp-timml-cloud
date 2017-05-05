@@ -62,7 +62,7 @@ def map(request):
 class Map_Layout(MapViewLayoutController):
     # This class redefines the MapViewLayoutController functions to customize a setup just for this app
 
-    base_template = "wellhead/base.html"
+    base_template = "wellhead/map.html"
 
     def build_mvview(self, request, args, kwargs):
         view_options = MVView(
